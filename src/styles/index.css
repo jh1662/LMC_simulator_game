@@ -1,0 +1,5 @@
+/* Not grey-scale incase darkmode is used to view*/
+body {
+    background-color: green;
+    color: yellow;
+}
