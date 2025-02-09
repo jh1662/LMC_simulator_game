@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Node.js: Current File",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/src/code/index.ts",
+        "outFiles": [ "${workspaceFolder}/src/code/**/*.ts" ],
+        "sourceMaps": true,
+        "cwd": "${workspaceFolder}"
+      }
+    ]
+  }
