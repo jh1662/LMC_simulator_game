@@ -1,0 +1,373 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.controlUnit = void 0;
+var Register;
+(function (Register) {
+    Register[Register["programCounter"] = 0] = "programCounter";
+    Register[Register["address"] = 1] = "address";
+    Register[Register["instruction"] = 2] = "instruction";
+    Register[Register["accumulator"] = 3] = "accumulator";
+})(Register || (Register = {}));
+var numberStatus;
+(function (numberStatus) {
+    numberStatus[numberStatus["underflow"] = 0] = "underflow";
+    numberStatus[numberStatus["normal"] = 1] = "normal";
+    numberStatus[numberStatus["overflow"] = 2] = "overflow";
+})(numberStatus || (numberStatus = {}));
+class RAM {
+    constructor(memory) {
+        this.cells = new Array(100); //< initalise
+        //^ LMC simulator has 100 memory cells in the RAM
+        for (let index = 0; index < memory.length; index++) {
+            //* fill array with argument's elements
+            let buffer = memory[index];
+            //^ satisfies TS-2322
+            if (buffer == undefined) {
+                buffer = 0;
+            }
+            //^ satisfies TS-2322 but if-statement will never be true
+            this.cells[index] = buffer;
+        }
+    }
+    //: property methods
+    read(address) {
+        const value = this.cells[address];
+        //^ gets in accordence to index argument (memory address)
+        if (value == undefined) {
+            return 0;
+        }
+        //^ satisfies TS-2322
+        return value;
+    }
+    write(address, value) { this.cells[address] = value; } //< setter
+}
+class ALU {
+    //^ was there a overflow, underflow, or neither of them?
+    constructor() {
+        this.unflow = 999 * 2 + 1;
+        //^ 999*2 because 2 lots of 999s - one for positive (1 to 999) and the other for negative (-1 to -999)
+        //^ and the +1 to take the number zero into account.
+        this.arithmeticStatus = numberStatus.normal;
+    }
+    getArithmeticStatus() {
+        return this.arithmeticStatus;
+        //^ for the last time an ADD or SUB operation happened
+    }
+    //: property mutator methods
+    add(input, registers) {
+        let result;
+        result = input + registers.read(Register.accumulator);
+        //^ get's accumulator's value and modify it
+        if (result > 999) { //< overflow
+            this.arithmeticStatus = numberStatus.overflow;
+            result = result - this.unflow;
+            //^ deals with overflow
+            registers.write(Register.accumulator, result);
+        }
+        else if (result < -999) { //< underflow
+            this.arithmeticStatus = numberStatus.underflow;
+            result = result + this.unflow;
+            //^ deals with underflow
+            registers.write(Register.accumulator, result);
+        }
+        else { //< in range
+            this.arithmeticStatus = numberStatus.normal;
+            registers.write(Register.accumulator, result);
+        }
+    }
+    minus(input, registers) { this.add(input * -1, registers); } //< self-invoking
+    shift(registers, left) {
+        //: local variables (non-constant)
+        let result;
+        let operand = String(registers.read(Register.accumulator));
+        if (operand[0] == "-") {
+            operand = operand.slice(1);
+        }
+        //^ prevents negative value's minus sign from messing up the shifting operation
+        switch (operand.length) {
+            //* deals with the different digits of significances that the accumulator's value may have
+            case 1:
+                operand = "00" + operand + "0";
+                break;
+            case 2:
+                operand = "0" + operand + "0";
+                break;
+            default:
+                operand = operand + "0";
+                break; //< case 3
+        }
+        //: does the shifting
+        if (left) {
+            result = operand.slice(1);
+        }
+        else {
+            result = operand.slice(0, 2);
+        } //< else right
+        if (registers.read(Register.accumulator) < 0) {
+            result = "-" + result;
+        }
+        //^ re-add the minus sign if negative
+        registers.write(Register.accumulator, Number(result));
+        //^ writes result to accumulator
+    }
+}
+class Registers {
+    constructor() {
+        this.programCounter = 0;
+        this.address = 0;
+        this.instruction = 0;
+        this.accumulator = 0;
+    }
+    //: conditional accessor methods
+    read(register) {
+        switch (register) {
+            case Register.programCounter: return this.programCounter;
+            case Register.address: return this.address;
+            case Register.instruction: return this.instruction;
+            default: return this.accumulator; //< case Register.accumulator
+        }
+    }
+    write(register, value) {
+        switch (register) {
+            case Register.programCounter:
+                this.programCounter = value;
+                break;
+            case Register.address:
+                this.address = value;
+                break;
+            case Register.instruction:
+                this.instruction = value;
+                break;
+            default: this.accumulator = value; //< case Register.accumulator
+        }
+    }
+}
+class IO {
+    constructor(predefinedInputs) {
+        this.predefinedInputs = predefinedInputs;
+        //^ user may use pre-defined inputs for rapid prototyping
+        this.outputHistory = [];
+    }
+    //: property methods
+    output(operand) {
+        this.outputHistory.push(String(operand));
+        console.log(operand);
+        //! for now uses console for testing but must link up with user interface
+    }
+    stackShift() {
+        //* satisfies TS-2322(return type could be either 'number' or 'undefined')
+        const element = this.predefinedInputs.shift();
+        //^ pops the list
+        if (element == undefined) {
+            return 0;
+        }
+        //^ is list empty?
+        return element;
+    }
+    input() {
+        if (this.predefinedInputs.length != 0) {
+            return this.stackShift();
+        }
+        return 0; //! takes user input but is currently '0' for sake of heuristic testing
+        //^ else
+    }
+    getHistory() {
+        //! for now only for testing purposes - may become a final feature but not high piority
+        return this.outputHistory;
+    }
+}
+class controlUnit {
+    constructor(memory, predefinedInputs) {
+        this.displayStatus("Program starting");
+        this.ram = new RAM(memory);
+        this.alu = new ALU;
+        this.registers = new Registers;
+        this.io = new IO(predefinedInputs);
+        //: default values - user can change
+        this.cycleReady = false;
+        this.cycleInterval = 1;
+    }
+    //: private methods
+    fetch() {
+        //* inter-class getter and inter-class mutator method
+        const buffer = this.ram.read(this.registers.read(Register.programCounter));
+        //^ call getter method
+        const bufferStr = String(buffer); //< parse for decoding
+        //: breakdown instruction into opcode and operand
+        this.registers.write(Register.instruction, Number(bufferStr[0])); //< opcode
+        this.registers.write(Register.address, Number(bufferStr.slice(1, 4))); //< operand
+    }
+    decode() {
+        switch (this.registers.read(Register.instruction)) { //< 0 to 9
+            //x moved code from switch cases to methods because compiler does not allow two cases can declare the same variable.
+            case 1:
+                this.ADD();
+                break;
+            case 2:
+                this.SUB();
+                break;
+            case 3:
+                this.STA();
+                break;
+            case 4:
+                this.SH();
+                break;
+            //^ not part of the moden standard LMC instruction set but otherwise would be unpopulated
+            case 5:
+                this.LDA();
+                break;
+            case 6:
+                this.BRA();
+                break;
+            case 7:
+                this.BRZ();
+                break;
+            case 8:
+                this.BRP();
+                break;
+            default: this.IO(); //< case 9
+            //^ used "default" for code integrety
+        }
+    }
+    //: methods for each instuction - the methods for instriction's execution
+    ADD() {
+        //* Add memory cell address’ value to accumulator’s value
+        //: locate and get pointed value
+        const address = this.registers.read(Register.address);
+        const input = this.ram.read(address);
+        this.displayStatus("Little man adds mail address " + address + "'s value to calculator.");
+        this.alu.add(input, this.registers);
+        //^ adding operation
+    }
+    SUB() {
+        //* Subtract memory cell address’ value from accumulator’s value
+        //: locate and get pointed value
+        const address = this.registers.read(Register.address);
+        const input = this.ram.read(address);
+        this.displayStatus("Little man subtracts mail address " + address + "'s value from calculator.");
+        this.alu.minus(input, this.registers);
+    }
+    STA() {
+        //* Store accumulator’s value in memory cell address
+        const address = this.registers.read(Register.address);
+        this.ram.write(address, this.registers.read(Register.accumulator)); //< storing operation
+        this.displayStatus("Little man stores calculator's value to mail address " + address);
+    }
+    SH() {
+        //* Shift the accumulator value’s base-10 digits of significance, by one digit, to the left or right
+        if (this.registers.read(Register.address) == 1) { //< left
+            this.alu.shift(this.registers, true);
+            this.displayStatus("Little man left-shifts calculator's value");
+        }
+        else { //< right (==2)
+            this.alu.shift(this.registers, false);
+            this.displayStatus("Little man right-shifts calculator's value");
+        }
+    }
+    LDA() {
+        //* Load memory address’s value to the accumulator (becomes the new accumulator’s value)
+        const address = this.registers.read(Register.address);
+        this.displayStatus("Little man loads mail address " + address + "'s value to the calculator");
+        this.registers.write(Register.accumulator, this.ram.read(address)); //< loading operation
+    }
+    BRA() {
+        //* Branch – change PC’s value to – the address value (regardless of accumulator’s value)
+        const address = this.registers.read(Register.address);
+        this.displayStatus("Little man branches to mail address " + address);
+        this.registers.write(Register.programCounter, address - 1); //< branching operation
+    }
+    BRZ() {
+        //* Branch – change PC’s value to – the address value if accumulator’s value is zero
+        const address = this.registers.read(Register.address);
+        this.displayStatus("If calculator value is 0, little man branches to mail address" + address);
+        if (this.registers.read(Register.accumulator) == 0) {
+            this.registers.write(Register.programCounter, address - 1);
+        }
+        //^ conditional branching
+    }
+    BRP() {
+        //* Branch – change PC’s value to – the address value if accumulator’s value is positive or zero (not negative)
+        const address = this.registers.read(Register.address);
+        this.displayStatus("If calculator value is 0 or zero, little man branches to mail address" + address);
+        if (this.registers.read(Register.accumulator) >= 0) {
+            this.registers.write(Register.programCounter, address - 1);
+        }
+        //^ conditional branching
+    }
+    IO() {
+        //* Takes user input for accumulator value or output from accumulator value
+        const address = this.registers.read(Register.address);
+        this.displayStatus("Little man connects to the outside world");
+        switch (address) {
+            //* determines which IO operation to do (based in address being either 1, 2, or 3)
+            case 1:
+                this.registers.write(Register.accumulator, this.io.input());
+                break;
+            //^ Input
+            case 2:
+                this.io.output(this.registers.read(Register.accumulator));
+                break;
+            //^ Output as integer
+            default: //< case 3
+                //* Output as extended ASCII character (only within a certain range)
+                const decimal = this.registers.read(Register.accumulator);
+                if (decimal < 32 || decimal > 255) {
+                    this.io.output("[?]");
+                    break;
+                }
+                this.io.output(String.fromCharCode(decimal));
+                break;
+        }
+    }
+    displayStatus(status) {
+        console.log(status);
+        //! depends of second sprint to have a frontend to output to
+    }
+    //: public methods
+    cycle() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            //^ code source: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep "or in Typescript:" section
+            while (true) {
+                //: degugging purposes
+                console.log("PC - " + this.registers.read(Register.programCounter));
+                console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
+                //if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
+                this.displayStatus("Little man fetches next instruction");
+                yield sleep(this.cycleInterval);
+                this.fetch();
+                if (this.registers.read(Register.instruction) == 0) {
+                    this.displayStatus("Little man takes a coffee break");
+                    break;
+                }
+                this.displayStatus("Little man decodes then do the instruction");
+                yield sleep(this.cycleInterval);
+                this.decode();
+                yield sleep(this.cycleInterval);
+                //: increment and check in PC's value went over limit (99)
+                this.displayStatus("Little man checks the mail counter");
+                yield sleep(this.cycleInterval);
+                this.registers.write(Register.programCounter, this.registers.read(Register.programCounter) + 1);
+                if (this.registers.read(Register.programCounter) > 99) {
+                    //* resets to zero when above 99
+                    this.displayStatus("Counter too high - Little man resets mail counter");
+                    this.registers.write(Register.programCounter, 0);
+                    yield sleep(this.cycleInterval);
+                }
+            }
+            this.displayStatus("Program halted");
+            return this.io.getHistory();
+        });
+    }
+    getArithmeticStatus() { return this.alu.getArithmeticStatus(); } //< inter-class getter
+}
+exports.controlUnit = controlUnit;

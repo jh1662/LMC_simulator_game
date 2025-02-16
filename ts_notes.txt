@@ -3,6 +3,9 @@ command = what it does
 npm init -y = creates package.json
 npm install -g typescript = install ts globally
 npm install --save-dev typescript = install ts into dev part of project
+npm install --save-dev ts-node = install ts-node into dev part of project
 
 tsc --init = creates tsconfig.json
 tsc = compiles ts into js
+tsc -p tsconfig.json = compiles ts into js but with the configs
+npm install --save-dev jest @types/jest ts-jest typescript = install all 3 dependencies for a smooth ts automated testing
