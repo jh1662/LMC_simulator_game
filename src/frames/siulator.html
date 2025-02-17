@@ -1,0 +1,103 @@
+<!-- Made rapidly without comments because this is only for the hi-fi framework. -->
+<!-- Links/names to CSS and scripts will change when making the real deal / physical model with -->
+<!-- more appropiate naming and comments. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LMC</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="default.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="row">
+    <div class="container">
+        <div class="col-sm-4">
+            <div class="well">
+                <table id="ide-table">
+                    <tr>
+                        <th>#</th>
+                        <th>Label</th>
+                        <th>Opcode</th>
+                        <th>Operand</th>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="well">
+                <button class="btn btn-success">Back to menu</button>
+                <button class="btn btn-success">Time or Step</button>
+                <button class="btn btn-success" onclick="resetTextBoxes()">Reset</button>
+                <button class="btn btn-success">Run Settings</button>
+                <button class="btn btn-success">Button</button>
+                <button class="btn btn-success" onclick="assembleValues()">Assemble</button>
+                <button class="btn btn-success" onclick="openManual()">Manual</button>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="well">
+                <div class="list-item">
+                    <span>Program Counter</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Memory Instruction Register</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Memory Address Register</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Accumulator</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+            </div>
+            <div class="well">
+                <span>Arithmetic Logical Unit status</span>
+                <div class="boxes">
+                    <input type="text" class="readonly-input small" readonly>
+                    <input type="text" class="readonly-input large" readonly>
+                    <input type="text" class="readonly-input small" readonly>
+                </div>
+            </div>
+            <div class="well">
+                <button class="btn btn-success" onclick="toggleDisplay()">Display Button</button>
+                <div id="display-box" class="display-box">Text or Image</div>
+            </div>
+            <div class="well">
+                <span>Readonly Section</span>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="well">
+                <div class="group">
+                    <span>Input</span>
+                    <input type="text" class="fixed-width-input">
+                    <span>Output</span>
+                    <input type="text" class="expandable-output" readonly>
+                </div>
+            </div>
+            <div class="well">
+                <span>Pre-defined Inputs</span>
+                <input type="text" class="full-width">
+            </div>
+            <div class="well">
+                <table id="generated-table"></table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
