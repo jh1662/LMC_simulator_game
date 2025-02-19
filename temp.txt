@@ -1,0 +1,2 @@
+<span>Program Counter</span>
+<div class="col-xs-2"><input type="text" class="form-control readonly-input" readonly></div>
