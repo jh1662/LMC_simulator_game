@@ -1,2 +1,85 @@
 <span>Program Counter</span>
 <div class="col-xs-2"><input type="text" class="form-control readonly-input" readonly></div>
+data-bs-theme="dark"
+/*
+class CompilerUI{
+
+    private validate(script:string[][]):boolean{
+        let labels:Map<string, number> = new Map<string, number>();
+        let instructions = ["ADD", "SUB", "STA", "LDA", "SHL", "SHR", "BRA", "BRZ", "BRP", "INP", "OUT", "HLT", "DAT"];
+        let noOperands = ["SHL", "SHR", "INP", "OUT", "HLT"];
+        let mandatoryOperands = ["ADD", "SUB", "STA", "LDA", "BRA", "BRZ", "BRP", "DAT"];
+
+        for (let row = 0; row < script.length; row++){
+            //* many constants are used as compiler does not recognise list[index] for fixing TS-2532
+            const line = script[row];
+            if (line === undefined){ break; }
+            for (let column = 0; column < 3; column++){
+                const token = line[column];
+                if (token === undefined){ break; }
+
+                //: formatting the token - makes validation much easier and formatting does not give errors.
+                token.replace(/\s+/g, '');
+                //^ Removes all whitespaces.
+                //^ Learned about 'regular expressions' on https://www.regexone.com/ .
+                token.replace(/./g, (char) => char.toUpperCase());
+                //^ capitalises all characters
+
+                //: validating the token
+                if ((/[^A-Z0-9]/).test(token)){ return false; }
+                //^ Does token contain any character that is not alphanumeric?
+                //^ Makes token only consists alphanumeric characters (26 letters A-Z and numerical digits 0-9).
+                switch (column){
+                    case 0:
+                        if (token == ""){ break; }
+                        //^ Does current line have a label?
+                        if (labels.has(token)){ return false; }
+                        //^ Is label already defined?
+                        //^ If code line has a label, it must be unique.
+                        break;
+                    case 1:
+                        if (!instructions.includes(token)){ return false; }
+                        if (noOperands.includes(token)){
+                            if (line[2] != ""){ return false; }
+                        }
+                        //: if instruction requires an operand/address
+                        if (line[2] != ""){ return false; }
+
+                        break;
+                    default: //< 2
+
+            }
+        }
+        return true;
+    }
+    private validate(script: string[][]): void {
+        for (let line = 0; line < script.length; line++) {
+            const lineContent = script[line];
+            if (lineContent === undefined) { break; }
+
+            for (let token = 0; token < 3; token++) {
+                const tokenContent = lineContent[token];
+                if (tokenContent === undefined) { break; }
+                lineContent[token] = tokenContent.replace(/\s+/g, '');
+                // ^ Removes all whitespaces.
+                // ^ Learned about 'regular expressions' on https://www.regexone.com/.
+            }
+        }
+    }
+
+
+    private labels(tokens:string[][]):number{
+        //* check and format the labels
+        let labels:Map<string, number> = new Map<string, number>();
+        for (let codeLine = 0; codeLine < tokens.length; codeLine++){
+            if (tokens[codeLine][0] != "" ){
+
+            }
+            if (tokens[codeLine][0] != "" ){
+
+            }
+        return 0;
+        }
+    }
+}
+    */

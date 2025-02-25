@@ -56,9 +56,9 @@ body, html {
     margin-top: 10px; /* Add top margin */
     border: 1px solid #00F; /* Add border */
     padding: 10px; /* Add padding */
-    height: 100px; /* Set height */
     text-align: center; /* Center text */
     background-color: #FFF; /* Set background color */
+    display: inline-block;
 }
 
 table {
@@ -112,3 +112,7 @@ button {
     margin-right: 20px; /* Add right margin */
 }
 
+img {
+    width: 100%;
+    height: auto;
+}

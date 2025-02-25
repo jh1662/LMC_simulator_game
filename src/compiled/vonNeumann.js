@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.controlUnit = void 0;
+//#region enumeration
 var Register;
 (function (Register) {
     Register[Register["programCounter"] = 0] = "programCounter";
@@ -17,13 +18,18 @@ var Register;
     Register[Register["instruction"] = 2] = "instruction";
     Register[Register["accumulator"] = 3] = "accumulator";
 })(Register || (Register = {}));
+//^ To identidy which processor sregister to read or write to.
 var numberStatus;
 (function (numberStatus) {
     numberStatus[numberStatus["underflow"] = 0] = "underflow";
     numberStatus[numberStatus["normal"] = 1] = "normal";
     numberStatus[numberStatus["overflow"] = 2] = "overflow";
 })(numberStatus || (numberStatus = {}));
+//^ To identify if the ALU operation has overflowed, uncderflowed, or neither.
+//#endregion
+//#region aggregated classes
 class RAM {
+    //^ where the momory stores
     constructor(memory) {
         this.cells = new Array(100); //< initalise
         //^ LMC simulator has 100 memory cells in the RAM
@@ -185,8 +191,11 @@ class IO {
         return this.outputHistory;
     }
 }
+//#endregion
+//#region exported class (controlUnit)
 class controlUnit {
     constructor(memory, predefinedInputs) {
+        //: encapsulation
         this.displayStatus("Program starting");
         this.ram = new RAM(memory);
         this.alu = new ALU;
@@ -221,7 +230,8 @@ class controlUnit {
             case 4:
                 this.SH();
                 break;
-            //^ not part of the moden standard LMC instruction set but otherwise would be unpopulated
+            //^ Not part of the moden standard LMC instruction set but otherwise would be unpopulated.
+            //^ Either is the left-shift ('401') or right-shift ('402')
             case 5:
                 this.LDA();
                 break;
@@ -235,7 +245,8 @@ class controlUnit {
                 this.BRP();
                 break;
             default: this.IO(); //< case 9
-            //^ used "default" for code integrety
+            //^ Used "default" for code integrety.
+            //^ Either input (901), output integer (902), or output extended ASCII character (only if in specified range) (903).
         }
     }
     //: methods for each instuction - the methods for instriction's execution
@@ -245,8 +256,7 @@ class controlUnit {
         const address = this.registers.read(Register.address);
         const input = this.ram.read(address);
         this.displayStatus("Little man adds mail address " + address + "'s value to calculator.");
-        this.alu.add(input, this.registers);
-        //^ adding operation
+        this.alu.add(input, this.registers); //< adding operation
     }
     SUB() {
         //* Subtract memory cell address’ value from accumulator’s value
@@ -254,7 +264,7 @@ class controlUnit {
         const address = this.registers.read(Register.address);
         const input = this.ram.read(address);
         this.displayStatus("Little man subtracts mail address " + address + "'s value from calculator.");
-        this.alu.minus(input, this.registers);
+        this.alu.minus(input, this.registers); //< subtraction operation
     }
     STA() {
         //* Store accumulator’s value in memory cell address
@@ -265,11 +275,11 @@ class controlUnit {
     SH() {
         //* Shift the accumulator value’s base-10 digits of significance, by one digit, to the left or right
         if (this.registers.read(Register.address) == 1) { //< left
-            this.alu.shift(this.registers, true);
+            this.alu.shift(this.registers, true); //< left-shift operation
             this.displayStatus("Little man left-shifts calculator's value");
         }
         else { //< right (==2)
-            this.alu.shift(this.registers, false);
+            this.alu.shift(this.registers, false); //< right-shift operation
             this.displayStatus("Little man right-shifts calculator's value");
         }
     }
@@ -292,7 +302,7 @@ class controlUnit {
         if (this.registers.read(Register.accumulator) == 0) {
             this.registers.write(Register.programCounter, address - 1);
         }
-        //^ conditional branching
+        //^ conditional branching operation
     }
     BRP() {
         //* Branch – change PC’s value to – the address value if accumulator’s value is positive or zero (not negative)
@@ -301,31 +311,35 @@ class controlUnit {
         if (this.registers.read(Register.accumulator) >= 0) {
             this.registers.write(Register.programCounter, address - 1);
         }
-        //^ conditional branching
+        //^ conditional branching operation
     }
     IO() {
         //* Takes user input for accumulator value or output from accumulator value
         const address = this.registers.read(Register.address);
         this.displayStatus("Little man connects to the outside world");
         switch (address) {
-            //* determines which IO operation to do (based in address being either 1, 2, or 3)
+            //* Determines which IO operation to do (based in address being either 1, 2, or 3).
             case 1:
                 this.registers.write(Register.accumulator, this.io.input());
                 break;
-            //^ Input
+            //^ Input operation
             case 2:
                 this.io.output(this.registers.read(Register.accumulator));
                 break;
-            //^ Output as integer
+            //^ Output (as integer) operation
             default: //< case 3
                 //* Output as extended ASCII character (only within a certain range)
                 const decimal = this.registers.read(Register.accumulator);
+                //^ "decimal" as in base-10 integer.
+                //^ Convert decimal to extended ASCII character
                 if (decimal < 32 || decimal > 255) {
                     this.io.output("[?]");
                     break;
                 }
+                //^ range of most vsible extended ASCII characters
                 this.io.output(String.fromCharCode(decimal));
                 break;
+            //^ Output (as extended ASCII character) operation
         }
     }
     displayStatus(status) {
@@ -341,17 +355,21 @@ class controlUnit {
                 //: degugging purposes
                 console.log("PC - " + this.registers.read(Register.programCounter));
                 console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
+                //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
                 //if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
                 this.displayStatus("Little man fetches next instruction");
                 yield sleep(this.cycleInterval);
                 this.fetch();
+                //^ fetch part of the cycle
                 if (this.registers.read(Register.instruction) == 0) {
+                    //* when compiled assembly program ends
                     this.displayStatus("Little man takes a coffee break");
                     break;
                 }
                 this.displayStatus("Little man decodes then do the instruction");
                 yield sleep(this.cycleInterval);
                 this.decode();
+                //^ decode part of the cycle but also calls the specified instruction method for the execution part of the cycle
                 yield sleep(this.cycleInterval);
                 //: increment and check in PC's value went over limit (99)
                 this.displayStatus("Little man checks the mail counter");
@@ -363,6 +381,7 @@ class controlUnit {
                     this.registers.write(Register.programCounter, 0);
                     yield sleep(this.cycleInterval);
                 }
+                //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
             }
             this.displayStatus("Program halted");
             return this.io.getHistory();
@@ -371,3 +390,4 @@ class controlUnit {
     getArithmeticStatus() { return this.alu.getArithmeticStatus(); } //< inter-class getter
 }
 exports.controlUnit = controlUnit;
+//#endregion
