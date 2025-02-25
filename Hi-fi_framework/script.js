@@ -68,7 +68,7 @@ function assembleValues() {
 function toggleDisplay() {
     const displayBox = document.getElementById('display-box');
     if (displayBox.innerHTML === 'Text or Image') {
-        displayBox.innerHTML = '<img src="android.png" alt="Image" style="width: 100%; height: 100%;">';
+        displayBox.innerHTML = '<img src="android.png" alt="Image">';
         //^ image sourced from https://www.pixilart.com/art/android-sr2d969d913e7aws3
     } else {
         displayBox.innerHTML = 'Text or Image';

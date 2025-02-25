@@ -1,0 +1,17 @@
+.table-striped td, .table-striped th {
+    padding: 0;
+    /*^ Remove padding from table cells to allow user to zoomin more if needed*/
+}
+* {
+    font-size: 1.25rem !important;
+    /*^ "!important" overwrites bootstrap classes (such as "input-group-text") which are not possible to overwite without */
+}
+img {
+    width: 100%;
+    /*^ match its div container*/
+    height: auto;
+}
+.display-box {
+    display: inline-block;
+    /*^ match width to image's*/
+}
