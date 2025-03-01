@@ -1,4 +1,11 @@
-"use strict";
+///import { Register } from "./vonNeumann";
+export var Register;
+(function (Register) {
+    Register[Register["programCounter"] = 0] = "programCounter";
+    Register[Register["address"] = 1] = "address";
+    Register[Register["instruction"] = 2] = "instruction";
+    Register[Register["accumulator"] = 3] = "accumulator";
+})(Register || (Register = {}));
 //#region frontend connected classes
 var Direction;
 (function (Direction) {
@@ -8,7 +15,7 @@ var Direction;
     Direction[Direction["right"] = 3] = "right";
 })(Direction || (Direction = {}));
 ;
-class MemoryUI {
+export class MemoryUI {
     constructor(tableId) {
         this.HTMLTable = document.getElementById(tableId);
         //^ "as HTMLTableElement" assures code that argument isn't null
@@ -63,7 +70,7 @@ class MemoryUI {
         }
     }
 }
-class EditorUI {
+export class EditorUI {
     constructor(tableId) {
         this.HTMLTable = document.getElementById(tableId);
         //^ "as HTMLTableElement" assures code that argument isn't null
@@ -140,6 +147,7 @@ class EditorUI {
         const row = parseInt(rowStr);
         const column = parseInt(colStr);
         switch (direction) {
+            //* calling more specific navigation functions (with arguments) based on directions
             case Direction.up:
                 this.verticalNavigation(row, column, true);
                 break;
@@ -179,12 +187,14 @@ class EditorUI {
         //* 'isRight' as in the direction.
         const lastColumnID = 2; //< operand column
         if (isRight) {
+            //* increment column id if moving right
             columnId++;
             if (columnId > lastColumnID) {
                 columnId = 0;
             }
         }
-        else { //< moving downwards
+        else { //< moving left
+            //* decrement column id
             columnId--;
             if (columnId < 0) {
                 columnId = lastColumnID;
@@ -193,28 +203,177 @@ class EditorUI {
         const textbox = document.getElementById(`input-${rowId}-${columnId}`);
         textbox.focus();
     }
-}
-//#endregion
-//#region backend classes
-//#endregion
-//#region main class
-/*
-class simulatorApp{
-    //: all file's class instances - for front-end
-    private memoryUI: MemoryUI;
-    private editorUI: EditorUI;
-    //: all file's class instances - for back-end
-    //private compilerUI: CompilerUI;
-    constructor(){
-        //this.compilerUI = new CompilerUI();
-        this.memoryUI = new MemoryUI('memoryTable');
-        this.editorUI = new EditorUI('editorTable');
+    getScript() {
+        //* returns the script as a 2D array tokens
+        let script = [];
+        for (let lineId = 0; lineId < this.HTMLTable.rows.length - 1; lineId++) {
+            ///const row:HTMLTableRowElement = this.HTMLTable.rows[lineId] as HTMLTableRowElement;
+            const line = [
+                //* Does not matter if the cell is empty - prevents jagged arrays.
+                //* Same functionality as:
+                //* "for (let cell = 1; cell < 4; cell++) { line.push(((document.getElementById(`input-${lineId}-${cell}`) as HTMLInputElement).value).innerText); }"
+                //* but easier to comprehend and maintain/update in this current form and does not take that much more code space.
+                document.getElementById(`input-${lineId}-0`).value, //< label token
+                //^ "as HTMLInputElement" satisfies TS-2531.
+                //^ More reliable and easier to get textboxes by predictable ID rather that getting textbox by parent element (cell).
+                document.getElementById(`input-${lineId}-1`).value, //< opcode token
+                document.getElementById(`input-${lineId}-2`).value //< operand token
+            ];
+            if (line[0] == "" && line[1] == "" && line[2] == "") {
+                continue;
+            }
+            //^ do not add empty lines to the script
+            if (line[0].charAt(0) == "#" || line[0].charAt(0) == "//") {
+                continue;
+            }
+            //^ Not possible for line[0] to be undefined - "as string" satisfies TS-2532.
+            //^ Do not add region declarations or comments to the script.
+            script.push(line);
+            //^ each sub-array is a line, of tokens, in the script.
+        }
+        /*
+        //? If only top line runs the output is no parsed
+        //? but if both top and bottom lines run both outputs are parsed.
+        //? Most likely the cause is that the script somehow gets parsed (by object referance) before first output.
+        console.log(script);
+        console.log(this.parseScript(script));
+        */
+        console.log(script);
+        return this.parseScript(script);
+        //^ Script is either a 2D array of tokens or an empty array.
+        //^ If caller detects emty array, it will exit/stop.
+    }
+    parseScript(script) {
+        //* parsing the tokens - makes validation much easier.
+        //* parsing does not give errors hence is in this frontend class.
+        for (let lineNum = 0; lineNum < script.length; lineNum++) {
+            const line = script[lineNum];
+            //^ declaration satisfies TS-2322
+            for (let tokenType = 0; tokenType < line.length; tokenType++) {
+                let token = line[tokenType];
+                if (token == undefined) {
+                    token = "";
+                }
+                //^ reassaignment as "" satisfies TS-18048
+                line[tokenType] = token.replace(/\s+/g, '');
+                //^ Removes all whitespaces.
+                //^ Learned about 'regular expressions' on https://www.regexone.com/ .
+                line[tokenType] = token.replace(/./g, (char) => char.toUpperCase());
+                //^ capitalises all characters
+            }
+        }
+        return script;
+        //^ returns the script (2D-array of tokens) as parsed
     }
 }
+class IOUI {
+    //^ button for submitting non-predefined inputs
+    constructor(input, predefinedInput, outputHistory, submitInput) {
+        this.input = document.getElementById(input);
+        this.predefinedInput = document.getElementById(predefinedInput);
+        this.outputHistory = document.getElementById(outputHistory);
+        this.submitInput = document.getElementById(submitInput);
+    }
+    getInput() {
+        this.input.readOnly = false;
+        return new Promise((resolve) => {
+            this.submitInput.addEventListener("click", () => {
+                let userInput = this.input.value;
+                userInput = userInput.replace(/\s+/g, '');
+                //^ remove whitespaces
+                if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
+                    userInput = "";
+                }
+                //^ validation - if invalid, assaign it as ""
+                resolve(this.input.value);
+            }, {
+                once: true
+            });
+        });
+    }
+    output(appendingValue) { this.outputHistory.value += (", " + appendingValue); }
+    reset() {
+        this.predefinedInput.value = "";
+        this.predefinedInput.readOnly = false;
+        this.input.readOnly = true;
+    }
+    start() { this.predefinedInput.readOnly = true; }
+}
+/*
+class ALUUI{
+
+}
 */
-console.log('simulatorUI has loaded');
-const memoryUI = new MemoryUI('memoryTable');
-const editorUI = new EditorUI('editorTable');
-function addRowIfNeeded(textbox) { editorUI.generateLine(textbox); }
-function navigateEditor(event) { editorUI.navigationCheck(event); }
+class RegistersUI {
+    constructor(programCounter, memoryInstructionRegister, memoryAddressRegister, accumulator) {
+        this.programCounter = document.getElementById(programCounter);
+        this.memoryInstructionRegister = document.getElementById(memoryInstructionRegister);
+        this.memoryAddressRegister = document.getElementById(memoryAddressRegister);
+        this.accumulator = document.getElementById(accumulator);
+    }
+    updateRegister(register, newValue) {
+        //* 'newValue' was and works as a number but needs it as string because no math operations will apply to it
+        //* and HTML input textboxes accept strings only for overwriting the '.value' property.
+        //* Second parameter is called 'newValue' because not to be confused with the HTML element's '.value' property
+        //* that gets called ofter in this class.
+        switch (register) {
+            case Register.programCounter:
+                this.programCounter.value = newValue.toString();
+                break;
+            case Register.instruction:
+                this.memoryInstructionRegister.value = newValue.toString();
+                break;
+            case Register.address:
+                this.memoryAddressRegister.value = newValue.toString();
+                break;
+            case Register.accumulator:
+                this.accumulator.value = newValue.toString();
+                break;
+        }
+    }
+    resetRegisters() {
+        this.programCounter.value = "0";
+        this.memoryInstructionRegister.value = "0";
+        this.memoryAddressRegister.value = "0";
+        this.accumulator.value = "0";
+    }
+}
+class MiscellaneousUI {
+    //* Collection of managing single UI attributes that are not belong to a group and do not require a constructor.
+    displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
+    toggleDarkMode() {
+        //* note: dark/light mode is different to style themes
+        const HTMLEle = document.documentElement;
+        const currentMode = HTMLEle.getAttribute('data-bs-theme');
+        //^ Cannot get property directly due to name composition (use of dashes in name).
+        if (currentMode == "light") {
+            HTMLEle.setAttribute('data-bs-theme', 'dark');
+        }
+        else {
+            HTMLEle.setAttribute('data-bs-theme', 'light');
+        }
+    }
+}
+//#endregion
+//#region main class
+export class SimulatorUI {
+    constructor() {
+        //: Ids as arguments for simplicity and ease when maintaining/updating.
+        this.memoryUI = new MemoryUI('memoryTable');
+        this.editorUI = new EditorUI('editorTable');
+        this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
+        this.iOUI = new IOUI('input', 'predefinedInputs', 'output', 'submitInput');
+        this.miscellaneousUI = new MiscellaneousUI();
+        console.log('simulatorUI has loaded');
+    }
+    //: called by middleware for tasks that does not involve the backend
+    addRowIfNeeded(textbox) { this.editorUI.generateLine(textbox); }
+    navigateEditor(event) { this.editorUI.navigationCheck(event); }
+    toggleDarkMode() { this.miscellaneousUI.toggleDarkMode(); }
+    getScript() { return this.editorUI.getScript(); }
+    displayManual() { this.miscellaneousUI.displayManual(); }
+    compile(memory) { this.memoryUI.compileToMemory(memory); }
+}
+//function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }
+//function navigateEditor(event:KeyboardEvent):void{ editorUI.navigationCheck(event); }
 //#endregion

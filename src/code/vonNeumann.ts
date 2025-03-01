@@ -1,7 +1,7 @@
 //#region enumeration
-enum Register { programCounter, address, instruction, accumulator }
+export enum Register { programCounter, address, instruction, accumulator }
 //^ To identidy which processor sregister to read or write to.
-enum numberStatus { underflow, normal, overflow}
+enum NumberStatus { underflow, normal, overflow}
 //^ To identify if the ALU operation has overflowed, uncderflowed, or neither.
 //#endregion
 //#region aggregated classes
@@ -34,14 +34,14 @@ class ALU{
     //: private fields
     private unflow:number;
     //^ constant number for dealing with overflows and underflows
-    private arithmeticStatus:numberStatus;
+    private arithmeticStatus:NumberStatus;
     //^ was there a overflow, underflow, or neither of them?
 
     constructor(){
         this.unflow = 999*2+1;
         //^ 999*2 because 2 lots of 999s - one for positive (1 to 999) and the other for negative (-1 to -999)
         //^ and the +1 to take the number zero into account.
-        this.arithmeticStatus = numberStatus.normal;
+        this.arithmeticStatus = NumberStatus.normal;
     }
     public getArithmeticStatus(){ //< getter method
         return this.arithmeticStatus;
@@ -54,19 +54,19 @@ class ALU{
         result = input + registers.read(Register.accumulator);
         //^ get's accumulator's value and modify it
         if (result > 999){ //< overflow
-            this.arithmeticStatus = numberStatus.overflow;
+            this.arithmeticStatus = NumberStatus.overflow;
             result = result - this.unflow;
             //^ deals with overflow
             registers.write(Register.accumulator, result);
         }
         else if (result < -999){ //< underflow
-            this.arithmeticStatus = numberStatus.underflow;
+            this.arithmeticStatus = NumberStatus.underflow;
             result = result + this.unflow;
             //^ deals with underflow
             registers.write(Register.accumulator, result);
         }
         else{ //< in range
-            this.arithmeticStatus = numberStatus.normal;
+            this.arithmeticStatus = NumberStatus.normal;
             registers.write(Register.accumulator, result);
         }
     }
@@ -344,7 +344,7 @@ export class controlUnit{
         this.displayStatus("Program halted");
         return this.io.getHistory();
     }
-    public getArithmeticStatus():numberStatus{ return this.alu.getArithmeticStatus(); } //< inter-class getter
+    public getArithmeticStatus():NumberStatus{ return this.alu.getArithmeticStatus(); } //< inter-class getter
     //^! 'getArithmeticStatus' does not get called in first sprint (hence not tested) but in the second sprint
 }
 //#endregion
