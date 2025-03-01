@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,10 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.controlUnit = void 0;
 //#region enumeration
-var Register;
+export var Register;
 (function (Register) {
     Register[Register["programCounter"] = 0] = "programCounter";
     Register[Register["address"] = 1] = "address";
@@ -19,12 +16,12 @@ var Register;
     Register[Register["accumulator"] = 3] = "accumulator";
 })(Register || (Register = {}));
 //^ To identidy which processor sregister to read or write to.
-var numberStatus;
-(function (numberStatus) {
-    numberStatus[numberStatus["underflow"] = 0] = "underflow";
-    numberStatus[numberStatus["normal"] = 1] = "normal";
-    numberStatus[numberStatus["overflow"] = 2] = "overflow";
-})(numberStatus || (numberStatus = {}));
+var NumberStatus;
+(function (NumberStatus) {
+    NumberStatus[NumberStatus["underflow"] = 0] = "underflow";
+    NumberStatus[NumberStatus["normal"] = 1] = "normal";
+    NumberStatus[NumberStatus["overflow"] = 2] = "overflow";
+})(NumberStatus || (NumberStatus = {}));
 //^ To identify if the ALU operation has overflowed, uncderflowed, or neither.
 //#endregion
 //#region aggregated classes
@@ -62,7 +59,7 @@ class ALU {
         this.unflow = 999 * 2 + 1;
         //^ 999*2 because 2 lots of 999s - one for positive (1 to 999) and the other for negative (-1 to -999)
         //^ and the +1 to take the number zero into account.
-        this.arithmeticStatus = numberStatus.normal;
+        this.arithmeticStatus = NumberStatus.normal;
     }
     getArithmeticStatus() {
         return this.arithmeticStatus;
@@ -74,19 +71,19 @@ class ALU {
         result = input + registers.read(Register.accumulator);
         //^ get's accumulator's value and modify it
         if (result > 999) { //< overflow
-            this.arithmeticStatus = numberStatus.overflow;
+            this.arithmeticStatus = NumberStatus.overflow;
             result = result - this.unflow;
             //^ deals with overflow
             registers.write(Register.accumulator, result);
         }
         else if (result < -999) { //< underflow
-            this.arithmeticStatus = numberStatus.underflow;
+            this.arithmeticStatus = NumberStatus.underflow;
             result = result + this.unflow;
             //^ deals with underflow
             registers.write(Register.accumulator, result);
         }
         else { //< in range
-            this.arithmeticStatus = numberStatus.normal;
+            this.arithmeticStatus = NumberStatus.normal;
             registers.write(Register.accumulator, result);
         }
     }
@@ -193,7 +190,7 @@ class IO {
 }
 //#endregion
 //#region exported class (controlUnit)
-class controlUnit {
+export class controlUnit {
     constructor(memory, predefinedInputs) {
         //: encapsulation
         this.displayStatus("Program starting");
@@ -389,5 +386,4 @@ class controlUnit {
     }
     getArithmeticStatus() { return this.alu.getArithmeticStatus(); } //< inter-class getter
 }
-exports.controlUnit = controlUnit;
 //#endregion

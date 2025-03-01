@@ -8,6 +8,7 @@
 /// Disabled code line
 //# Notes for the current scope it is in (not as strict as '//*') but does not affect region start nor end declarations.
 //x Note that is not neccessarily related to the code - such as talking about the greater project (can also be done with '//X').
+//@ Decalation for both the developers and the compiler to unserstand, such as '// @ts-ignore' to ignore TS errors in the line below the comment.
 
 /* showing its use in multiline comments:
     ^
@@ -18,7 +19,7 @@
     ?
     /
     #
-    //x
+    x
 */
 
 //x Due to '/**/' restrictions and limitations, some multiline comments are done with multiple adjecent single-line comments.
