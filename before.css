@@ -1,0 +1,30 @@
+* {
+    color: #000 /*< text colour*/
+}
+body{
+    background-color: #FFB; /*< page background*/
+}
+span{
+    background-color: #FFB !important; /*< part of page background*/
+    border-color: #0AF !important; /*< secondary colour*/
+}
+.btn{
+    background-color: #0AF; /*< secondary colour*/
+    border-color: #0F0; /*< secondary colour*/
+
+}
+.btn:hover{
+    background-color: #0F0; /*< primary colour*/
+    border-color: #0AF; /*< secondary colour*/
+
+}
+input{
+    background-color: #0F0 !important; /*< primary colour*/
+    /*^ "!important" overwrites bootstrap classes (such as "input-group-text" and "table table-striped") which are not possible to overwite without */
+    border-color: #0AF !important; /*< secondary colour*/
+}
+.table td, .table th {
+    padding: 0;
+    /*^ Remove padding from table cells to allow user to zoomin more if needed*/
+    border-color: #0F0; /*< primary colour*/
+}

@@ -344,13 +344,13 @@ class MiscellaneousUI {
     toggleDarkMode() {
         //* note: dark/light mode is different to style themes
         const HTMLEle = document.documentElement;
-        const currentMode = HTMLEle.getAttribute('data-bs-theme');
+        const currentMode = HTMLEle.getAttribute('data-theme');
         //^ Cannot get property directly due to name composition (use of dashes in name).
         if (currentMode == "light") {
-            HTMLEle.setAttribute('data-bs-theme', 'dark');
+            HTMLEle.setAttribute('data-theme', 'dark');
         }
         else {
-            HTMLEle.setAttribute('data-bs-theme', 'light');
+            HTMLEle.setAttribute('data-theme', 'light');
         }
     }
 }
