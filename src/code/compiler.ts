@@ -4,7 +4,11 @@ enum ErrorType{ labelDuplicate, labelInvalid, labelMissing, instructionInvalid, 
 enum TokenType{ label, opcode, operand }
 
 export class Compiler{
-    //* no need for constructor method
+    private message:string;
+
+    constructor(){ this.message = ""; }
+    public getMessage():string{ return this.message; }
+
     private generateErrorMessage(lineId:number, tokenType:TokenType, errorType:ErrorType, invalidToken:string):string{
         //* invalidToken may or may not be used depending on type of error ('errorType' argument).
         //* Code structure with or without 'invalidToken' is so similar that method overloading (
@@ -57,6 +61,7 @@ export class Compiler{
         //* and the other calls a method from another class.
         const message:string = this.generateErrorMessage(lineId, tokenType, errorType, invalidToken);
         console.log(message);
+        this.message = message;
     }
     private labelMapping(script:string[][]):Map<string, number>{
         //* might be slightly more sense to use Map<string, string> instead but the different data types allows develops to easily identify what the key set and value set are
@@ -89,16 +94,23 @@ export class Compiler{
         //^ the other validation part of the labels (check if alphanumeric) is done in the caller method
     }
     private compress(script:string[][]):string[][]{
+        //* Validates if script has any opcode, if not then deem script empty, and compress it by removing any comments or empty lines.
         let isEmpty:boolean = true;
         //^ Empty script specifically means that there is no opcode in the assembly script/code.
         //^ Assume true until proven otherwise.
-        for (let lineId = 0; lineId < script.length; lineId){
+        for (let lineId = 0; lineId < script.length; lineId++){
             let opcode:string = (script[lineId] as string[])[1] as string;
             //^ Use of "as" instead of "if", to satisfy TS-2367 due to complexity of getting element from 2D array.
             //^ It is not possible to code a line without opcode, therefore the program assumes that a line without
             //^ opcode is either an empty line or comment/region.
-            if (opcode != ""){ continue; }
-            script.splice(lineId, 1);
+            if (opcode == ""){
+                script.splice(lineId, 1);
+                //^ remove redundant line
+                lineId--;
+                //^ account change of list's element in current index
+                continue;
+            }
+
             isEmpty = false
         }
         if (isEmpty){ return []; }
@@ -134,15 +146,17 @@ export class Compiler{
             let line = script[lineId];
             if (line == undefined){ continue; }
             //^ satisfies TS-18048
+
+            let ExpectedOperand:boolean = true;
+            //^ Outside nested loop because it (potentially) written to when validating opcode and read from when validating operand.
+            //^ Assume that operand is expected until proven wrong.
+
             for (let column = 0; column < 3; column++){
                 //* 'column' does not take the line numbering column into account here
                 let token = line[column];
                 if (token == undefined){ token=""; }
                 //^ satisfies TS-2345
 
-                let ExpectedOperand:boolean = true;
-                //^ Outside nested loop because it (potentially) written to when validating opcode and read from when validating operand.
-                //^ Assume that operand is expected until proven wrong.
                 //^ Default 'true' instead of 'false' because it makes codes have less intensity/frequency of indented code.
                 let opcodeDAT:boolean = false;
 
@@ -174,10 +188,6 @@ export class Compiler{
 
                         break;
                     default: //< TokenType.operand
-                        if (labels.has(token)){ this.errorMessage(lineId, column, ErrorType.labelDuplicate, token); return [-1]; }
-                        //^ Has called label already been defined?
-                        //^ If address/operand is label, then that must label must be declared otherwise error will appear.
-
                         if((/[A-Z]/).test(token)){
                             //* if referances label, check if label is declared than compile it into line id
                             const compiled:number|undefined = labels.get(token);
@@ -185,7 +195,7 @@ export class Compiler{
                             //^ NOT to satisfy TS warnings/errors - compiled is expected to be 'undefined'
                             //^ if value cannot be found with subjected label as key.
                             compiledInstruction += compiled.toString();
-                            //^ compiles operand into line id
+                            //^ compiles operand into line id - operand is valid as is a label that was declared in the assemblt script.
                             break;
                         }
 

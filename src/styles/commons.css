@@ -1,8 +1,11 @@
-.table-striped td, .table-striped th {
+.table td, .table th {
+    background-color: transparent !important;
     padding: 0;
     /*^ Remove padding from table cells to allow user to zoomin more if needed*/
 }
 * {
+    border-width: 0.1rem !important;
+    /*^ "!important" overwite bootstrap class "input-group-text"*/
     font-size: 1.25rem !important;
     /*^ "!important" overwrites bootstrap classes (such as "input-group-text") which are not possible to overwite without */
 }
