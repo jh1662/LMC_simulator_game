@@ -1,5 +1,5 @@
 /*
-import { controlUnit } from "./vonNeumann";
+import { controlUnit } from "./vonNeumann.js";
 
 async function test(){
     //* addition (before async was added)
@@ -47,17 +47,18 @@ async function testDebugging(){
 
 testDebugging();
 */
-import { Compiler } from "./compiler.js";
+import { Compiler } from "../code/compiler.js";
 function testCompiler(){
 
     const preCompiled:string[][] = [
         //* represents 2D list values fetched from the frontend's assembly code editor.
         ["", "INP", ""],
-        ["", "STA", "99"],
+        ["", "STA", "BUFFER"],
         ["", "INP", ""],
-        ["", "ADD", "99"],
+        ["", "ADD", "BUFFER"],
         ["", "OUT", ""],
-        ["", "HLT", ""]
+        ["", "HLT", ""],
+        ["BUFFER", "DAT", ""]
     ];
 
     //: instantiate then apply compiler to script.
