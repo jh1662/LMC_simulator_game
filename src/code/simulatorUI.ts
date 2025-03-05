@@ -1,5 +1,5 @@
-///import { Register } from "./vonNeumann";
-export enum Register { programCounter, address, instruction, accumulator }
+import { Register } from "./vonNeumann";
+//^ Why make new enumeration when can import an existing one.
 //#region frontend connected classes
 enum Direction{up, down, left, right};
 export class MemoryUI{

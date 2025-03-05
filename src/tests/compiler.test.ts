@@ -85,15 +85,16 @@ describe("Testing validation and compilation by script's labels and operands",()
         expect(compiled).toStrictEqual([503, 902, 0, -999]);
     });
     describe("Testing valid code with labels and only labels for the operand",() => {
+        //*
         test('Modified pre-compiled script of the "add/subtr" program (from LMCCompatibility.test.ts) - DAT at beginning', () => {
             const preCompiled:string[][] = [
-                ["buffer", "DAT", ""],
+                ["BUFFER", "DAT", "0"],
                 //^ Cannot really referance label without declaring in thus to use of DAT here.
                 //^ Dispite this, more DAT tests will still be tested for better debugging when using automatic testing.
                 ["", "INP", ""],
-                ["", "STA", "buffer"],
+                ["", "STA", "BUFFER"],
                 ["", "INP", ""],
-                ["", "ADD", "buffer"],
+                ["", "ADD", "BUFFER"],
                 ["", "OUT", ""],
                 ["", "HLT", ""],
             ];
@@ -101,25 +102,25 @@ describe("Testing validation and compilation by script's labels and operands",()
             const compiler:Compiler = new Compiler();
             const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
 
-            expect(compiled).toStrictEqual([901,300,901,100,902,0]);
+            expect(compiled).toStrictEqual([0,901,300,901,100,902,0]);
             //^ buffer should be at memory address '0'
         });
         test('Another modified pre-compiled script of the "add/subtr" program (from LMCCompatibility.test.ts) - DAT at end', () => {
             const preCompiled:string[][] = [
                 ["", "INP", ""],
-                ["", "STA", "buffer"],
+                ["", "STA", "BUFFER"],
                 ["", "INP", ""],
-                ["", "ADD", "buffer"],
+                ["", "ADD", "BUFFER"],
                 ["", "OUT", ""],
                 ["", "HLT", ""],
-                ["buffer", "DAT", ""],
+                ["BUFFER", "DAT", ""]
                 //^ DAT now at the end to test if label referancing works before declaration (it should work)
             ];
 
             const compiler:Compiler = new Compiler();
             const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
 
-            expect(compiled).toStrictEqual([901,306,901,106,902,0]);
+            expect(compiled).toStrictEqual([901,306,901,106,902,0,0]);
             //^ buffer should be memory address '6'
         });
         test('All branch instructions - 3 operands of different label addresses', () => {
@@ -133,7 +134,7 @@ describe("Testing validation and compilation by script's labels and operands",()
                 ["", "OUT", ""],
                 ["one", "OUT", ""],
                 ["two", "OUT", ""],
-                ["three", "HLT", ""],
+                ["three", "HLT", ""]
             ];
 
             const compiler:Compiler = new Compiler();
@@ -155,7 +156,7 @@ describe("Testing validation and compilation by script's labels and operands",()
                 ["", "OUT", ""],
                 [" o ne ", "OUT", ""],
                 ["t2wo22", "OUT", ""],
-                ["i", "HLT", ""],
+                ["i", "HLT", ""]
             ];
 
             const compiler:Compiler = new Compiler();
@@ -176,7 +177,7 @@ describe("Testing validation and compilation by script's labels and operands",()
                 //^ label with some letters in upper-case
                 ["", "OUT", " B u F f E R 1 "],
                 //^ label with both whitespacing and some upper-case
-                ["", "HLT", ""],
+                ["", "HLT", ""]
             ];
 
             const compiler:Compiler = new Compiler();
@@ -204,7 +205,7 @@ describe("Testing validation and compilation by script's labels and operands",()
                 ["one", "INP", ""],
                 ["", "STA", ""],
                 ["three", "OUT", ""],
-                ["three", "OUT", ""],
+                ["three", "OUT", ""]
             ];
 
             const compiler:Compiler = new Compiler();

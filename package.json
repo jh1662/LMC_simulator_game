@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "heur": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/code/heuristicTesting.ts",
-    "heurWarning": "node --trace-warnings --loader ts-node/esm src/code/heuristicTesting.ts",
-    "debugHeur": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/code/heuristicTesting.ts",
+    "heur": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
+    "heurWarning": "node --trace-warnings --loader ts-node/esm src/tests/heuristicTesting.ts",
+    "debug": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
     "heurjs": "tsc && node --inspect-brk src/compiled/heuristicTesting.js",
     "expe": "ts-node src/tests/experiment.ts"
   },
