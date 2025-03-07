@@ -83,3 +83,49 @@ class CompilerUI{
     }
 }
     */
+
+    describe("Testing valid code without labels",() => {});
+
+        test('All branch instructions - 3 operands of different label addresses with extreme naming', () => {
+            const preCompiled:string[][] = [
+                ["", "INP", ""],
+                ["", "OUT", ""],
+                ["", "BRZ", " O NE "],
+                //^ whitepace before, in-middle, and after label
+                ["", "BRP", "t2wo22"],
+                //^ label contains numerical digits inside and at end but not at the beginning
+                ["", "BRA", "i"],
+                //^ label is a singular character
+                ["", "OUT", ""],
+                [" o ne ", "OUT", ""],
+                ["t2wo22", "OUT", ""],
+                ["i", "HLT", ""]
+            ];
+
+            const compiler:Compiler = new Compiler();
+            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+            expect(compiled).toStrictEqual([901,902,705,806,607,902,902,902,0]);
+            //^ ' o ne ', 't2wo22', 'i' should be at addresses '5', '6', '7' respectively
+        });
+        test('Modified pre-compiled script of the "add/subtr" program (from LMCCompatibility.test.ts) - variations of the same label', () => {
+            const preCompiled:string[][] = [
+                ["buffer1", "DAT", ""],
+                //^ all label referances should all referance the same label
+                ["", "INP", ""],
+                ["", "STA", " b    uf fer1 "],
+                //^ label with whitespacing
+                ["", "INP", ""],
+                ["", "ADD", "bUFFeR1"],
+                //^ label with some letters in upper-case
+                ["", "OUT", " B u F f E R 1 "],
+                //^ label with both whitespacing and some upper-case
+                ["", "HLT", ""]
+            ];
+
+            const compiler:Compiler = new Compiler();
+            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+            expect(compiled).toStrictEqual([901,300,901,100,902,0]);
+            //^ buffer1 should be at memory address '0'
+        });

@@ -1,7 +1,8 @@
-import { Register } from "./vonNeumann";
+import { Register,NumberStatus } from "./vonNeumann.js";
 //^ Why make new enumeration when can import an existing one.
 //#region frontend connected classes
 enum Direction{up, down, left, right};
+//enum UIProperties{};
 export class MemoryUI{
     //* Class to generate the memory table once per simulator page load
     //* and to write to its cells (the textboxes).
@@ -280,13 +281,49 @@ class IOUI{
         this.input.readOnly = true;
     }
 
-    public start():void{ this.predefinedInput.readOnly = true; }
-}
-/*
-class ALUUI{
+    public start():number[]{
+        //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file.
+        this.predefinedInput.readOnly = true;
 
+        let compiledInputs:number[] = [];
+        const inputs:string = this.predefinedInput.value.replace(/\s+/g, '');
+        //^ Collect all pre-defined inputs and remove any whitespaces.
+        if (inputs == "") { return []; }
+        //^ Means no pre-defined inputs but still valid.
+        const splitInputs:string[] = inputs.split(",");
+        for (const input in splitInputs){
+            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) { return [-1]; }
+            //^ return '-1' to indicate invalid.
+            compiledInputs.push(parseInt(splitInputs.pop() as string,10))
+            //^ 'as string' to satisfy TS-2345 because it is certain that splitInputs.pop() will always return a string.
+        }
+        return compiledInputs;
+    }
 }
-*/
+
+class ALUUI{
+    private flow:HTMLInputElement;
+    private operation:HTMLInputElement;
+    private result:HTMLInputElement;
+    constructor(flow:string, operation:string, result:string){
+        this.flow = document.getElementById(flow) as HTMLInputElement;
+        this.operation = document.getElementById(operation) as HTMLInputElement;
+        this.result = document.getElementById(result) as HTMLInputElement;
+    }
+    update(flow:NumberStatus, operation:string, result:string){
+        switch(flow){
+            case NumberStatus.normal: this.flow.value = "="; break;
+            //: better to use plus and minus signs instead of greater/less signs ('>' and '<') to not confuse the HTML.
+            case NumberStatus.underflow: this.flow.value = "-"; break;
+            case NumberStatus.underflow: this.flow.value = "+"; break;
+
+        }
+        this.operation.value = operation;
+        //^ formatting the string requires processing outside class
+        this.result.value = result;
+    }
+}
+
 class RegistersUI{
     //* simplitic - only display integers or resets to "0" as the procession happens in the backend.
     //* specifically named in plural form to emphasise the
@@ -328,15 +365,47 @@ class RegistersUI{
 }
 
 class MiscellaneousUI{
-    //* Collection of managing single UI attributes that are not belong to a group and do not require a constructor.
+    //* Collection of managing single UI attributes that are not belong to a group.
+    private HTMLEle:HTMLElement;
+    private status:HTMLElement;
+    private displayBox:HTMLElement;
+
+    private displayImage:string;
+    private displayObjective:string;
+
+    constructor(status:string, displayBox:string){
+        this.status = document.getElementById(status) as HTMLElement;
+        this.HTMLEle = document.documentElement;
+        this.displayBox = document.getElementById(displayBox) as HTMLElement;
+        this.displayImage = "HLT";
+        //^ name for default image and image for program stopping or not currently running
+        this.displayObjective = "This is sandbox mode.";
+    }
     public displayManual():void{ window.open('manual.html', '_blank', 'width=800,height=600'); }
+    public changeStatus(status:string):void{ this.status.innerHTML = status; }
     public toggleDarkMode():void{
         //* note: dark/light mode is different to style themes
-        const HTMLEle:HTMLElement = document.documentElement;
-        const currentMode:string|null = HTMLEle.getAttribute('data-theme');
+        const currentMode:string|null = this.HTMLEle.getAttribute('data-theme');
         //^ Cannot get property directly due to name composition (use of dashes in name).
-        if (currentMode == "light") { HTMLEle.setAttribute('data-theme', 'dark'); }
-        else { HTMLEle.setAttribute('data-theme', 'light'); }
+        if (currentMode == "light") { this.HTMLEle.setAttribute('data-theme', 'dark'); }
+        else { this.HTMLEle.setAttribute('data-theme', 'light'); }
+    }
+    public toggleDisplayMode():void{
+        //* switch between objective and image
+        if (this.displayBox.innerHTML.slice(0,10) == "<img src=") {
+            //^ simplistic way to tell if display
+            this.displayBox.innerHTML = this.displayObjective;
+            //^ switch to displaying objective in box
+            return;
+        }
+        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}.png>`
+        //^ Change to specific image depending on simulator's state.
+        //^ Using PNGs (and maybe GIFs) instead of JPEG because of wanting more lossless formats.
+    }
+    public changeDisplayImage(newImageName:string):void{
+        //^ Image could be image or GIF
+        this.displayImage = newImageName;
+        this.toggleDisplayMode();
     }
 }
 //#endregion
@@ -349,25 +418,35 @@ export class SimulatorUI{
     private iOUI:IOUI;
     //@ts-ignore
     private registerUI:RegistersUI;
-    private miscellaneousUI: MiscellaneousUI;
+    private miscellaneousUI:MiscellaneousUI;
+    //@ts-ignore
+    private aLUUI:ALUUI;
     constructor(){
         //: Ids as arguments for simplicity and ease when maintaining/updating.
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input','predefinedInputs','output','submitInput');
-        this.miscellaneousUI = new MiscellaneousUI();
+        this.miscellaneousUI = new MiscellaneousUI('status','displayBox');
+        this.aLUUI = new ALUUI('flow','operation','result');
 
         console.log('simulatorUI has loaded');
     }
-    //: called by middleware for tasks that does not involve the backend
+    //: called tasks that does not involve the backend
     public addRowIfNeeded(textbox:HTMLInputElement):void{ this.editorUI.generateLine(textbox); }
     public navigateEditor(event:KeyboardEvent):void{ this.editorUI.navigationCheck(event); }
-    public toggleDarkMode():void{ this.miscellaneousUI.toggleDarkMode(); }
-    public getScript():string[][]{ return this.editorUI.getScript(); }
-    public displayManual():void{ this.miscellaneousUI.displayManual(); }
+    public toggleDarkMode():void{ this.miscellaneousUI.toggleDarkMode(); } //< call by button
+    public getScript():string[][]{ return this.editorUI.getScript(); } //< call by middleware
+    public displayManual():void{ this.miscellaneousUI.displayManual(); } //< call by button
+    public getPredefinedInputs():number[]{ return this.iOUI.start()} //< called by middleware
 
-    public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); }
+    public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); } //< call by middleware
+    public changeStatus(status:string){ this.miscellaneousUI.changeStatus(status); } //< call by middleware
+
+    public toggleDisplayMode():void{this.miscellaneousUI.toggleDisplayMode(); } //< call by button
+    public changeDisplayImage(newImageName:string):void{this.miscellaneousUI.changeDisplayImage(newImageName); } //< call by button
+
+    //public update(UIProperty:string, value:string){}
 }
 
 //function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }

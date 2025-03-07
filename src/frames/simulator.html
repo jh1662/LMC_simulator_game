@@ -49,6 +49,7 @@
                     <button class="btn mb-3" id="manual">Manual</button>
                     <button class="btn mb-3" id="submitInput">Submit Input</button>
                     <button class="btn mb-3" id="toggleMode">Toggle Light/dark Mode</button>
+                    <button class="btn mb-3" id="toggleDisplay">Toggle Display</button>
                 </div>
             </div>
             <!--#endregion-->
@@ -85,14 +86,14 @@
                 <div class="well">
                     <span>Arithmetic Logical Unit status</span>
                     <div class="d-flex">
-                        <input type="text" class="form-control" style="flex: 0.5;" readonly>
+                        <input type="text" class="form-control" id="flow" style="flex: 0.5;" readonly>
                         <!--^ the style part is a shorthand for 'flex-shrink' or 'flex-grow' but can specify the scale of the effect -->
                         <!--^ and it is neccessary to tweak that way because the sub-section/'well' is too small that 'flex-shrink' does not -->
                         <!--^ actually have any meaningful effect -->
 
                         <!--^ unlike the textboxes inside the table (code editor), Bootstrap classes only work in div tags instead of directly inside -->
-                        <input type="text" class="form-control" style="flex: 2;" readonly>
-                        <input type="text" class="form-control" style="flex: 0.5;" readonly>
+                        <input type="text" class="form-control" id="operation" style="flex: 2;" readonly>
+                        <input type="text" class="form-control" id="result" style="flex: 0.5;" readonly>
                     </div>
                 </div>
                 <div class="well">
@@ -111,12 +112,15 @@
                         <input type="text" class="form-control text-end" id="PredefinedInputs">
                     </div>
                 </div>
-                <div class="well">
-                    <button class="btn" onclick="toggleDisplay()">Display Button</button>
-                    <div id="display-box" class="display-box">Text or Image</div>
-                </div>
-                <div class="well">
-                    <span>IMAGE GOES HERE</span>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 well">
+                            <div id="displayBox">Text or Image</div>
+                        </div>
+                        <div class="col-md-6 well">
+                            <span id="status">simulator loaded</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--#endregion-->
