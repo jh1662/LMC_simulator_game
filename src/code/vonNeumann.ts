@@ -1,7 +1,7 @@
 //#region enumeration
 export enum Register { programCounter, address, instruction, accumulator }
 //^ To identidy which processor sregister to read or write to.
-enum NumberStatus { underflow, normal, overflow}
+export enum NumberStatus { underflow, normal, overflow}
 //^ To identify if the ALU operation has overflowed, uncderflowed, or neither.
 //#endregion
 //#region aggregated classes

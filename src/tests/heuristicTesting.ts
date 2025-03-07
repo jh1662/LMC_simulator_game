@@ -52,13 +52,11 @@ function testCompiler(){
 
     const preCompiled:string[][] = [
         //* represents 2D list values fetched from the frontend's assembly code editor.
-        ["", "INP", ""],
-        ["", "STA", "BUFFER"],
-        ["", "INP", ""],
-        ["", "ADD", "BUFFER"],
+        ["ONE", "INP", ""],
+        ["", "STA", "99"],
         ["", "OUT", ""],
-        ["", "HLT", ""],
-        ["BUFFER", "DAT", ""]
+        ["THREE", "OUT", ""],
+        ["", "HLT", ""]
     ];
 
     //: instantiate then apply compiler to script.

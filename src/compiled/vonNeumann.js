@@ -16,7 +16,7 @@ export var Register;
     Register[Register["accumulator"] = 3] = "accumulator";
 })(Register || (Register = {}));
 //^ To identidy which processor sregister to read or write to.
-var NumberStatus;
+export var NumberStatus;
 (function (NumberStatus) {
     NumberStatus[NumberStatus["underflow"] = 0] = "underflow";
     NumberStatus[NumberStatus["normal"] = 1] = "normal";

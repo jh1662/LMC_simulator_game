@@ -51,15 +51,15 @@ export class Compiler {
                 //* used exclusively with the DAT opcode
                 return "operand not expected" + message + `label "${invalidToken}" is integer but out of bounds (-999 - 999)`;
             case ErrorType.addressExpected:
-                return "operand expected" + message + `operand expected for opcode`;
-            case ErrorType.addressExpected:
-                return "operand not expected" + message + `operand expected for opcode`;
+                return "operand expected" + message + `operand expected for opcode but got nothing`;
+            case ErrorType.addressNotExpected:
+                return "operand not expected" + message + `operand not expected for opcode but still recieved an operand`;
             //: lack of input - no opcodes at all:
             case ErrorType.opcodeAllAbsent:
                 return "no operands detected, assembly programs cannot execute without opcodes - empty";
             //^ different structure to other errors because there is no code (by standard of lack of opcodes) in the assembly script
             //: general error - not alphanumeric
-            default: //< ErrorType tokenNotAlphanumeric
+            default: //< ErrorType.tokenNotAlphanumeric
                 //^ using default case satisfy TS-2366 for method's return data-type
                 return "non-alphanumeric" + message + `token "${invalidToken}" is not alphanumeric. Alphanumeric must only comprise of numbers digits (0-9) and letters (A-Z)`;
         }
@@ -83,7 +83,7 @@ export class Compiler {
             //: so "as" is used instead to satisfy TS-2532 and TS-2345 respectively.
             const token = script[lineId][0];
             if (token == "") {
-                break;
+                continue;
             }
             //^ Does current line have a label?
             //^ Label's existance is not mandatory
@@ -132,13 +132,16 @@ export class Compiler {
         //* Together will take O(n*3+n) while saperating them will take O((n*3)*2+n) big-O notation.
         //* If script is invalid, return '[-1]', otherwise return the script compiled.
         /// //* return 'number[]' stucture: [ 'success or type of error', 'code line relevant to error', 'token column relevant to error', 'token causing the error', 'description of error']
-        const instructions = ["ADD", "SUB", "STA", "SHL", "SHR", "LDA", "BRA", "BRZ", "BRP", "INP", "OUT", "HLT", "DAT"];
+        const instructions = ["ADD", "SUB", "STA", "SHL", "SHR", "LDA", "BRA", "BRZ", "BRP", "INP", "OUT", "OCT", "HLT", "DAT"];
         //^ Does not include "DAT" as it is an opcode but not necessarily an instruction.
         const noOperands = ["SHL", "SHR", "INP", "OUT", "HLT"];
+        //^ Instructions that where either operands are forbidden.
         ///const mandatoryOperands:string[] = ["ADD", "SUB", "STA", "LDA", "BRA", "BRZ", "BRP", "DAT"];
-        const compiledInstructions = new Map([["ADD", 1], ["SUB", 2], ["STA", 3], ["SHL", 401], ["SHR", 402], ["LDA", 5], ["BRA", 600], ["BRZ", 700], ["BRA", 800], ["INP", 901], ["OUT", 902], ["HLT", 0]]);
+        const compiledInstructions = new Map([["ADD", 1], ["SUB", 2], ["STA", 3], ["SHL", 401], ["SHR", 402], ["LDA", 5], ["BRA", 6], ["BRZ", 7], ["BRP", 8], ["INP", 901], ["OUT", 902], ["OCT", 903], ["HLT", 0]]);
         //^ easier to identify what the key set and value set are as 'Map<string, number>' instead of 'Map<string, string>'
         let compiledScript = [];
+        this.message = "Compilation successful";
+        //^ Assume script is valid until proven otherwise
         script = this.compress(script);
         if (script.length == 0) {
             return [-1];
@@ -159,6 +162,9 @@ export class Compiler {
             let ExpectedOperand = true;
             //^ Outside nested loop because it (potentially) written to when validating opcode and read from when validating operand.
             //^ Assume that operand is expected until proven wrong.
+            //^ Default 'true' instead of 'false' because it makes codes have less intensity/frequency of indented code.
+            let opcodeDAT = false;
+            //^ opcode 'DAT' is treated differently to other operand-expecting opcodes because, unlike thier 0 to 99 range, 'DAT' can expept integers from -999 to 999.
             for (let column = 0; column < 3; column++) {
                 //* 'column' does not take the line numbering column into account here
                 let token = line[column];
@@ -166,18 +172,20 @@ export class Compiler {
                     token = "";
                 }
                 //^ satisfies TS-2345
-                //^ Default 'true' instead of 'false' because it makes codes have less intensity/frequency of indented code.
-                let opcodeDAT = false;
                 //: validating the token
-                if ((/[^A-Z0-9]/).test(token)) {
+                if ((/[^A-Z0-9-]/).test(token)) {
                     this.errorMessage(lineId, column, ErrorType.tokenNotAlphanumeric, token);
                     return [-1];
                 }
-                //^ Does token contain any character that is not alphanumeric?
-                //^ Makes token only consists alphanumeric characters (26 letters A-Z and numerical digits 0-9).
+                //^ Does token contain any character that is not alphanumeric (tolerates dashes)?
+                //^ Makes token only consists alphanumeric characters (26 letters A-Z and numerical digits 0-9) and dashes.
                 switch (column) {
                     case TokenType.label:
-                        if ((/^[^0-9]/).test(token)) {
+                        if (token == "") {
+                            break;
+                        }
+                        //^ cannot validate something that is empty (is valid)
+                        if (!(/^[^0-9]/).test(token)) {
                             this.errorMessage(lineId, column, ErrorType.labelInvalid, token);
                             return [-1];
                         }
@@ -193,7 +201,6 @@ export class Compiler {
                         //^ All possible input combinations for opcode are limited to the instruction set so validation is simple.
                         if (noOperands.includes(token)) {
                             ExpectedOperand = false;
-                            break;
                         }
                         //^ for operand validation - depends if corrosponding opcode expects an operand or not.
                         if (token == "DAT") {
@@ -211,6 +218,7 @@ export class Compiler {
                         }
                         //^ satisfies TS-18048 but should never be true.
                         compiledInstruction = compiledOpcode.toString();
+                        //^ resets current compiled form of current line and assaign the compiled opcode to it
                         break;
                     default: //< TokenType.operand
                         if ((/[A-Z]/).test(token)) {
@@ -222,11 +230,11 @@ export class Compiler {
                             }
                             //^ NOT to satisfy TS warnings/errors - compiled is expected to be 'undefined'
                             //^ if value cannot be found with subjected label as key.
-                            compiledInstruction += compiled.toString();
+                            compiledInstruction += compiled.toString().padStart(2, '0');
                             //^ compiles operand into line id - operand is valid as is a label that was declared in the assemblt script.
                             break;
                         }
-                        if (!ExpectedOperand) {
+                        if (!opcodeDAT && !ExpectedOperand) {
                             //* invalid if opcode does not expect an operand but gets one anyways
                             if (token != "") {
                                 this.errorMessage(lineId, column, ErrorType.addressNotExpected, token);
@@ -235,26 +243,40 @@ export class Compiler {
                             break;
                             //^ if current operand is empty then no need to compile it
                         }
-                        if (token == "") {
+                        if (!opcodeDAT && token == "") {
                             this.errorMessage(lineId, column, ErrorType.addressExpected, token);
                             return [-1];
                         }
                         //^ If instruction requires an operand/address.
                         //^ Invalid if opcode expects an operand but does not get one.
+                        //^ Does not apply to the special case of 'DAT' because DAT operand is optional.
                         //: if operand exists but is not label referance:
-                        if (!(opcodeDAT && (/^-?(?:[1-9]?\d{1,2}|0)$/).test(token))) {
+                        if (opcodeDAT) {
+                            //* validation if corrosponding opcode is 'DAT'
+                            if (token == "") {
+                                compiledInstruction = "0";
+                                break;
+                            }
+                            //^ If there is no operand, the stored is '0' be default - empty variables like in other LMCs and progromming languages.
+                            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(token)) {
+                                this.errorMessage(lineId, column, ErrorType.addressOutOfBoundsDAT, token);
+                                return [-1];
+                            }
+                            //^ Invalid if not made out of numerical digit ('[0-9]') that is in range -999 to -1
+                            //^ ('-?' and '\d{1,2}'), 1 to 999 ('\d{1,2}'), or is 0 (|0) in any way in whole string
+                            //^ ('^' and '$' respectively), as swell as having the DAT opcode.
+                            compiledInstruction = token.padStart(2, '0');
+                            //^ Assaign, potentially padded integer (as string) to the compiled line.
+                            //^ If single digit, then add 0 to its right, otherwise leave it.
+                            //^ https://www.w3schools.com/jsref/jsref_string_padstart.asp .
+                            break;
+                        }
+                        if (!(/^(?:[1-9]?\d|0)$/).test(token)) {
                             this.errorMessage(lineId, column, ErrorType.addressOutOfBounds, token);
                             return [-1];
                         }
-                        //^ Invalid if not made out of numerical digit ('[0-9]') that is in range -999 to -1
-                        //^ ('-?' and '\d{1,2}'), 1 to 999 ('\d{1,2}'), or is 0 (|0) in any way in whole string
-                        //^ ('^' and '$' respectively), as swell as having the DAT opcode.
-                        if (!(!opcodeDAT && (/^(?:[1-9]?\d|0)$/).test(token))) {
-                            this.errorMessage(lineId, column, ErrorType.addressOutOfBoundsDAT, token);
-                            return [-1];
-                        }
                         //^ if not DAT, expect operand to be integer in range 0-99, otherwise invalid
-                        compiledInstruction += token;
+                        compiledInstruction += token.padStart(2, '0');
                 }
             }
             compiledScript.push(parseInt(compiledInstruction, 10));

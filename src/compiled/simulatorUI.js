@@ -1,11 +1,5 @@
-///import { Register } from "./vonNeumann";
-export var Register;
-(function (Register) {
-    Register[Register["programCounter"] = 0] = "programCounter";
-    Register[Register["address"] = 1] = "address";
-    Register[Register["instruction"] = 2] = "instruction";
-    Register[Register["accumulator"] = 3] = "accumulator";
-})(Register || (Register = {}));
+import { Register, NumberStatus } from "./vonNeumann.js";
+//^ Why make new enumeration when can import an existing one.
 //#region frontend connected classes
 var Direction;
 (function (Direction) {
@@ -15,6 +9,7 @@ var Direction;
     Direction[Direction["right"] = 3] = "right";
 })(Direction || (Direction = {}));
 ;
+//enum UIProperties{};
 export class MemoryUI {
     constructor(tableId) {
         this.HTMLTable = document.getElementById(tableId);
@@ -297,13 +292,52 @@ class IOUI {
         this.predefinedInput.readOnly = false;
         this.input.readOnly = true;
     }
-    start() { this.predefinedInput.readOnly = true; }
+    start() {
+        //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file.
+        this.predefinedInput.readOnly = true;
+        let compiledInputs = [];
+        const inputs = this.predefinedInput.value.replace(/\s+/g, '');
+        //^ Collect all pre-defined inputs and remove any whitespaces.
+        if (inputs == "") {
+            return [];
+        }
+        //^ Means no pre-defined inputs but still valid.
+        const splitInputs = inputs.split(",");
+        for (const input in splitInputs) {
+            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) {
+                return [-1];
+            }
+            //^ return '-1' to indicate invalid.
+            compiledInputs.push(parseInt(splitInputs.pop(), 10));
+            //^ 'as string' to satisfy TS-2345 because it is certain that splitInputs.pop() will always return a string.
+        }
+        return compiledInputs;
+    }
 }
-/*
-class ALUUI{
-
+class ALUUI {
+    constructor(flow, operation, result) {
+        this.flow = document.getElementById(flow);
+        this.operation = document.getElementById(operation);
+        this.result = document.getElementById(result);
+    }
+    update(flow, operation, result) {
+        switch (flow) {
+            case NumberStatus.normal:
+                this.flow.value = "=";
+                break;
+            //: better to use plus and minus signs instead of greater/less signs ('>' and '<') to not confuse the HTML.
+            case NumberStatus.underflow:
+                this.flow.value = "-";
+                break;
+            case NumberStatus.underflow:
+                this.flow.value = "+";
+                break;
+        }
+        this.operation.value = operation;
+        //^ formatting the string requires processing outside class
+        this.result.value = result;
+    }
 }
-*/
 class RegistersUI {
     constructor(programCounter, memoryInstructionRegister, memoryAddressRegister, accumulator) {
         this.programCounter = document.getElementById(programCounter);
@@ -339,19 +373,43 @@ class RegistersUI {
     }
 }
 class MiscellaneousUI {
-    //* Collection of managing single UI attributes that are not belong to a group and do not require a constructor.
+    constructor(status, displayBox) {
+        this.status = document.getElementById(status);
+        this.HTMLEle = document.documentElement;
+        this.displayBox = document.getElementById(displayBox);
+        this.displayImage = "HLT";
+        //^ name for default image and image for program stopping or not currently running
+        this.displayObjective = "This is sandbox mode.";
+    }
     displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
+    changeStatus(status) { this.status.innerHTML = status; }
     toggleDarkMode() {
         //* note: dark/light mode is different to style themes
-        const HTMLEle = document.documentElement;
-        const currentMode = HTMLEle.getAttribute('data-theme');
+        const currentMode = this.HTMLEle.getAttribute('data-theme');
         //^ Cannot get property directly due to name composition (use of dashes in name).
         if (currentMode == "light") {
-            HTMLEle.setAttribute('data-theme', 'dark');
+            this.HTMLEle.setAttribute('data-theme', 'dark');
         }
         else {
-            HTMLEle.setAttribute('data-theme', 'light');
+            this.HTMLEle.setAttribute('data-theme', 'light');
         }
+    }
+    toggleDisplayMode() {
+        //* switch between objective and image
+        if (this.displayBox.innerHTML.slice(0, 10) == "<img src=") {
+            //^ simplistic way to tell if display
+            this.displayBox.innerHTML = this.displayObjective;
+            //^ switch to displaying objective in box
+            return;
+        }
+        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}.png>`;
+        //^ Change to specific image depending on simulator's state.
+        //^ Using PNGs (and maybe GIFs) instead of JPEG because of wanting more lossless formats.
+    }
+    changeDisplayImage(newImageName) {
+        //^ Image could be image or GIF
+        this.displayImage = newImageName;
+        this.toggleDisplayMode();
     }
 }
 //#endregion
@@ -363,16 +421,21 @@ export class SimulatorUI {
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input', 'predefinedInputs', 'output', 'submitInput');
-        this.miscellaneousUI = new MiscellaneousUI();
+        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox');
+        this.aLUUI = new ALUUI('flow', 'operation', 'result');
         console.log('simulatorUI has loaded');
     }
-    //: called by middleware for tasks that does not involve the backend
+    //: called tasks that does not involve the backend
     addRowIfNeeded(textbox) { this.editorUI.generateLine(textbox); }
     navigateEditor(event) { this.editorUI.navigationCheck(event); }
-    toggleDarkMode() { this.miscellaneousUI.toggleDarkMode(); }
-    getScript() { return this.editorUI.getScript(); }
-    displayManual() { this.miscellaneousUI.displayManual(); }
-    compile(memory) { this.memoryUI.compileToMemory(memory); }
+    toggleDarkMode() { this.miscellaneousUI.toggleDarkMode(); } //< call by button
+    getScript() { return this.editorUI.getScript(); } //< call by middleware
+    displayManual() { this.miscellaneousUI.displayManual(); } //< call by button
+    getPredefinedInputs() { return this.iOUI.start(); } //< called by middleware
+    compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
+    changeStatus(status) { this.miscellaneousUI.changeStatus(status); } //< call by middleware
+    toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(); } //< call by button
+    changeDisplayImage(newImageName) { this.miscellaneousUI.changeDisplayImage(newImageName); } //< call by button
 }
 //function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }
 //function navigateEditor(event:KeyboardEvent):void{ editorUI.navigationCheck(event); }
