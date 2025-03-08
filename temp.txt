@@ -1,3 +1,8 @@
+V0.1.5 - Fixed Toggle Display problem ('splice' command 2ng arg was 1 higher than it should be.). Made memory cells read only.
+
+//function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }
+//function navigateEditor(event:KeyboardEvent):void{ editorUI.navigationCheck(event); }
+
 <span>Program Counter</span>
 <div class="col-xs-2"><input type="text" class="form-control readonly-input" readonly></div>
 data-bs-theme="dark"

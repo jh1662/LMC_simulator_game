@@ -1,24 +1,25 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { SimulatorUI } from './simulatorUI.js';
 import { Compiler } from './compiler.js';
-const simulatorUI = new SimulatorUI();
+import { controlUnit } from './vonNeumann.js';
+const simulatorUI = new SimulatorUI("This is sandbox mode.");
+//^ Single parameter is the text for the current objective.
 let compiledScript;
-//: only requires frontend functionality
-document.addEventListener("DOMContentLoaded", () => {
-    //* for HTML elemets that are not generated after load
-    document.getElementById('toggleMode').addEventListener("click", () => simulatorUI.toggleDarkMode());
-    document.getElementById('manual').addEventListener("click", () => simulatorUI.displayManual());
-    document.getElementById('toggleDisplay').addEventListener("click", () => simulatorUI.toggleDisplayMode());
-});
-window.addRowIfNeeded = function (textbox) { simulatorUI.addRowIfNeeded(textbox); };
-window.navigateEditor = function (event) { simulatorUI.navigateEditor(event); };
 //: only requires both frontend and backend functionalitytsc
 document.addEventListener("DOMContentLoaded", () => {
     //: HTML button elements
     //(document.getElementById('Menu') as HTMLButtonElement).addEventListener("click", )
     //(document.getElementById('timeOrStep') as HTMLButtonElement).addEventListener("click", )
     document.getElementById('compile').addEventListener("click", () => compile());
-    //(document.getElementById('run') as HTMLButtonElement).addEventListener("click", )
-    //(document.getElementById('submitInput') as HTMLButtonElement).addEventListener("click", )
+    document.getElementById('run').addEventListener("click", () => run());
 });
 function compile() {
     const compiler = new Compiler;
@@ -33,13 +34,16 @@ function compile() {
     //^ If invalid script, show error to user and stop.
     simulatorUI.compile(compiledScript); //< calls global variable
 }
-/*
-async function run():Promise<void>{
-    const predefinedInputs:number[] = simulatorUI.getPredefinedInputs();
-    const ControlUnit:controlUnit = new controlUnit(compiledScript,predefinedInputs);
-    await ControlUnit.cycle();
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const predefinedInputs = simulatorUI.getPredefinedInputs();
+        const ControlUnit = new controlUnit(compiledScript, predefinedInputs);
+        yield ControlUnit.cycle();
+    });
 }
+/*
 function updateUI(status:string,process:number,affectedUIs:Map<number,string>):void{
     simulatorUI.changeStatus(status);
     //simulatorUI.changeLittleMan(process);
-}*/ 
+}
+    */ 
