@@ -1,7 +1,15 @@
 import { Register,NumberStatus } from "./vonNeumann.js";
 //^ Why make new enumeration when can import an existing one.
-//#region frontend connected classes
 enum Direction{up, down, left, right};
+declare global {
+    //* Used because TS/JS files are called as modular files.
+    interface Window {
+        //* Required to listen to HTML elements that are generated after DOM load (e.g.: generating new texboxes for the script editor).
+        addRowIfNeeded: (textbox: HTMLInputElement) => void;
+        navigateEditor: (event:KeyboardEvent) => void;
+    }
+}
+//#region frontend connected classes
 //enum UIProperties{};
 export class MemoryUI{
     //* Class to generate the memory table once per simulator page load
@@ -32,7 +40,7 @@ export class MemoryUI{
                 //: deals with the odd row cells
                 const cellId = `memoryCell${(row*10)+cell}`;
                 //^ needs to be referanced when either assembly program compiles or is referanced by the assembly program's execution
-                const cellContent = Object.assign(document.createElement('input'), {type: 'text', className: 'form-control col-xs-11', id: cellId, readOnly: false});
+                const cellContent = Object.assign(document.createElement('input'), {type: 'text', className: 'form-control col-xs-11', id: cellId, readOnly: true});
                 //^ "Object.assign" - allows object to both be declared and have properties assigned in the same line without bad practice.
                 rowOdd.insertCell().appendChild(cellContent);
                 //^ inserting the contents as a new cell in the current odd cell
@@ -373,13 +381,13 @@ class MiscellaneousUI{
     private displayImage:string;
     private displayObjective:string;
 
-    constructor(status:string, displayBox:string){
+    constructor(status:string, displayBox:string, objective:string){
         this.status = document.getElementById(status) as HTMLElement;
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox) as HTMLElement;
-        this.displayImage = "HLT";
+        this.displayImage = "hlt";
         //^ name for default image and image for program stopping or not currently running
-        this.displayObjective = "This is sandbox mode.";
+        this.displayObjective = objective;
     }
     public displayManual():void{ window.open('manual.html', '_blank', 'width=800,height=600'); }
     public changeStatus(status:string):void{ this.status.innerHTML = status; }
@@ -392,7 +400,7 @@ class MiscellaneousUI{
     }
     public toggleDisplayMode():void{
         //* switch between objective and image
-        if (this.displayBox.innerHTML.slice(0,10) == "<img src=") {
+        if (this.displayBox.innerHTML.slice(0,9) == "<img src=") {
             //^ simplistic way to tell if display
             this.displayBox.innerHTML = this.displayObjective;
             //^ switch to displaying objective in box
@@ -421,23 +429,33 @@ export class SimulatorUI{
     private miscellaneousUI:MiscellaneousUI;
     //@ts-ignore
     private aLUUI:ALUUI;
-    constructor(){
-        //: Ids as arguments for simplicity and ease when maintaining/updating.
+    constructor(objective:string){
+        //: ids as arguments for simplicity and ease when maintaining/updating
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input','predefinedInputs','output','submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status','displayBox');
+        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective);
         this.aLUUI = new ALUUI('flow','operation','result');
+
+        document.addEventListener("DOMContentLoaded", () => {
+            //* Handle functionality that only requires frontend (no relation to backend).
+            //* For HTML elemets that are not generated after original DOM load.
+            (document.getElementById('toggleMode') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toggleDarkMode());
+            (document.getElementById('manual') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.displayManual());
+            (document.getElementById('toggleDisplay') as HTMLButtonElement).addEventListener("click", () => this.toggleDisplayMode());
+
+        });
+        //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
+        window.addRowIfNeeded = this.addRowIfNeeded.bind(this);
+        window.navigateEditor = this.navigateEditor.bind(this);
 
         console.log('simulatorUI has loaded');
     }
     //: called tasks that does not involve the backend
     public addRowIfNeeded(textbox:HTMLInputElement):void{ this.editorUI.generateLine(textbox); }
     public navigateEditor(event:KeyboardEvent):void{ this.editorUI.navigationCheck(event); }
-    public toggleDarkMode():void{ this.miscellaneousUI.toggleDarkMode(); } //< call by button
     public getScript():string[][]{ return this.editorUI.getScript(); } //< call by middleware
-    public displayManual():void{ this.miscellaneousUI.displayManual(); } //< call by button
     public getPredefinedInputs():number[]{ return this.iOUI.start()} //< called by middleware
 
     public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); } //< call by middleware
@@ -449,6 +467,5 @@ export class SimulatorUI{
     //public update(UIProperty:string, value:string){}
 }
 
-//function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }
-//function navigateEditor(event:KeyboardEvent):void{ editorUI.navigationCheck(event); }
+
 //#endregion

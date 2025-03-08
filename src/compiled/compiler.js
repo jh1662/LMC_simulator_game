@@ -159,7 +159,7 @@ export class Compiler {
                 continue;
             }
             //^ satisfies TS-18048
-            let ExpectedOperand = true;
+            let expectOperand = true;
             //^ Outside nested loop because it (potentially) written to when validating opcode and read from when validating operand.
             //^ Assume that operand is expected until proven wrong.
             //^ Default 'true' instead of 'false' because it makes codes have less intensity/frequency of indented code.
@@ -200,18 +200,16 @@ export class Compiler {
                         //^ Invalid if opcode is not recignised.
                         //^ All possible input combinations for opcode are limited to the instruction set so validation is simple.
                         if (noOperands.includes(token)) {
-                            ExpectedOperand = false;
+                            expectOperand = false;
                         }
                         //^ for operand validation - depends if corrosponding opcode expects an operand or not.
                         if (token == "DAT") {
                             opcodeDAT = true;
+                            break;
                         }
                         //^ For (existing) operand validation - if opcode is "DAT" then expect operand to be in integer range -999 to 999,
                         //^ otherwise operand to be in address range 0 to 99 or a label refernace.
-                        if (opcodeDAT) {
-                            break;
-                        }
-                        //: if valid, then opcode is already in its compiled form
+                        //: if valid, then compile opcode unless is 'DAT'.
                         let compiledOpcode = compiledInstructions.get(token);
                         if (compiledOpcode == undefined) {
                             compiledOpcode = 0;
@@ -234,7 +232,7 @@ export class Compiler {
                             //^ compiles operand into line id - operand is valid as is a label that was declared in the assemblt script.
                             break;
                         }
-                        if (!opcodeDAT && !ExpectedOperand) {
+                        if (!opcodeDAT && !expectOperand) {
                             //* invalid if opcode does not expect an operand but gets one anyways
                             if (token != "") {
                                 this.errorMessage(lineId, column, ErrorType.addressNotExpected, token);
