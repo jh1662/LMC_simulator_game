@@ -8,6 +8,23 @@ var Direction;
     Direction[Direction["right"] = 3] = "right";
 })(Direction || (Direction = {}));
 ;
+export var UICatagory;
+(function (UICatagory) {
+    UICatagory[UICatagory["registerAccumulator"] = 0] = "registerAccumulator";
+    UICatagory[UICatagory["registerProgramCounter"] = 1] = "registerProgramCounter";
+    UICatagory[UICatagory["registerAddress"] = 2] = "registerAddress";
+    UICatagory[UICatagory["registerInstruction"] = 3] = "registerInstruction";
+    //^ relating to registerUI
+    UICatagory[UICatagory["aLU"] = 4] = "aLU";
+    //^ realting to aLUUI - only one because all three relavant HTML textboxes get updated at the same time
+    UICatagory[UICatagory["status"] = 5] = "status";
+    UICatagory[UICatagory["displayImage"] = 6] = "displayImage";
+    UICatagory[UICatagory["cell"] = 7] = "cell";
+    //: relating to IOUI
+    UICatagory[UICatagory["output"] = 8] = "output";
+    //^ outputted numbers from LMC simulator
+    UICatagory[UICatagory["end"] = 9] = "end";
+})(UICatagory || (UICatagory = {}));
 //#region frontend connected classes
 //enum UIProperties{};
 export class MemoryUI {
@@ -262,31 +279,41 @@ export class EditorUI {
     }
 }
 class IOUI {
-    //^ button for submitting non-predefined inputs
+    //^ to prevent a comma before the first output in the display
     constructor(input, predefinedInput, outputHistory, submitInput) {
         this.input = document.getElementById(input);
         this.predefinedInput = document.getElementById(predefinedInput);
         this.outputHistory = document.getElementById(outputHistory);
         this.submitInput = document.getElementById(submitInput);
+        this.firstOutput = true;
     }
     getInput() {
+        //* returns promise because it must wait for user the submit the correct input first.
         this.input.readOnly = false;
         return new Promise((resolve) => {
             this.submitInput.addEventListener("click", () => {
                 let userInput = this.input.value;
                 userInput = userInput.replace(/\s+/g, '');
-                //^ remove whitespaces
+                //^ regex expression for removing whitespaces
                 if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
-                    userInput = "";
+                    //* validation - if valid then settle promise (and input becomes read only again)
+                    this.input.readOnly = true;
+                    resolve(parseInt(this.input.value));
                 }
-                //^ validation - if invalid, assaign it as ""
-                resolve(this.input.value);
+                this.input.value = "Invalid - enter integer between -999 and 999!";
+                //^ far simpler to display error in textbox than calling parent class instance
             }, {
                 once: true
             });
         });
     }
-    output(appendingValue) { this.outputHistory.value += (", " + appendingValue); }
+    output(appendingValue) {
+        if (!this.firstOutput) {
+            this.outputHistory.value += (", " + appendingValue);
+        }
+        this.outputHistory.value = (appendingValue);
+        this.firstOutput = false;
+    }
     reset() {
         this.predefinedInput.value = "";
         this.predefinedInput.readOnly = false;
@@ -305,11 +332,12 @@ class IOUI {
         const splitInputs = inputs.split(",");
         for (const input in splitInputs) {
             if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) {
-                return [-1];
+                return [-1000];
             }
-            //^ return '-1' to indicate invalid.
-            compiledInputs.push(parseInt(splitInputs.pop(), 10));
-            //^ 'as string' to satisfy TS-2345 because it is certain that splitInputs.pop() will always return a string.
+            //^ Return '-1000' to indicate invalid instead of -1 because valid range is -999 to 999.
+            //^ Keep in mind, an empty list is still valid as user does not have to predefine the inputs before execution.
+            //x Can allow user to know what pre-defined input is invalid but is a lower priority, so will do after 3rd sprint if have time.
+            compiledInputs.push(parseInt(input, 10));
         }
         return compiledInputs;
     }
@@ -377,9 +405,11 @@ class MiscellaneousUI {
         this.status = document.getElementById(status);
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox);
-        this.displayImage = "hlt";
-        //^ name for default image and image for program stopping or not currently running
+        this.displayImage = "hlt.png";
+        //^ Name for default image and image for program stopping or not currently running.
+        //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
+        this.displayBox.innerHTML = this.displayObjective;
     }
     displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
     changeStatus(status) { this.status.innerHTML = status; }
@@ -402,21 +432,23 @@ class MiscellaneousUI {
             //^ switch to displaying objective in box
             return;
         }
-        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}.png>`;
+        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         //^ Change to specific image depending on simulator's state.
         //^ Using PNGs (and maybe GIFs) instead of JPEG because of wanting more lossless formats.
     }
     changeDisplayImage(newImageName) {
         //^ Image could be image or GIF
         this.displayImage = newImageName;
-        this.toggleDisplayMode();
+        if (this.displayBox.innerHTML.slice(0, 9) == "<img src=") {
+            this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
+        }
     }
 }
 //#endregion
 //#region main class
 export class SimulatorUI {
     constructor(objective) {
-        //: ids as arguments for simplicity and ease when maintaining/updating
+        //: ids as arguments for simplicity and ease when maintaining/updating/developing
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
@@ -435,14 +467,54 @@ export class SimulatorUI {
         window.navigateEditor = this.navigateEditor.bind(this);
         console.log('simulatorUI has loaded');
     }
-    //: called tasks that does not involve the backend
+    //: Not related to backend but for dynamically generated HTML elements laoded after the original DOM
     addRowIfNeeded(textbox) { this.editorUI.generateLine(textbox); }
     navigateEditor(event) { this.editorUI.navigationCheck(event); }
-    getScript() { return this.editorUI.getScript(); } //< call by middleware
-    getPredefinedInputs() { return this.iOUI.start(); } //< called by middleware
+    //: Called by middleware for the backend
+    getScript() { return this.editorUI.getScript(); }
+    getPredefinedInputs() { return this.iOUI.start(); }
+    //: For the frontend (not relating to backend)
     compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
-    changeStatus(status) { this.miscellaneousUI.changeStatus(status); } //< call by middleware
     toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(); } //< call by button
-    changeDisplayImage(newImageName) { this.miscellaneousUI.changeDisplayImage(newImageName); } //< call by button
+    resetRegesters() { this.registerUI.resetRegisters; } //< call by middleware
+    update(catagoty, value) {
+        //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
+        switch (catagoty) {
+            case UICatagory.registerAccumulator:
+                this.registerUI.updateRegister(Register.accumulator, parseInt(value[0], 10));
+                break;
+            //^ 'as string' satisfy TS-2345 because it will certainly not be undefined when called.
+            case UICatagory.registerInstruction:
+                this.registerUI.updateRegister(Register.instruction, parseInt(value[0], 10));
+                break;
+            case UICatagory.registerProgramCounter:
+                this.registerUI.updateRegister(Register.instruction, parseInt(value[0], 10));
+                break;
+            case UICatagory.registerAddress:
+                this.registerUI.updateRegister(Register.address, parseInt(value[0], 10));
+                break;
+            case UICatagory.aLU:
+                this.aLUUI.update(parseInt(value[0], 10), value[1], value[2]);
+                break;
+            //^ Integers are interchangable with enumerations.
+            //^ Update(NumberStatus, operation, result).
+            case UICatagory.displayImage:
+                this.miscellaneousUI.changeDisplayImage(value[0]);
+                break;
+            //^ string is name of image file but not path (path is handled by called method)
+            case UICatagory.cell:
+                this.memoryUI.writeToCell(parseInt(value[0], 10), parseInt(value[1], 10));
+                break;
+            case UICatagory.output:
+                this.iOUI.output(value[0]);
+                break;
+            case UICatagory.end:
+                this.iOUI.reset();
+                break;
+            default: this.miscellaneousUI.changeStatus(value[0]); //< case UICatagory.status
+            //^ Made to default for good peactice and code integrety.
+            //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
+        }
+    }
 }
 //#endregion

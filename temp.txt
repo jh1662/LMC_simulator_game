@@ -1,5 +1,7 @@
 V0.1.5 - Fixed Toggle Display problem ('splice' command 2ng arg was 1 higher than it should be.). Made memory cells read only.
 
+//^ 'controlUnit?' optional parameter not because it may not be used but to uphold the code standard – recyclable/reusable and independent
+
 //function addRowIfNeeded(textbox:HTMLInputElement):void{ editorUI.generateLine(textbox); }
 //function navigateEditor(event:KeyboardEvent):void{ editorUI.navigationCheck(event); }
 
