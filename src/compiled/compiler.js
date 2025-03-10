@@ -21,7 +21,7 @@ var TokenType;
     TokenType[TokenType["operand"] = 2] = "operand";
 })(TokenType || (TokenType = {}));
 export class Compiler {
-    constructor() { this.message = ""; }
+    constructor() { this.message = "Compilation sucessful. Click run to start executing!"; }
     getMessage() { return this.message; }
     generateErrorMessage(lineId, tokenType, errorType, invalidToken) {
         //* invalidToken may or may not be used depending on type of error ('errorType' argument).

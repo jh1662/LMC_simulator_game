@@ -6,7 +6,7 @@ enum TokenType{ label, opcode, operand }
 export class Compiler{
     private message:string;
 
-    constructor(){ this.message = ""; }
+    constructor(){ this.message = "Compilation sucessful. Click run to start executing!"; }
     public getMessage():string{ return this.message; }
 
     private generateErrorMessage(lineId:number, tokenType:TokenType, errorType:ErrorType, invalidToken:string):string{

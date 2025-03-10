@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "codeSize": "wc -l src/code/*.ts",
     "test": "jest",
     "heur": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
     "heurWarning": "node --trace-warnings --loader ts-node/esm src/tests/heuristicTesting.ts",

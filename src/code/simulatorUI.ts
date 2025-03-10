@@ -1,6 +1,19 @@
 import { Register,NumberStatus } from "./vonNeumann.js";
 //^ Why make new enumeration when can import an existing one.
 enum Direction{up, down, left, right};
+export enum UICatagory {
+    registerAccumulator, registerProgramCounter, registerAddress, registerInstruction,
+    //^ relating to registerUI
+    aLU,
+    //^ realting to aLUUI - only one because all three relavant HTML textboxes get updated at the same time
+    status, //< Status of execution
+    displayImage, //< Image of Little-Man
+    cell, //< relating to memoryUI
+    //: relating to IOUI
+    output,
+    //^ outputted numbers from LMC simulator
+    end
+}
 declare global {
     //* Used because TS/JS files are called as modular files.
     interface Window {
@@ -47,7 +60,7 @@ export class MemoryUI{
             }
         }
     }
-    private writeToCell(index:number, value:number):void{
+    public writeToCell(index:number, value:number):void{
         //* Assume both arguments are valid (with-in range).
         //* Table is 2-dimentional, but LMC simulator engine ('vonNeumann.ts') views memory as 1-dimentional.
         const cell:HTMLElement|null = document.getElementById(`memoryCell${index}`);
@@ -258,30 +271,42 @@ class IOUI{
 
     private submitInput:HTMLButtonElement;
     //^ button for submitting non-predefined inputs
+    private firstOutput:boolean;
+    //^ to prevent a comma before the first output in the display
 
     constructor(input:string, predefinedInput:string, outputHistory:string, submitInput:string){
         this.input = document.getElementById(input) as HTMLInputElement;
         this.predefinedInput = document.getElementById(predefinedInput) as HTMLInputElement;
         this.outputHistory = document.getElementById(outputHistory) as HTMLInputElement;
         this.submitInput = document.getElementById(submitInput) as HTMLButtonElement;
+        this.firstOutput = true;
     }
 
-    public getInput():Promise<string>{
+    public getInput():Promise<number>{
+        //* returns promise because it must wait for user the submit the correct input first.
         this.input.readOnly = false;
         return new Promise((resolve) => {
             this.submitInput.addEventListener("click",() => {
                 let userInput = this.input.value;
                 userInput = userInput.replace(/\s+/g, '');
-                //^ remove whitespaces
-                if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) { userInput = ""; }
-                //^ validation - if invalid, assaign it as ""
-                resolve(this.input.value);
+                //^ regex expression for removing whitespaces
+                if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
+                    //* validation - if valid then settle promise (and input becomes read only again)
+                    this.input.readOnly = true;
+                    resolve(parseInt(this.input.value));
+                }
+                this.input.value = "Invalid - enter integer between -999 and 999!";
+                //^ far simpler to display error in textbox than calling parent class instance
             },{
                 once: true
             })
         });
     }
-    public output(appendingValue:string){ this.outputHistory.value += (", "+appendingValue); }
+    public output(appendingValue:string){
+        if (!this.firstOutput){ this.outputHistory.value += (", "+appendingValue); }
+        this.outputHistory.value = (appendingValue);
+        this.firstOutput = false;
+    }
 
     public reset():void{
         this.predefinedInput.value = "";
@@ -300,10 +325,11 @@ class IOUI{
         //^ Means no pre-defined inputs but still valid.
         const splitInputs:string[] = inputs.split(",");
         for (const input in splitInputs){
-            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) { return [-1]; }
-            //^ return '-1' to indicate invalid.
-            compiledInputs.push(parseInt(splitInputs.pop() as string,10))
-            //^ 'as string' to satisfy TS-2345 because it is certain that splitInputs.pop() will always return a string.
+            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) { return [-1000]; }
+            //^ Return '-1000' to indicate invalid instead of -1 because valid range is -999 to 999.
+            //^ Keep in mind, an empty list is still valid as user does not have to predefine the inputs before execution.
+            //x Can allow user to know what pre-defined input is invalid but is a lower priority, so will do after 3rd sprint if have time.
+            compiledInputs.push(parseInt(input, 10));
         }
         return compiledInputs;
     }
@@ -385,9 +411,12 @@ class MiscellaneousUI{
         this.status = document.getElementById(status) as HTMLElement;
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox) as HTMLElement;
-        this.displayImage = "hlt";
-        //^ name for default image and image for program stopping or not currently running
+        this.displayImage = "hlt.png";
+        //^ Name for default image and image for program stopping or not currently running.
+        //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
+
+        this.displayBox.innerHTML = this.displayObjective;
     }
     public displayManual():void{ window.open('manual.html', '_blank', 'width=800,height=600'); }
     public changeStatus(status:string):void{ this.status.innerHTML = status; }
@@ -406,14 +435,16 @@ class MiscellaneousUI{
             //^ switch to displaying objective in box
             return;
         }
-        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}.png>`
+        this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         //^ Change to specific image depending on simulator's state.
         //^ Using PNGs (and maybe GIFs) instead of JPEG because of wanting more lossless formats.
     }
     public changeDisplayImage(newImageName:string):void{
         //^ Image could be image or GIF
         this.displayImage = newImageName;
-        this.toggleDisplayMode();
+        if (this.displayBox.innerHTML.slice(0,9) == "<img src=") {
+            this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
+        }
     }
 }
 //#endregion
@@ -422,15 +453,12 @@ export class SimulatorUI{
     //* To store and manage all front-end class instances.
     private memoryUI:MemoryUI;
     private editorUI:EditorUI;
-    //@ts-ignore
     private iOUI:IOUI;
-    //@ts-ignore
     private registerUI:RegistersUI;
     private miscellaneousUI:MiscellaneousUI;
-    //@ts-ignore
     private aLUUI:ALUUI;
     constructor(objective:string){
-        //: ids as arguments for simplicity and ease when maintaining/updating
+        //: ids as arguments for simplicity and ease when maintaining/updating/developing
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
@@ -452,19 +480,45 @@ export class SimulatorUI{
 
         console.log('simulatorUI has loaded');
     }
-    //: called tasks that does not involve the backend
+    //: Not related to backend but for dynamically generated HTML elements laoded after the original DOM
     public addRowIfNeeded(textbox:HTMLInputElement):void{ this.editorUI.generateLine(textbox); }
     public navigateEditor(event:KeyboardEvent):void{ this.editorUI.navigationCheck(event); }
-    public getScript():string[][]{ return this.editorUI.getScript(); } //< call by middleware
-    public getPredefinedInputs():number[]{ return this.iOUI.start()} //< called by middleware
 
+    //: Called by middleware for the backend
+    public getScript():string[][]{ return this.editorUI.getScript(); }
+    public getPredefinedInputs():number[]{
+        //! Should rename this to startExecution or smth like that.
+        this.registerUI.resetRegisters();
+        return this.iOUI.start();
+        //^ get pre-defined inputs
+    }
+
+    //: For the frontend (not relating to backend)
     public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); } //< call by middleware
-    public changeStatus(status:string){ this.miscellaneousUI.changeStatus(status); } //< call by middleware
+    public toggleDisplayMode():void{ this.miscellaneousUI.toggleDisplayMode(); } //< call by button
+    public resetRegesters():void{ this.registerUI.resetRegisters; } //< call by middleware
 
-    public toggleDisplayMode():void{this.miscellaneousUI.toggleDisplayMode(); } //< call by button
-    public changeDisplayImage(newImageName:string):void{this.miscellaneousUI.changeDisplayImage(newImageName); } //< call by button
-
-    //public update(UIProperty:string, value:string){}
+    public update(catagoty:UICatagory, value:string[]){
+        //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
+        switch(catagoty){
+            case UICatagory.registerAccumulator: this.registerUI.updateRegister(Register.accumulator,parseInt(value[0] as string, 10)); break;
+            //^ 'as string' satisfy TS-2345 because it will certainly not be undefined when called.
+            case UICatagory.registerInstruction: this.registerUI.updateRegister(Register.instruction,parseInt(value[0] as string, 10)); break;
+            case UICatagory.registerProgramCounter: this.registerUI.updateRegister(Register.instruction,parseInt(value[0] as string, 10)); break;
+            case UICatagory.registerAddress: this.registerUI.updateRegister(Register.address,parseInt(value[0] as string, 10)); break;
+            case UICatagory.aLU: this.aLUUI.update(parseInt(value[0] as string, 10), value[1] as string, value[2] as string); break;
+            //^ Integers are interchangable with enumerations.
+            //^ Update(NumberStatus, operation, result).
+            case UICatagory.displayImage: this.miscellaneousUI.changeDisplayImage(value[0] as string); break;
+            //^ string is name of image file but not path (path is handled by called method)
+            case UICatagory.cell: this.memoryUI.writeToCell(parseInt(value[0] as string, 10),parseInt(value[1] as string, 10)); break;
+            case UICatagory.output: this.iOUI.output(value[0] as string); break;
+            case UICatagory.end: this.iOUI.reset(); break;
+            default: this.miscellaneousUI.changeStatus(value[0] as string); //< case UICatagory.status
+            //^ Made to default for good peactice and code integrety.
+            //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
+        }
+    }
 }
 
 
