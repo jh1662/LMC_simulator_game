@@ -181,8 +181,8 @@ class IO {
         if (this.predefinedInputs.length != 0) {
             return this.stackShift();
         }
-        return 0; //! takes user input but is currently '0' for sake of heuristic testing
-        //^ else
+        return -1000;
+        //^ else - return '-1000' to indicate that there is no more inputs in the FIFO list.
     }
     getHistory() {
         //! for now only for testing purposes - may become a final feature but not high piority
@@ -230,8 +230,11 @@ export class ControlUnit {
         this.displayStatus(UICatagory.displayImage, ["fetching.png"]);
     }
     decode() {
-        this.displayStatus(UICatagory.status, ["Little man open the mail and reads: " + this.registers.read(Register.instruction) + this.registers.read(Register.address)]);
+        this.displayStatus(UICatagory.status, ["Little man open the mail and reads: " + this.ram.read(Register.programCounter)]);
+        //^ Simpler thad getting from memory address and memory instruction registers because those would require formatting such as conditional padding.
         this.displayStatus(UICatagory.displayImage, ["decoding.png"]);
+        this.displayStatus(UICatagory.registerInstruction, [this.registers.read(Register.instruction).toString()]);
+        this.displayStatus(UICatagory.registerAddress, [this.registers.read(Register.address).toString()]);
         switch (this.registers.read(Register.instruction)) { //< 0 to 9
             //x moved code from switch cases to methods because compiler does not allow two cases can declare the same variable.
             case 1:
@@ -355,40 +358,55 @@ export class ControlUnit {
         this.displayStatus(UICatagory.displayImage, ["branchFail.png"]);
     }
     IO() {
-        //* Takes user input for accumulator value or output from accumulator value
-        const address = this.registers.read(Register.address);
-        switch (address) {
-            //* Determines which IO operation to do (based in address being either 1, 2, or 3).
-            case 1:
-                //* Input operation
-                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to take in mail"]);
-                this.registers.write(Register.accumulator, this.io.input());
-                this.displayStatus(UICatagory.displayImage, ["inp.png"]);
-                break;
-            case 2:
-                //* Output (as integer) operation
-                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain integer)"]);
-                this.io.output(this.registers.read(Register.accumulator));
-                this.io.getHistory();
-                this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
-                this.displayStatus(UICatagory.displayImage, ["out.png"]);
-                break;
-            default: //< case 3
-                //* Output as extended ASCII character (only within a certain range)
-                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain ASCII character)"]);
-                const decimal = this.registers.read(Register.accumulator);
-                //^ "decimal" as in base-10 integer.
-                //^ Convert decimal to extended ASCII character
-                if (decimal < 32 || decimal > 255) {
-                    this.io.output("[?]");
+        return __awaiter(this, void 0, void 0, function* () {
+            //* Takes user input for accumulator value or output from accumulator value.
+            //* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
+            const address = this.registers.read(Register.address);
+            switch (address) {
+                //* Determines which IO operation to do (based in address being either 1, 2, or 3).
+                case 1:
+                    //* Input operation
+                    let input = this.io.input();
+                    if (input == -1000) {
+                        if (this.middleware != undefined) {
+                            input = yield this.middleware.getInput();
+                        }
+                        //^ middleware will be undifined when testing only the backend simulator
+                        else {
+                            input = 0;
+                        }
+                        //^ should not happen but incase
+                    }
+                    this.registers.write(Register.accumulator, input);
+                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to take in mail"]);
+                    this.displayStatus(UICatagory.displayImage, ["inp.png"]);
+                    this.displayStatus(UICatagory.registerAccumulator, [input.toString()]);
                     break;
-                }
-                //^ range of most vsible extended ASCII characters
-                this.io.output(String.fromCharCode(decimal));
-                //^ Output (as extended ASCII character) operation
-                this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
-                this.displayStatus(UICatagory.displayImage, ["output.png"]);
-        }
+                case 2:
+                    //* Output (as integer) operation
+                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain integer)"]);
+                    this.io.output(this.registers.read(Register.accumulator));
+                    this.io.getHistory();
+                    this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
+                    this.displayStatus(UICatagory.displayImage, ["out.png"]);
+                    break;
+                default: //< case 3
+                    //* Output as extended ASCII character (only within a certain range)
+                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain ASCII character)"]);
+                    const decimal = this.registers.read(Register.accumulator);
+                    //^ "decimal" as in base-10 integer.
+                    //^ Convert decimal to extended ASCII character
+                    if (decimal < 32 || decimal > 255) {
+                        this.io.output("[?]");
+                        break;
+                    }
+                    //^ range of most vsible extended ASCII characters
+                    this.io.output(String.fromCharCode(decimal));
+                    //^ Output (as extended ASCII character) operation
+                    this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
+                    this.displayStatus(UICatagory.displayImage, ["output.png"]);
+            }
+        });
     }
     displayStatus(uIcatagory, content) {
         if (this.middleware == undefined) {
@@ -438,7 +456,6 @@ export class ControlUnit {
                     this.registers.write(Register.programCounter, 0);
                 }
                 //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
-                yield sleep(this.cycleInterval);
             }
             this.displayStatus(UICatagory.end, []);
             return this.io.getHistory();

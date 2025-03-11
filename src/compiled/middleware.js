@@ -41,6 +41,7 @@ export class Middleware {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const predefinedInputs = this.simulatorUI.getPredefinedInputs();
+            //^ Also prepares for run.
             //: verify if execution is possible
             if (predefinedInputs[0] == -1000) {
                 this.simulatorUI.update(UICatagory.status, ["Cannot execute, atleast one pre-defined input is invalid. Please use integers in range -999 to 999 in format: [input1], [input2], [inputN]"]);
@@ -56,22 +57,22 @@ export class Middleware {
                 return;
             }
             //^ Cannot execute an invalid script.
+            this.simulatorUI.start();
             this.simulator = new ControlUnit(this.compiledScript, predefinedInputs, this);
             this.simulatorUI.resetRegesters();
             yield this.simulator.cycle();
+            this.simulatorUI.end();
         });
     }
+    //: called by VonNeuman.ts
     updateUI(uIcatagory, content) {
         console.log("update: " + uIcatagory + "-" + content);
         this.simulatorUI.update(uIcatagory, content);
+    }
+    getInput() {
+        return __awaiter(this, void 0, void 0, function* () { return yield this.simulatorUI.getInput(); });
     }
 }
 //@ts-ignore
 const middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
-/*
-function updateUI(status:string,process:number,affectedUIs:Map<number,string>):void{
-    simulatorUI.changeStatus(status);
-    //simulatorUI.changeLittleMan(process);
-}
-    */ 

@@ -6,7 +6,45 @@ const path = require('path');
 //: linking HTML file only once because nothing will change it from original DOM and saves computational time
 const html = fs.readFileSync(path.resolve('../frames/', 'index.html'), 'utf8');
 document.body.innerHTML = html;
-
+/*
+editorTable
+line-0
+0-0
+input-0-0
+0-1
+input-0-1
+0-2
+input-0-2
+line-1
+1-0
+input-1-0
+1-1
+input-1-1
+1-2
+input-1-2
+Menu
+timeOrStep
+Reset
+compile
+run
+manual
+submitInput
+toggleMode
+toggleDisplay
+registerProgramCounter
+registerInstruction
+registerAddress
+registerAccumulator
+flow
+operation
+result
+input
+output
+predefinedInputs
+displayBox
+status
+memoryTable
+*/
 describe("Testing register textbox elements", () => {
     test("Program counter register", () => {
         const htmlElement:any = document.getElementById('registerProgramCounter');

@@ -160,8 +160,8 @@ class IO{
     }
     public input():number { //< conditional getter
         if (this.predefinedInputs.length != 0){ return this.stackShift(); }
-        return 0; //! takes user input but is currently '0' for sake of heuristic testing
-        //^ else
+        return -1000;
+        //^ else - return '-1000' to indicate that there is no more inputs in the FIFO list.
     }
     public getHistory():string[]{ //< getter
         //! for now only for testing purposes - may become a final feature but not high piority
@@ -224,8 +224,9 @@ export class ControlUnit{
         this.displayStatus(UICatagory.displayImage,["fetching.png"])
     }
     private decode(){ //< contitional caller method
-        this.displayStatus(UICatagory.status,["Little man open the mail and reads: "+this.registers.read(Register.instruction)+this.registers.read(Register.address)]);
-        this.displayStatus(UICatagory.displayImage,["decoding.png"])
+        this.displayStatus(UICatagory.status,["Little man open the mail and reads: " + this.ram.read(Register.programCounter)]);
+        //^ Simpler thad getting from memory address and memory instruction registers because those would require formatting such as conditional padding.
+        this.displayStatus(UICatagory.displayImage,["decoding.png"]);
 
         this.displayStatus(UICatagory.registerInstruction,[this.registers.read(Register.instruction).toString()]);
         this.displayStatus(UICatagory.registerAddress,[this.registers.read(Register.address).toString()]);
@@ -353,15 +354,22 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["If calculator value is not 0 nor positive, little man continues"+(address-1)]);
         this.displayStatus(UICatagory.displayImage,["branchFail.png"]);
     }
-    private IO(){
-        //* Takes user input for accumulator value or output from accumulator value
+    private async IO():Promise<void>{
+        //* Takes user input for accumulator value or output from accumulator value.
+        //* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
         const address:number = this.registers.read(Register.address);
         switch(address){
             //* Determines which IO operation to do (based in address being either 1, 2, or 3).
             case 1:
                 //* Input operation
-                const input:number = this.io.input()
-                this.registers.write(Register.accumulator,this.io.input());
+                let input:number = this.io.input();
+                if (input == -1000){
+                    if (this.middleware != undefined) { input = await this.middleware.getInput(); }
+                    //^ middleware will be undifined when testing only the backend simulator
+                    else { input = 0; }
+                    //^ should not happen but incase
+                }
+                this.registers.write(Register.accumulator,input);
 
                 this.displayStatus(UICatagory.status,["Little man connects to the outside world to take in mail"]);
                 this.displayStatus(UICatagory.displayImage,["inp.png"]);
@@ -439,7 +447,6 @@ export class ControlUnit{
 
             }
             //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
-            await sleep(this.cycleInterval);
         }
         this.displayStatus(UICatagory.end,[]);
         return this.io.getHistory();

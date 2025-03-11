@@ -36,6 +36,7 @@ export class Middleware{
     }
     private async run():Promise<void>{
         const predefinedInputs:number[] = this.simulatorUI.getPredefinedInputs();
+        //^ Also prepares for run.
         //: verify if execution is possible
         if (predefinedInputs[0] == -1000){ this.simulatorUI.update(UICatagory.status,["Cannot execute, atleast one pre-defined input is invalid. Please use integers in range -999 to 999 in format: [input1], [input2], [inputN]"]); return; }
         if (this.compiledScript == undefined){ this.simulatorUI.update(UICatagory.status,["Cannot execute, need to compile first."]); return; }
@@ -43,23 +44,23 @@ export class Middleware{
         if (this.compiledScript[0] == -1){ this.simulatorUI.update(UICatagory.status,["Cannot execute, need to compile a valid script first."]); return; }
         //^ Cannot execute an invalid script.
 
+        this.simulatorUI.start();
+
         this.simulator = new ControlUnit( this.compiledScript as number[], predefinedInputs, this);
         this.simulatorUI.resetRegesters();
         await this.simulator.cycle();
+
+        this.simulatorUI.end();
     }
+    //: called by VonNeuman.ts
     public updateUI(uIcatagory:UICatagory, content:string[]):void{
         console.log("update: "+uIcatagory+"-"+content);
         this.simulatorUI.update(uIcatagory,content);
     }
+    public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
+
 }
 
 //@ts-ignore
 const middleware:Middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
-
-/*
-function updateUI(status:string,process:number,affectedUIs:Map<number,string>):void{
-    simulatorUI.changeStatus(status);
-    //simulatorUI.changeLittleMan(process);
-}
-    */
