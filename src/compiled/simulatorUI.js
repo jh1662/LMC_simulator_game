@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { Register, NumberStatus } from "./vonNeumann.js";
 //^ Why make new enumeration when can import an existing one.
 var Direction;
@@ -281,31 +290,28 @@ export class EditorUI {
 class IOUI {
     //^ to prevent a comma before the first output in the display
     constructor(input, predefinedInput, outputHistory, submitInput) {
+        this.getInput = () => {
+            this.input.readOnly = false;
+            return new Promise((resolve) => {
+                const handleClick = () => {
+                    let userInput = this.input.value.trim().replace(/\s+/g, '');
+                    if ((/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
+                        this.input.readOnly = true;
+                        this.submitInput.removeEventListener("click", handleClick);
+                        resolve(parseInt(userInput, 10));
+                    }
+                    else {
+                        this.input.value = "Invalid - enter integer between -999 and 999!";
+                    }
+                };
+                this.submitInput.addEventListener("click", handleClick);
+            });
+        };
         this.input = document.getElementById(input);
         this.predefinedInput = document.getElementById(predefinedInput);
         this.outputHistory = document.getElementById(outputHistory);
         this.submitInput = document.getElementById(submitInput);
         this.firstOutput = true;
-    }
-    getInput() {
-        //* returns promise because it must wait for user the submit the correct input first.
-        this.input.readOnly = false;
-        return new Promise((resolve) => {
-            this.submitInput.addEventListener("click", () => {
-                let userInput = this.input.value;
-                userInput = userInput.replace(/\s+/g, '');
-                //^ regex expression for removing whitespaces
-                if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
-                    //* validation - if valid then settle promise (and input becomes read only again)
-                    this.input.readOnly = true;
-                    resolve(parseInt(this.input.value));
-                }
-                this.input.value = "Invalid - enter integer between -999 and 999!";
-                //^ far simpler to display error in textbox than calling parent class instance
-            }, {
-                once: true
-            });
-        });
     }
     output(appendingValue) {
         if (!this.firstOutput) {
@@ -330,7 +336,7 @@ class IOUI {
         }
         //^ Means no pre-defined inputs but still valid.
         const splitInputs = inputs.split(",");
-        for (const input in splitInputs) {
+        for (const input of splitInputs) {
             if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) {
                 return [-1000];
             }
@@ -401,7 +407,7 @@ class RegistersUI {
     }
 }
 class MiscellaneousUI {
-    constructor(status, displayBox, objective) {
+    constructor(status, displayBox, objective, runButton) {
         this.status = document.getElementById(status);
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox);
@@ -409,6 +415,7 @@ class MiscellaneousUI {
         //^ Name for default image and image for program stopping or not currently running.
         //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
+        this.runButton = document.getElementById(runButton);
         this.displayBox.innerHTML = this.displayObjective;
     }
     displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
@@ -443,6 +450,12 @@ class MiscellaneousUI {
             this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         }
     }
+    disableDuringRun() {
+        this.runButton.disabled = true;
+    }
+    enableAfterRun() {
+        this.runButton.disabled = false;
+    }
 }
 //#endregion
 //#region main class
@@ -453,7 +466,7 @@ export class SimulatorUI {
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input', 'predefinedInputs', 'output', 'submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', objective);
+        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', objective, 'run');
         this.aLUUI = new ALUUI('flow', 'operation', 'result');
         document.addEventListener("DOMContentLoaded", () => {
             //* Handle functionality that only requires frontend (no relation to backend).
@@ -472,7 +485,15 @@ export class SimulatorUI {
     navigateEditor(event) { this.editorUI.navigationCheck(event); }
     //: Called by middleware for the backend
     getScript() { return this.editorUI.getScript(); }
-    getPredefinedInputs() { return this.iOUI.start(); }
+    getPredefinedInputs() {
+        return this.iOUI.start();
+        //^ get pre-defined inputs
+    }
+    getInput() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.iOUI.getInput();
+        });
+    }
     //: For the frontend (not relating to backend)
     compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
     toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(); } //< call by button
@@ -515,6 +536,13 @@ export class SimulatorUI {
             //^ Made to default for good peactice and code integrety.
             //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
         }
+    }
+    end() {
+        this.miscellaneousUI.enableAfterRun();
+    }
+    start() {
+        this.registerUI.resetRegisters();
+        this.miscellaneousUI.disableDuringRun();
     }
 }
 //#endregion

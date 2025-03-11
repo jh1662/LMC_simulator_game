@@ -282,26 +282,25 @@ class IOUI{
         this.firstOutput = true;
     }
 
-    public getInput():Promise<number>{
-        //* returns promise because it must wait for user the submit the correct input first.
+    public getInput = (): Promise<number> => {
         this.input.readOnly = false;
-        return new Promise((resolve) => {
-            this.submitInput.addEventListener("click",() => {
-                let userInput = this.input.value;
-                userInput = userInput.replace(/\s+/g, '');
-                //^ regex expression for removing whitespaces
-                if (!(/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
-                    //* validation - if valid then settle promise (and input becomes read only again)
+        return new Promise<number>((resolve) => {
+            const handleClick = () => {
+                let userInput = this.input.value.trim().replace(/\s+/g, '');
+                if ((/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
                     this.input.readOnly = true;
-                    resolve(parseInt(this.input.value));
+                    this.submitInput.removeEventListener("click", handleClick);
+                    resolve(parseInt(userInput, 10));
+                } else {
+                    this.input.value = "Invalid - enter integer between -999 and 999!";
                 }
-                this.input.value = "Invalid - enter integer between -999 and 999!";
-                //^ far simpler to display error in textbox than calling parent class instance
-            },{
-                once: true
-            })
+            };
+
+            this.submitInput.addEventListener("click", handleClick);
         });
     }
+
+
     public output(appendingValue:string){
         if (!this.firstOutput){ this.outputHistory.value += (", "+appendingValue); }
         this.outputHistory.value = (appendingValue);
@@ -324,7 +323,7 @@ class IOUI{
         if (inputs == "") { return []; }
         //^ Means no pre-defined inputs but still valid.
         const splitInputs:string[] = inputs.split(",");
-        for (const input in splitInputs){
+        for (const input of splitInputs){
             if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(input)) { return [-1000]; }
             //^ Return '-1000' to indicate invalid instead of -1 because valid range is -999 to 999.
             //^ Keep in mind, an empty list is still valid as user does not have to predefine the inputs before execution.
@@ -403,11 +402,12 @@ class MiscellaneousUI{
     private HTMLEle:HTMLElement;
     private status:HTMLElement;
     private displayBox:HTMLElement;
+    private runButton:HTMLButtonElement;
 
     private displayImage:string;
     private displayObjective:string;
 
-    constructor(status:string, displayBox:string, objective:string){
+    constructor(status:string, displayBox:string, objective:string, runButton:string){
         this.status = document.getElementById(status) as HTMLElement;
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox) as HTMLElement;
@@ -415,6 +415,8 @@ class MiscellaneousUI{
         //^ Name for default image and image for program stopping or not currently running.
         //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
+
+        this.runButton =  document.getElementById(runButton) as HTMLButtonElement;
 
         this.displayBox.innerHTML = this.displayObjective;
     }
@@ -446,6 +448,12 @@ class MiscellaneousUI{
             this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         }
     }
+    public disableDuringRun():void{
+        this.runButton.disabled = true;
+    }
+    public enableAfterRun():void{
+        this.runButton.disabled = false;
+    }
 }
 //#endregion
 //#region main class
@@ -463,7 +471,7 @@ export class SimulatorUI{
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input','predefinedInputs','output','submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective);
+        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective,'run');
         this.aLUUI = new ALUUI('flow','operation','result');
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -487,10 +495,11 @@ export class SimulatorUI{
     //: Called by middleware for the backend
     public getScript():string[][]{ return this.editorUI.getScript(); }
     public getPredefinedInputs():number[]{
-        //! Should rename this to startExecution or smth like that.
-        this.registerUI.resetRegisters();
         return this.iOUI.start();
         //^ get pre-defined inputs
+    }
+    public async getInput():Promise<number>{
+        return await this.iOUI.getInput();
     }
 
     //: For the frontend (not relating to backend)
@@ -518,6 +527,13 @@ export class SimulatorUI{
             //^ Made to default for good peactice and code integrety.
             //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
         }
+    }
+    public end(){
+        this.miscellaneousUI.enableAfterRun();
+    }
+    public start(){
+        this.registerUI.resetRegisters();
+        this.miscellaneousUI.disableDuringRun();
     }
 }
 
