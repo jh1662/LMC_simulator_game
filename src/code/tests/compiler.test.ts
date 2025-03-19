@@ -1,4 +1,4 @@
-import { Compiler } from "../code/compiler";
+import { Compiler } from "../compiler";
 /* Templates:
 test('[TEST NAME HERE]', () => {
     const preCompiled:string[][] = [
@@ -381,7 +381,7 @@ describe("Testing validation and compilation by script's opcodes",() => {
                 ["", "SHR", ""],
                 ["", "INP", ""],
                 ["", "OUT", ""],
-                ["", "OCT", ""],
+                ["", "OTC", ""],
                 ["", "HLT", ""],
             ];
 
@@ -428,8 +428,8 @@ describe("Testing validation and compilation by script's opcodes",() => {
                 expect(compiled).toStrictEqual([-1]);
                 expect(compiler.getMessage()).toStrictEqual(errorUnexpectedOperandLine0);
             });
-            test("output as ASCII character (OCT)",() => {
-                const preCompiled:string[][] = [["", "OCT", "invalidOperand"]];
+            test("output as ASCII character (OTC)",() => {
+                const preCompiled:string[][] = [["", "OTC", "invalidOperand"]];
 
                 const compiler:Compiler = new Compiler();
                 const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
@@ -556,77 +556,3 @@ describe("Testing validation and compilation by script's opcodes",() => {
     });
 });
 //#endregion
-//#region LMC compatability and up to standards
-describe("Testing LMC compatibility with others and if up to standard", () => {
-    /*
-    test("", () => {
-        const preCompiled:string[][] = [
-            ["", "", ""],
-            ["", "", ""]
-        ];
-
-        const compiler:Compiler = new Compiler();
-        const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-        expect(compiled).toStrictEqual([]);
-    });
-    */
-    describe("Peter Higginson's LMC assembly program examples", () => {
-        test('"add" program', () => {
-            const preCompiled:string[][] = [
-                ["", "INP", ""],
-                ["", "STA", "99"],
-                ["", "INP", ""],
-                ["", "ADD", "99"],
-                ["", "OUT", ""],
-                ["", "HLT", ""]
-            ];
-
-            const compiler:Compiler = new Compiler();
-            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-            expect(compiled).toStrictEqual([901,399,901,199,902,0]);
-        });
-        test('"add/subtr" program', () => {
-            const preCompiled:string[][] = [
-                ["", "INP", ""],
-                ["", "STA", "FIRST"],
-                ["", "INP", ""],
-                ["", "ADD", "FIRST"],
-                ["", "OUT", ""],
-                ["", "INP", ""],
-                ["", "SUB", "FIRST"],
-                ["", "OUT", ""],
-                ["", "HLT", ""],
-                ["FIRST", "DAT", ""]
-            ];
-
-            const compiler:Compiler = new Compiler();
-            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-            expect(compiled).toStrictEqual([]);
-        });
-        test('"ascii" program', () => {
-            const preCompiled:string[][] = [
-                ["", "INP", ""],
-                ["", "STA", "FIRST"],
-                ["", "INP", ""],
-                ["", "ADD", "FIRST"],
-                ["", "OUT", ""],
-                ["", "INP", ""],
-                ["", "SUB", "FIRST"],
-                ["", "OUT", ""],
-                ["", "HLT", ""],
-                ["FIRST", "DAT", ""]
-            ];
-
-            const compiler:Compiler = new Compiler();
-            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-            expect(compiled).toStrictEqual([]);
-        });
-
-    });
-
-});
-

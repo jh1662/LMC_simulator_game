@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { UICatagory } from "./simulatorUI.js";
 //^ better practice and far more easier to identify by enumeration that string or integer.
 //#region enumerations (exported)
@@ -234,7 +225,12 @@ export class ControlUnit {
         //^ Simpler thad getting from memory address and memory instruction registers because those would require formatting such as conditional padding.
         this.displayStatus(UICatagory.displayImage, ["decoding.png"]);
         this.displayStatus(UICatagory.registerInstruction, [this.registers.read(Register.instruction).toString()]);
-        this.displayStatus(UICatagory.registerAddress, [this.registers.read(Register.address).toString()]);
+        let address = this.registers.read(Register.address).toString();
+        if (address.length == 1) {
+            address = "0" + address;
+        }
+        //^ adds padding when needed - make sure address is double digit
+        this.displayStatus(UICatagory.registerAddress, [address]);
         switch (this.registers.read(Register.instruction)) { //< 0 to 9
             //x moved code from switch cases to methods because compiler does not allow two cases can declare the same variable.
             case 1:
@@ -357,56 +353,56 @@ export class ControlUnit {
         this.displayStatus(UICatagory.status, ["If calculator value is not 0 nor positive, little man continues" + (address - 1)]);
         this.displayStatus(UICatagory.displayImage, ["branchFail.png"]);
     }
+    ///private async IO(){
+    ///* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
     IO() {
-        return __awaiter(this, void 0, void 0, function* () {
-            //* Takes user input for accumulator value or output from accumulator value.
-            //* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
-            const address = this.registers.read(Register.address);
-            switch (address) {
-                //* Determines which IO operation to do (based in address being either 1, 2, or 3).
-                case 1:
-                    //* Input operation
-                    let input = this.io.input();
-                    if (input == -1000) {
-                        if (this.middleware != undefined) {
-                            input = yield this.middleware.getInput();
-                        }
-                        //^ middleware will be undifined when testing only the backend simulator
-                        else {
-                            input = 0;
-                        }
-                        //^ should not happen but incase
+        //* Takes user input for accumulator value or output from accumulator value.
+        const address = this.registers.read(Register.address);
+        switch (address) {
+            //* Determines which IO operation to do (based in address being either 1, 2, or 3).
+            case 1:
+                //* Input operation
+                let input = this.io.input();
+                if (input == -1000) {
+                    ///if (this.middleware != undefined) { input = await this.middleware.getInput(); }
+                    if (this.middleware != undefined) {
+                        input = this.middleware.getInput();
                     }
-                    this.registers.write(Register.accumulator, input);
-                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to take in mail"]);
-                    this.displayStatus(UICatagory.displayImage, ["inp.png"]);
-                    this.displayStatus(UICatagory.registerAccumulator, [input.toString()]);
-                    break;
-                case 2:
-                    //* Output (as integer) operation
-                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain integer)"]);
-                    this.io.output(this.registers.read(Register.accumulator));
-                    this.io.getHistory();
-                    this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
-                    this.displayStatus(UICatagory.displayImage, ["out.png"]);
-                    break;
-                default: //< case 3
-                    //* Output as extended ASCII character (only within a certain range)
-                    this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain ASCII character)"]);
-                    const decimal = this.registers.read(Register.accumulator);
-                    //^ "decimal" as in base-10 integer.
-                    //^ Convert decimal to extended ASCII character
-                    if (decimal < 32 || decimal > 255) {
-                        this.io.output("[?]");
-                        break;
+                    //^ middleware will be undifined when testing only the backend simulator
+                    else {
+                        input = 0;
                     }
-                    //^ range of most vsible extended ASCII characters
-                    this.io.output(String.fromCharCode(decimal));
-                    //^ Output (as extended ASCII character) operation
-                    this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
-                    this.displayStatus(UICatagory.displayImage, ["output.png"]);
-            }
-        });
+                    //^ should not happen but incase
+                }
+                this.registers.write(Register.accumulator, input);
+                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to take in mail"]);
+                this.displayStatus(UICatagory.displayImage, ["inp.png"]);
+                this.displayStatus(UICatagory.registerAccumulator, [input.toString()]);
+                break;
+            case 2:
+                //* Output (as integer) operation
+                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain integer)"]);
+                this.io.output(this.registers.read(Register.accumulator));
+                this.io.getHistory();
+                this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
+                this.displayStatus(UICatagory.displayImage, ["out.png"]);
+                break;
+            default: //< case 3
+                //* Output as extended ASCII character (only within a certain range)
+                this.displayStatus(UICatagory.status, ["Little man connects to the outside world to post mail (contain ASCII character)"]);
+                const decimal = this.registers.read(Register.accumulator);
+                //^ "decimal" as in base-10 integer.
+                //^ Convert decimal to extended ASCII character
+                if (decimal < 32 || decimal > 255) {
+                    this.io.output("[?]");
+                    break;
+                }
+                //^ range of most vsible extended ASCII characters
+                this.io.output(String.fromCharCode(decimal));
+                //^ Output (as extended ASCII character) operation
+                this.displayStatus(UICatagory.output, [this.io.getLatestOutput()]);
+                this.displayStatus(UICatagory.displayImage, ["output.png"]);
+        }
     }
     displayStatus(uIcatagory, content) {
         if (this.middleware == undefined) {
@@ -417,49 +413,49 @@ export class ControlUnit {
         //^ calls parent class instance to update UI accordingly
     }
     //: public methods
-    cycle() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-            //^ code source: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep "or in Typescript:" section
-            while (true) {
-                //* most 'displayStatus' calls are done in other method calls as they have the relevant data/varaibles.
-                //: degugging purposes
-                console.log("PC - " + this.registers.read(Register.programCounter));
-                console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
-                //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
-                //if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
-                yield sleep(this.cycleInterval);
-                this.fetch();
-                //^ fetch part of the cycle
-                if (this.registers.read(Register.instruction) == 0) {
-                    //* when compiled assembly program ends
-                    this.displayStatus(UICatagory.status, ["Little man takes a coffee break"]);
-                    this.displayStatus(UICatagory.displayImage, ["hlt.png"]);
-                    break;
-                }
-                yield sleep(this.cycleInterval);
-                this.decode();
-                //^ decode part of the cycle but also calls the specified instruction method for the execution part of the cycle
-                yield sleep(this.cycleInterval);
-                //: increment and check in PC's value went over limit (99)
-                this.displayStatus(UICatagory.status, ["Little man checks the mail counter, is currently at " + this.registers.read(Register.programCounter)]);
-                this.displayStatus(UICatagory.displayImage, ["counter.png"]);
-                yield sleep(this.cycleInterval);
-                this.displayStatus(UICatagory.status, ["Little man increments the mail counter to " + (this.registers.read(Register.programCounter) + 1).toString()]);
-                this.displayStatus(UICatagory.displayImage, ["counterIncrement.png"]);
-                this.registers.write(Register.programCounter, this.registers.read(Register.programCounter) + 1);
-                if (this.registers.read(Register.programCounter) > 99) {
-                    //* resets to zero when above 99
-                    yield sleep(this.cycleInterval);
-                    this.displayStatus(UICatagory.status, ["Counter too high - Little man resets mail counter back to 0"]);
-                    this.displayStatus(UICatagory.displayImage, ["counterReset.png"]);
-                    this.registers.write(Register.programCounter, 0);
-                }
-                //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
+    async cycle() {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        //^ code source: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep "or in Typescript:" section
+        while (true) {
+            //* most 'displayStatus' calls are done in other method calls as they have the relevant data/varaibles.
+            //: degugging purposes
+            console.log("PC - " + this.registers.read(Register.programCounter));
+            console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
+            //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
+            ///if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
+            await sleep(this.cycleInterval);
+            this.fetch();
+            //^ fetch part of the cycle
+            if (this.registers.read(Register.instruction) == 0) {
+                //* when compiled assembly program ends
+                this.displayStatus(UICatagory.status, ["Little man takes a coffee break"]);
+                this.displayStatus(UICatagory.displayImage, ["hlt.png"]);
+                break;
             }
-            this.displayStatus(UICatagory.end, []);
-            return this.io.getHistory();
-        });
+            await sleep(this.cycleInterval);
+            this.decode();
+            //^ decode part of the cycle but also calls the specified instruction method for the execution part of the cycle
+            await sleep(this.cycleInterval);
+            //: increment and check in PC's value went over limit (99)
+            this.displayStatus(UICatagory.status, ["Little man checks the mail counter, is currently at " + this.registers.read(Register.programCounter)]);
+            this.displayStatus(UICatagory.displayImage, ["counter.png"]);
+            await sleep(this.cycleInterval);
+            this.displayStatus(UICatagory.status, ["Little man increments the mail counter to " + (this.registers.read(Register.programCounter) + 1).toString()]);
+            this.displayStatus(UICatagory.displayImage, ["counterIncrement.png"]);
+            this.registers.write(Register.programCounter, this.registers.read(Register.programCounter) + 1);
+            this.displayStatus(UICatagory.registerProgramCounter, [String(this.registers.read(Register.programCounter))]);
+            if (this.registers.read(Register.programCounter) > 99) {
+                //* resets to zero when above 99
+                await sleep(this.cycleInterval);
+                this.displayStatus(UICatagory.status, ["Counter too high - Little man resets mail counter back to 0"]);
+                this.displayStatus(UICatagory.displayImage, ["counterReset.png"]);
+                this.registers.write(Register.programCounter, 0);
+                this.displayStatus(UICatagory.registerProgramCounter, [String(this.registers.read(Register.programCounter))]);
+            }
+            //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
+        }
+        this.displayStatus(UICatagory.end, []);
+        return this.io.getHistory();
     }
     getArithmeticStatus() { return this.alu.getArithmeticStatus(); } //< inter-class getter
 }

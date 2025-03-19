@@ -1,4 +1,4 @@
-import { ControlUnit } from "../code/vonNeumann";
+import { ControlUnit } from "../vonNeumann";
 /* extremities not tested due to those being supposed to be dealt by the LMC compiler:
  * RAM cell out-of-bounds values
  * Invalid instruction codes

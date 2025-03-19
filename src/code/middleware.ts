@@ -57,7 +57,8 @@ export class Middleware{
         console.log("update: "+uIcatagory+"-"+content);
         this.simulatorUI.update(uIcatagory,content);
     }
-    public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
+    ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
+    public getInput():number{ return this.simulatorUI.getInput(); }
 
 }
 

@@ -41,14 +41,14 @@
                     </table>
                 </div>
                 <div class="well">
-                    <button class="btn mb-3" id="Menu">Back to menu</button>
+                    <button class="btn mb-3" id="menu">Back to menu</button>
                     <button class="btn mb-3" id="timeOrStep">Time or Step</button>
-                    <button class="btn mb-3" id="Reset">Reset</button>
+                    <button class="btn mb-3" id="reset">Reset</button>
                     <button class="btn mb-3">Run Settings</button>
                     <button class="btn mb-3" id="compile">Compile</button>
                     <button class="btn mb-3" id="run">Run</button>
                     <button class="btn mb-3" id="manual">Manual</button>
-                    <button class="btn mb-3" id="submitInput">Submit Input</button>
+                    <button disabled class="btn mb-3" id="submitInput">Submit Input</button>
                     <button class="btn mb-3" id="toggleMode">Toggle Light/dark Mode</button>
                     <button class="btn mb-3" id="toggleDisplay">Toggle Display</button>
                 </div>
@@ -60,27 +60,27 @@
                     <div class="list-item">
                         <div class="input-group mb-3">
                             <!--* https://www.w3schools.com/bootstrap5/bootstrap_form_input_group.php -->
-                            <span class="input-group-text" id="registerProgramCounter">Program Counter</span>
-                            <input type="text" class="form-control" readonly>
+                            <span class="input-group-text">Program Counter</span>
+                            <input type="text" class="form-control text-end" id="registerProgramCounter" readonly>
 
                         </div>
                     </div>
                     <div class="list-item">
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="registerInstruction">Memory Instruction Register</span>
-                            <input type="text" class="form-control text-end" readonly>
+                            <span class="input-group-text">Memory Instruction Register</span>
+                            <input type="text" class="form-control text-end" id="registerInstruction" readonly>
                         </div>
                     </div>
                     <div class="list-item">
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="registerAddress">Memory Address Register</span>
-                            <input type="text" class="form-control text-end" readonly>
+                            <span class="input-group-text">Memory Address Register</span>
+                            <input type="text" class="form-control text-end" id="registerAddress" readonly>
                         </div>
                     </div>
                     <div class="list-item">
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="registerAccumulator">Accumulator</span>
-                            <input type="text" class="form-control text-end" readonly>
+                            <span class="input-group-text">Accumulator</span>
+                            <input type="text" class="form-control text-end" id="registerAccumulator" readonly>
                         </div>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                     <div class="group">
                         <div class="input-group mb-3 mr-3 mt-3">
                             <span class="input-group-text">Input</span>
-                            <input type="text" class="form-control" id="input" readonly>
+                            <input disabled type="text" class="form-control" id="input" readonly>
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text">Output</span>

@@ -124,12 +124,12 @@ export class Compiler{
         //* If script is invalid, return '[-1]', otherwise return the script compiled.
 
         /// //* return 'number[]' stucture: [ 'success or type of error', 'code line relevant to error', 'token column relevant to error', 'token causing the error', 'description of error']
-        const instructions:string[] = ["ADD", "SUB", "STA", "SHL", "SHR", "LDA", "BRA", "BRZ", "BRP", "INP", "OUT", "OCT", "HLT", "DAT"];
+        const instructions:string[] = ["ADD", "SUB", "STA", "SHL", "SHR", "LDA", "BRA", "BRZ", "BRP", "INP", "OUT", "OTC", "HLT", "DAT"];
         //^ Does not include "DAT" as it is an opcode but not necessarily an instruction.
-        const noOperands:string[] = ["SHL", "SHR", "INP", "OUT", "HLT"];
+        const noOperands:string[] = ["SHL", "SHR", "INP", "OUT", "OTC", "HLT"];
         //^ Instructions that where either operands are forbidden.
         ///const mandatoryOperands:string[] = ["ADD", "SUB", "STA", "LDA", "BRA", "BRZ", "BRP", "DAT"];
-        const compiledInstructions:Map<string, number> = new Map([["ADD",1],["SUB",2],["STA",3],["SHL",401],["SHR",402],["LDA",5],["BRA",6],["BRZ",7],["BRP",8],["INP",901],["OUT",902],["OCT",903],["HLT",0]])
+        const compiledInstructions:Map<string, number> = new Map([["ADD",1],["SUB",2],["STA",3],["SHL",401],["SHR",402],["LDA",5],["BRA",6],["BRZ",7],["BRP",8],["INP",901],["OUT",902],["OTC",903],["HLT",0]])
         //^ easier to identify what the key set and value set are as 'Map<string, number>' instead of 'Map<string, string>'
         let compiledScript:number[] = [];
 

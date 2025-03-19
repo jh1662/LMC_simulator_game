@@ -46,8 +46,8 @@ async function testDebugging(){
 }
 
 testDebugging();
-*/
-import { Compiler } from "../code/compiler.js";
+
+import { Compiler } from "../compiler.js";
 function testCompiler(){
 
     const preCompiled:string[][] = [
@@ -56,6 +56,31 @@ function testCompiler(){
         ["", "STA", "99"],
         ["", "OUT", ""],
         ["THREE", "OUT", ""],
+        ["", "HLT", ""]
+    ];
+
+    //: instantiate then apply compiler to script.
+    const compiler:Compiler = new Compiler();
+    console.log("ready");
+    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+    //^ If valid, return compiled script as number[],
+    //^ otherwise, return error message as string.
+    //^ Caller function can know which return kind it is by checking return type.
+    console.log("set");
+    console.log(compiled);
+}
+testCompiler();
+*/
+import { Compiler } from "../compiler.js";
+function testCompiler(){
+
+    const preCompiled:string[][] = [
+        //* represents 2D list values fetched from the frontend's assembly code editor.
+        ["", "SHL", ""],
+        ["", "SHR", ""],
+        ["", "INP", ""],
+        ["", "OUT", ""],
+        ["", "OCT", ""],
         ["", "HLT", ""]
     ];
 

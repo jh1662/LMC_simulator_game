@@ -1,5 +1,24 @@
 V0.1.5 - Fixed Toggle Display problem ('splice' command 2ng arg was 1 higher than it should be.). Made memory cells read only.
 
+
+    public getInput = async(): Promise<number> => {
+        this.input.readOnly = false;
+        return new Promise<number>((resolve) => {
+            const handleClick = () => {
+                let userInput = this.input.value.trim().replace(/\s+/g, '');
+                if ((/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
+                    this.input.readOnly = true;
+                    this.submitInput.removeEventListener("click", handleClick);
+                    resolve(parseInt(userInput, 10));
+                } else {
+                    this.input.value = "Invalid - enter integer between -999 and 999!";
+                }
+            };
+
+            this.submitInput.addEventListener("click", handleClick);
+        });
+    }
+
     public getInput():Promise<number>{
         //* returns promise because it must wait for user the submit the correct input first.
         this.input.readOnly = false;
