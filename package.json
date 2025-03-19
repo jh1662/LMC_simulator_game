@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "codeSize": "wc -l src/code/*.ts",
-    "test": "jest",
-    "heur": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
+    "test": "node --no-warnings=ExperimentalWarning --experimental-vm-modules node_modules/jest/bin/jest.js --collectCoverage",
+    "heur": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/code/tests/heuristicTesting.ts",
     "heurWarning": "node --trace-warnings --loader ts-node/esm src/tests/heuristicTesting.ts",
     "debug": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
     "debugm": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/code/middleware.ts",
@@ -20,8 +20,8 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   }
 }

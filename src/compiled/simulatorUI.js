@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { Register, NumberStatus } from "./vonNeumann.js";
 //^ Why make new enumeration when can import an existing one.
 var Direction;
@@ -290,32 +281,51 @@ export class EditorUI {
 class IOUI {
     //^ to prevent a comma before the first output in the display
     constructor(input, predefinedInput, outputHistory, submitInput) {
-        this.getInput = () => {
-            this.input.readOnly = false;
-            return new Promise((resolve) => {
-                const handleClick = () => {
-                    let userInput = this.input.value.trim().replace(/\s+/g, '');
-                    if ((/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
-                        this.input.readOnly = true;
-                        this.submitInput.removeEventListener("click", handleClick);
-                        resolve(parseInt(userInput, 10));
-                    }
-                    else {
-                        this.input.value = "Invalid - enter integer between -999 and 999!";
-                    }
-                };
-                this.submitInput.addEventListener("click", handleClick);
-            });
-        };
         this.input = document.getElementById(input);
         this.predefinedInput = document.getElementById(predefinedInput);
         this.outputHistory = document.getElementById(outputHistory);
         this.submitInput = document.getElementById(submitInput);
         this.firstOutput = true;
     }
+    ///public getInput = async (): Promise<number> => {
+    getInput() {
+        return 0;
+        /*
+        this.input.readOnly = false;
+        return new Promise<number>((resolve, reject) => {
+            const attachEventListener = () => {
+                console.log("Attempting to attach event listener...");
+                if (this.submitInput) {
+                    // Ensure the event listener is only attached once
+                    const handleClick = () => {
+                        console.log("Button clicked!");
+                        let userInput = this.input.value.trim().replace(/\s+/g, '');
+                        if ((/^-?(?:[1-9]?\d{1,2}|0)$/).test(userInput)) {
+                            console.log("Valid input received:", userInput);
+                            this.input.readOnly = true;
+                            this.submitInput.removeEventListener("click", handleClick);
+                            resolve(parseInt(userInput, 10));
+                        } else {
+                            console.log("Invalid input. Prompting user to correct.");
+                            this.input.value = "Invalid - enter integer between -999 and 999!";
+                        }
+                    };
+
+                    this.submitInput.addEventListener("click", handleClick);
+                    console.log("Event listener successfully attached!");
+                } else {
+                    console.error("Submit button not found in the DOM.");
+                    reject("Submit button is unavailable.");
+                }
+            };
+        });
+        */
+    }
+    ;
     output(appendingValue) {
         if (!this.firstOutput) {
             this.outputHistory.value += (", " + appendingValue);
+            return;
         }
         this.outputHistory.value = (appendingValue);
         this.firstOutput = false;
@@ -326,7 +336,8 @@ class IOUI {
         this.input.readOnly = true;
     }
     start() {
-        //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file.
+        //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file (and resetting output).
+        //: for the pre-defined inputs
         this.predefinedInput.readOnly = true;
         let compiledInputs = [];
         const inputs = this.predefinedInput.value.replace(/\s+/g, '');
@@ -345,7 +356,11 @@ class IOUI {
             //x Can allow user to know what pre-defined input is invalid but is a lower priority, so will do after 3rd sprint if have time.
             compiledInputs.push(parseInt(input, 10));
         }
+        //: for resetting the output
+        this.firstOutput = true;
+        this.outputHistory.value = "";
         return compiledInputs;
+        //^ parsed pre-defined inputs as integer array.
     }
 }
 class ALUUI {
@@ -386,16 +401,16 @@ class RegistersUI {
         //* that gets called ofter in this class.
         switch (register) {
             case Register.programCounter:
-                this.programCounter.value = newValue.toString();
+                this.programCounter.value = newValue;
                 break;
             case Register.instruction:
-                this.memoryInstructionRegister.value = newValue.toString();
+                this.memoryInstructionRegister.value = newValue;
                 break;
             case Register.address:
-                this.memoryAddressRegister.value = newValue.toString();
+                this.memoryAddressRegister.value = newValue;
                 break;
             case Register.accumulator:
-                this.accumulator.value = newValue.toString();
+                this.accumulator.value = newValue;
                 break;
         }
     }
@@ -431,9 +446,10 @@ class MiscellaneousUI {
             this.HTMLEle.setAttribute('data-theme', 'light');
         }
     }
-    toggleDisplayMode() {
-        //* switch between objective and image
-        if (this.displayBox.innerHTML.slice(0, 9) == "<img src=") {
+    toggleDisplayMode(start) {
+        //* Switch between objective and image.
+        //* Unless is start of execution then make it Little Man action.
+        if (this.displayBox.innerHTML.slice(0, 9) == "<img src=" && !start) {
             //^ simplistic way to tell if display
             this.displayBox.innerHTML = this.displayObjective;
             //^ switch to displaying objective in box
@@ -489,30 +505,31 @@ export class SimulatorUI {
         return this.iOUI.start();
         //^ get pre-defined inputs
     }
+    ///public async getInput():Promise<number>{
+    ///    return await this.iOUI.getInput();
+    ///}
     getInput() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.iOUI.getInput();
-        });
+        return this.iOUI.getInput();
     }
     //: For the frontend (not relating to backend)
     compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
-    toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(); } //< call by button
+    toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(false); } //< call by button
     resetRegesters() { this.registerUI.resetRegisters; } //< call by middleware
     update(catagoty, value) {
         //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
         switch (catagoty) {
             case UICatagory.registerAccumulator:
-                this.registerUI.updateRegister(Register.accumulator, parseInt(value[0], 10));
+                this.registerUI.updateRegister(Register.accumulator, value[0]);
                 break;
             //^ 'as string' satisfy TS-2345 because it will certainly not be undefined when called.
             case UICatagory.registerInstruction:
-                this.registerUI.updateRegister(Register.instruction, parseInt(value[0], 10));
+                this.registerUI.updateRegister(Register.instruction, value[0]);
                 break;
             case UICatagory.registerProgramCounter:
-                this.registerUI.updateRegister(Register.instruction, parseInt(value[0], 10));
+                this.registerUI.updateRegister(Register.instruction, value[0]);
                 break;
             case UICatagory.registerAddress:
-                this.registerUI.updateRegister(Register.address, parseInt(value[0], 10));
+                this.registerUI.updateRegister(Register.address, value[0]);
                 break;
             case UICatagory.aLU:
                 this.aLUUI.update(parseInt(value[0], 10), value[1], value[2]);
@@ -543,6 +560,7 @@ export class SimulatorUI {
     start() {
         this.registerUI.resetRegisters();
         this.miscellaneousUI.disableDuringRun();
+        this.miscellaneousUI.toggleDisplayMode(true);
     }
 }
 //#endregion

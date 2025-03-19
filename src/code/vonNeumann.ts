@@ -53,7 +53,7 @@ class ALU{
         //^ for the last time an ADD or SUB operation happened
     }
     //: property mutator methods
-    public add(input:number, registers:Registers){
+    public add(input:number, registers:Registers):NumberStatus{
         let result:number;
 
         result = input + registers.read(Register.accumulator);
@@ -63,20 +63,21 @@ class ALU{
             result = result - this.unflow;
             //^ deals with overflow
             registers.write(Register.accumulator, result);
+            return NumberStatus.overflow;
         }
-        else if (result < -999){ //< underflow
+        if (result < -999){ //< underflow
             this.arithmeticStatus = NumberStatus.underflow;
             result = result + this.unflow;
             //^ deals with underflow
             registers.write(Register.accumulator, result);
+            return NumberStatus.underflow;
         }
-        else{ //< in range
-            this.arithmeticStatus = NumberStatus.normal;
-            registers.write(Register.accumulator, result);
-        }
-
+        //: in range
+        this.arithmeticStatus = NumberStatus.normal;
+        registers.write(Register.accumulator, result);
+        return NumberStatus.normal;
     }
-    public minus(input:number, registers:Registers){ this.add(input*-1, registers); } //< self-invoking
+    public minus(input:number, registers:Registers):NumberStatus{ return this.add(input*-1, registers); } //< self-invoking
     public shift(registers:Registers, left:boolean){
         //: local variables (non-constant)
         let result;
@@ -229,7 +230,10 @@ export class ControlUnit{
         this.displayStatus(UICatagory.displayImage,["decoding.png"]);
 
         this.displayStatus(UICatagory.registerInstruction,[this.registers.read(Register.instruction).toString()]);
-        this.displayStatus(UICatagory.registerAddress,[this.registers.read(Register.address).toString()]);
+        let address:string = this.registers.read(Register.address).toString();
+        if (address.length == 1) { address = "0" + address; }
+        //^ adds padding when needed - make sure address is double digit
+        this.displayStatus(UICatagory.registerAddress,[address]);
 
         switch(this.registers.read(Register.instruction)){ //< 0 to 9
             //x moved code from switch cases to methods because compiler does not allow two cases can declare the same variable.
@@ -255,13 +259,15 @@ export class ControlUnit{
         const address:number = this.registers.read(Register.address);
         const input:number = this.ram.read(address);
 
-        this.alu.add(input, this.registers); //< adding operation
+        const operation:string = `${input} + ${this.registers.read(Register.accumulator)}`;
+        const flow:NumberStatus = this.alu.add(input, this.registers); //< adding operation
 
         this.displayStatus(UICatagory.status, ["Little man adds mail address "+address+"'s value to calculator."]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
-        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()])
-        //^ Keeps code simpler by getting directly from register than to get return value from any of the public ALU methods.
-        //^ This way barely take more computional time.
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
+        const result:string = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.registerAccumulator, [result]);
+
+        this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
     private SUB(){
         //* Subtract memory cell address’ value from accumulator’s value
@@ -269,11 +275,15 @@ export class ControlUnit{
         const address:number = this.registers.read(Register.address);
         const input:number = this.ram.read(address);
 
-        this.alu.minus(input, this.registers); //< subtraction operation
+        const operation:string = `${input} + ${this.registers.read(Register.accumulator)}`;
+        const flow:NumberStatus = this.alu.minus(input, this.registers); //< subtraction operation
 
         this.displayStatus(UICatagory.status,["Little man subtracts mail address "+address+"'s value from calculator."]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
-        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()])
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
+        const result:string = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.registerAccumulator, [result]);
+
+        this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
     private STA(){
         //* Store accumulator’s value in memory cell address
@@ -283,24 +293,28 @@ export class ControlUnit{
         this.ram.write(address, accumulator); //< storing operation
 
         this.displayStatus(UICatagory.status,["Little man stores calculator's value to mail address "+address]);
-        this.displayStatus(UICatagory.aLU, ["sta.png"]);
+        this.displayStatus(UICatagory.displayImage, ["sta.png"]);
         this.displayStatus(UICatagory.cell,[address.toString(), accumulator.toString()]);
     }
     private SH(){
         //* Shift the accumulator value’s base-10 digits of significance, by one digit, to the left or right
+        let operation:string = "Shift " +this.registers.read(Register.accumulator);
         if(this.registers.read(Register.address) == 1){ //< left
             this.alu.shift(this.registers,true); //< left-shift operation
 
             this.displayStatus(UICatagory.status,["Little man left-shifts calculator's value"]);
+            operation = operation + " to the left"
         }
         else { //< right (==2)
             this.alu.shift(this.registers,false); //< right-shift operation
 
             this.displayStatus(UICatagory.status,["Little man right-shifts calculator's value"]);
-
+            operation = operation + " to the right"
         }
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
-        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()])
+        const result:string = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
+        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()]);
+        this.displayStatus(UICatagory.aLU, ["SHIFT",operation,result]);
     }
     private LDA(){
         //* Load memory address’s value to the accumulator (becomes the new accumulator’s value)
@@ -308,7 +322,7 @@ export class ControlUnit{
         const value:number = this.ram.read(address);
 
         this.displayStatus(UICatagory.status,["Little man loads mail address "+address+"'s value to the calculator as accumulator"]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
         this.displayStatus(UICatagory.registerAccumulator, [value.toString()]);
         //^ constant 'value' already had the accumulator value.
 
@@ -322,7 +336,7 @@ export class ControlUnit{
         //^ Notice - 'address-1' is fine even if resulting in '-1' because it will be incremented before next decoding.
 
         this.displayStatus(UICatagory.status,["Little man branches to mail address by changing program counter to "+(address-1)]);
-        this.displayStatus(UICatagory.displayImage,["branchSuccess.png"])
+        this.displayStatus(UICatagory.displayImage,["branchSuccess.png"]);
     }
     private BRZ(){
         //* Branch – change PC’s value to – the address value if accumulator’s value is zero
@@ -354,9 +368,10 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["If calculator value is not 0 nor positive, little man continues"+(address-1)]);
         this.displayStatus(UICatagory.displayImage,["branchFail.png"]);
     }
-    private async IO():Promise<void>{
+    ///private async IO(){
+        ///* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
+    private IO(){
         //* Takes user input for accumulator value or output from accumulator value.
-        //* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
         const address:number = this.registers.read(Register.address);
         switch(address){
             //* Determines which IO operation to do (based in address being either 1, 2, or 3).
@@ -364,7 +379,8 @@ export class ControlUnit{
                 //* Input operation
                 let input:number = this.io.input();
                 if (input == -1000){
-                    if (this.middleware != undefined) { input = await this.middleware.getInput(); }
+                    ///if (this.middleware != undefined) { input = await this.middleware.getInput(); }
+                    if (this.middleware != undefined) { input = this.middleware.getInput(); }
                     //^ middleware will be undifined when testing only the backend simulator
                     else { input = 0; }
                     //^ should not happen but incase
@@ -417,7 +433,7 @@ export class ControlUnit{
             console.log("Instruction - "+String(this.registers.read(Register.instruction))+String(this.registers.read(Register.instruction)));
 
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
-            //if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
+            ///if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
             await sleep(this.cycleInterval);
             this.fetch();
             //^ fetch part of the cycle
@@ -438,13 +454,14 @@ export class ControlUnit{
             this.displayStatus(UICatagory.status,["Little man increments the mail counter to "+(this.registers.read(Register.programCounter)+1).toString()]);
             this.displayStatus(UICatagory.displayImage,["counterIncrement.png"]);
             this.registers.write(Register.programCounter, this.registers.read(Register.programCounter)+1 )
+            this.displayStatus(UICatagory.registerProgramCounter, [String(this.registers.read(Register.programCounter))])
             if( this.registers.read(Register.programCounter) > 99 ){
                 //* resets to zero when above 99
                 await sleep(this.cycleInterval);
                 this.displayStatus(UICatagory.status,["Counter too high - Little man resets mail counter back to 0"]);
                 this.displayStatus(UICatagory.displayImage,["counterReset.png"]);
                 this.registers.write(Register.programCounter, 0);
-
+                this.displayStatus(UICatagory.registerProgramCounter, [String(this.registers.read(Register.programCounter))])
             }
             //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
         }
