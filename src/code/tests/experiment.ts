@@ -18,3 +18,11 @@ console.log('[?]');
 //x Discontinued because testing code (that doesn't call any part of the project) is easier to do online - https://www.programiz.com/javascript/online-compiler/ .
 //x However, will still put here what I put on the online compiler.
 
+
+
+
+
+const list:string[] = ["1","2","3"];
+
+//@ts-ignore
+const element:string = list[1];

@@ -120,7 +120,7 @@ export class Compiler{
     public validateAndCompile(script:string[][]):number[]{
         //* Actually does both the validation and compilation.
         //* They are not their own method because it is far more computationally expensive and long to do so as
-        //* Together will take O(n*3+n) while saperating them will take O((n*3)*2+n) big-O notation.
+        //* Together will take O(5n) while saperating them will take O(9n) big-O notation.
         //* If script is invalid, return '[-1]', otherwise return the script compiled.
 
         /// //* return 'number[]' stucture: [ 'success or type of error', 'code line relevant to error', 'token column relevant to error', 'token causing the error', 'description of error']

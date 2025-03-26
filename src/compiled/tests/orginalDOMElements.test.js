@@ -21,9 +21,9 @@ input-1-0
 input-1-1
 1-2
 input-1-2
-Menu
+menu
 timeOrStep
-Reset
+reset
 compile
 run
 manual
@@ -45,6 +45,32 @@ status
 memoryTable
 */
 //* Saperated by wells
+describe("Testing invalid elements to make sure tests are actually working", () => {
+    test("Fetching element by non-existant id", () => {
+        const htmlElement = document.getElementById('doesNotExist');
+        expect(htmlElement).toEqual(null);
+        //^ if cannot find element, null will be retuned instead
+        expect(htmlElement instanceof HTMLElement).not.toEqual(true);
+        //^ if is null, then it should not be an element
+    });
+    test("Fetching element but treating it as a different HTML element type", () => {
+        const htmlElement = document.getElementById('menu');
+        expect(htmlElement).not.toEqual(null);
+        expect(htmlElement instanceof HTMLSpanElement).not.toEqual(true);
+        //^ 'menu' should be a button, not span.
+    });
+    test("Fetching element but accessing a property that does not exist in that element type", () => {
+        const htmlElement = document.getElementById('menu');
+        expect(htmlElement).not.toEqual(null);
+        //: Is button but not input element
+        expect(htmlElement instanceof HTMLButtonElement).toEqual(true);
+        expect(htmlElement instanceof HTMLInputElement).not.toEqual(true);
+        expect(htmlElement.placeholder).toEqual(undefined);
+        //^ Tries to access a property that is availible in 'HTMLInputElement' but not in 'HTMLButtonElement'.
+        //^ When accessing a non-existant property, TS returns 'undefined'.
+        //^ Source - https://tc39.es/ecma262/#sec-frompropertydescriptor .
+    });
+});
 describe("Testing register textbox elements", () => {
     test("Program counter register", () => {
         const htmlElement = document.getElementById('registerProgramCounter');
@@ -122,7 +148,7 @@ describe("Testing input/output (IO) elements (all textboxes)", () => {
 describe("Control panel (group of buttons in bottom left)", () => {
     //* All buttons' HTML code do not declare a JS function "onclick"
     //* because that is handeled by the methods instead for modularity and organisation.
-    /*
+    /* Button ids here due to more vague nameing conventions.
     - menu
     - timeOrStep
     - reset
@@ -179,4 +205,55 @@ describe("Control panel (group of buttons in bottom left)", () => {
         expect(htmlElement).not.toEqual(null);
         expect(htmlElement instanceof HTMLButtonElement).toEqual(true);
     });
+});
+describe("The first two lines of texboxes in the script editor", () => {
+    //* Only tested the ids of the textbox and table because cell and rows ids are not called.
+    //* Row and cells have ids for sake of integrity and good coding practive.
+    test("testing the table containing the token textboxes (label, opcode, and operand)", () => {
+        //* the table which contains the script editor token textboxes.
+        const htmlElement = document.getElementById('editorTable');
+        expect(htmlElement).not.toEqual(null);
+        expect(htmlElement instanceof HTMLTableElement).toEqual(true);
+    });
+    describe("Testing the pre-generated cells only", () => {
+        //* these are generated as the original DOMs, new lines are dynamicly generated when needed.
+        describe("First row of token textboses (second row in table)", () => {
+            test("label", () => {
+                const htmlElement = document.getElementById('input-0-0');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+            test("opcode", () => {
+                const htmlElement = document.getElementById('input-0-1');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+            test("operand", () => {
+                const htmlElement = document.getElementById('input-0-2');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+        });
+        describe("Second row of token textboses (third row in table)", () => {
+            test("label", () => {
+                const htmlElement = document.getElementById('input-1-0');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+            test("opcode", () => {
+                const htmlElement = document.getElementById('input-1-1');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+            test("operand", () => {
+                const htmlElement = document.getElementById('input-1-2');
+                expect(htmlElement).not.toEqual(null);
+                expect(htmlElement instanceof HTMLInputElement).toEqual(true);
+            });
+        });
+    });
+});
+describe("Simulator's status", () => {
+    //! status
+    //! objective
 });

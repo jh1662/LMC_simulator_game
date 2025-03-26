@@ -265,6 +265,27 @@ describe("Testing LMC compatibility with others and if up to standard", () => {
             expect(compiled).toStrictEqual([901, 336, 733, 238, 339, 337, 536, 340, 539, 730, 238, 730, 536, 140, 336, 537, 238, 337, 238, 721, 608, 536, 340, 539, 238, 339, 337, 238, 730, 608, 536, 902, 0, 538, 902, 0, 0, 0, 1, 0, 0]);
         });
     });
+    describe("pbrinkmeier's LMC assembly program example", () => {
+        test('"takes two inputs and puts their difference in the outbox" program', () => {
+            const preCompiled:string[][] = [
+                ["", "INP", ""],
+                ["", "STA", "FIRST"],
+                ["", "INP", ""],
+                ["", "STA", "SECOND"],
+                ["", "LDA", "FIRST"],
+                ["", "SUB", "SECOND"],
+                ["", "OUT", ""],
+                ["", "HLT", ""],
+                ["FIRST", "DAT", "0"],
+                ["SECOND", "DAT", "0"]
+            ];
+
+            const compiler:Compiler = new Compiler();
+            const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+            expect(compiled).toStrictEqual([901, 308, 901, 309, 508, 209, 902, 0, 0, 0]);
+        });
+    });
     describe("Wellingborough School's LMC assembly program examples", () => {
         //* All tests' expected compiled scripts are different then the tested compiled scripts in LMCCompatability.test.ts
         //* because compiler doesn't include empty lines in its compiled script unlike Wellingborough School's LMC compiler.
