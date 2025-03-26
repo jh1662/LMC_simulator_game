@@ -145,6 +145,70 @@ export class EditorUI {
             //x adding different key functionality for when shift is pressed, at the same time, is a lower priority.
         }
     }
+    //: methods relating to fetching the script
+    getScript() {
+        //* returns the script as a 2D array tokens
+        let script = [];
+        for (let lineId = 0; lineId < this.HTMLTable.rows.length - 1; lineId++) {
+            ///const row:HTMLTableRowElement = this.HTMLTable.rows[lineId] as HTMLTableRowElement;
+            const line = [
+                //* Does not matter if the cell is empty - prevents jagged arrays.
+                //* Same functionality as:
+                //* "for (let cell = 1; cell < 4; cell++) { line.push(((document.getElementById(`input-${lineId}-${cell}`) as HTMLInputElement).value).innerText); }"
+                //* but easier to comprehend and maintain/update in this current form and does not take that much more code space.
+                document.getElementById(`input-${lineId}-0`).value, //< label token
+                //^ "as HTMLInputElement" satisfies TS-2531.
+                //^ More reliable and easier to get textboxes by predictable ID rather that getting textbox by parent element (cell).
+                document.getElementById(`input-${lineId}-1`).value, //< opcode token
+                document.getElementById(`input-${lineId}-2`).value //< operand token
+            ];
+            if (line[0] == "" && line[1] == "" && line[2] == "") {
+                continue;
+            }
+            //^ do not add empty lines to the script
+            if (line[0].charAt(0) == "#" || line[0].charAt(0) == "//") {
+                continue;
+            }
+            //^ Not possible for line[0] to be undefined - "as string" satisfies TS-2532.
+            //^ Do not add region declarations or comments to the script.
+            script.push(line);
+            //^ each sub-array is a line, of tokens, in the script.
+        }
+        /*
+        //? If only top line runs the output is no parsed
+        //? but if both top and bottom lines run both outputs are parsed.
+        //? Most likely the cause is that the script somehow gets parsed (by object referance) before first output.
+        console.log(script);
+        console.log(this.parseScript(script));
+        */
+        console.log(script);
+        return this.parseScript(script);
+        //^ Script is either a 2D array of tokens or an empty array.
+        //^ If caller detects emty array, it will exit/stop.
+    }
+    parseScript(script) {
+        //* parsing the tokens - makes validation much easier.
+        //* parsing does not give errors hence is in this frontend class.
+        for (let lineNum = 0; lineNum < script.length; lineNum++) {
+            const line = script[lineNum];
+            //^ declaration satisfies TS-2322
+            for (let tokenType = 0; tokenType < line.length; tokenType++) {
+                let token = line[tokenType];
+                if (token == undefined) {
+                    token = "";
+                }
+                //^ reassaignment as "" satisfies TS-18048
+                line[tokenType] = token.replace(/\s+/g, '');
+                //^ Removes all whitespaces.
+                //^ Learned about 'regular expressions' on https://www.regexone.com/ .
+                line[tokenType] = token.replace(/./g, (char) => char.toUpperCase());
+                //^ capitalises all characters
+            }
+        }
+        return script;
+        //^ returns the script (2D-array of tokens) as parsed
+    }
+    //: Methods relating to navigation
     navigation(event, direction) {
         event.preventDefault();
         //: Require multiple lines to satisfy TS-2345 - could be undefined.
@@ -214,68 +278,6 @@ export class EditorUI {
         }
         const textbox = document.getElementById(`input-${rowId}-${columnId}`);
         textbox.focus();
-    }
-    getScript() {
-        //* returns the script as a 2D array tokens
-        let script = [];
-        for (let lineId = 0; lineId < this.HTMLTable.rows.length - 1; lineId++) {
-            ///const row:HTMLTableRowElement = this.HTMLTable.rows[lineId] as HTMLTableRowElement;
-            const line = [
-                //* Does not matter if the cell is empty - prevents jagged arrays.
-                //* Same functionality as:
-                //* "for (let cell = 1; cell < 4; cell++) { line.push(((document.getElementById(`input-${lineId}-${cell}`) as HTMLInputElement).value).innerText); }"
-                //* but easier to comprehend and maintain/update in this current form and does not take that much more code space.
-                document.getElementById(`input-${lineId}-0`).value, //< label token
-                //^ "as HTMLInputElement" satisfies TS-2531.
-                //^ More reliable and easier to get textboxes by predictable ID rather that getting textbox by parent element (cell).
-                document.getElementById(`input-${lineId}-1`).value, //< opcode token
-                document.getElementById(`input-${lineId}-2`).value //< operand token
-            ];
-            if (line[0] == "" && line[1] == "" && line[2] == "") {
-                continue;
-            }
-            //^ do not add empty lines to the script
-            if (line[0].charAt(0) == "#" || line[0].charAt(0) == "//") {
-                continue;
-            }
-            //^ Not possible for line[0] to be undefined - "as string" satisfies TS-2532.
-            //^ Do not add region declarations or comments to the script.
-            script.push(line);
-            //^ each sub-array is a line, of tokens, in the script.
-        }
-        /*
-        //? If only top line runs the output is no parsed
-        //? but if both top and bottom lines run both outputs are parsed.
-        //? Most likely the cause is that the script somehow gets parsed (by object referance) before first output.
-        console.log(script);
-        console.log(this.parseScript(script));
-        */
-        console.log(script);
-        return this.parseScript(script);
-        //^ Script is either a 2D array of tokens or an empty array.
-        //^ If caller detects emty array, it will exit/stop.
-    }
-    parseScript(script) {
-        //* parsing the tokens - makes validation much easier.
-        //* parsing does not give errors hence is in this frontend class.
-        for (let lineNum = 0; lineNum < script.length; lineNum++) {
-            const line = script[lineNum];
-            //^ declaration satisfies TS-2322
-            for (let tokenType = 0; tokenType < line.length; tokenType++) {
-                let token = line[tokenType];
-                if (token == undefined) {
-                    token = "";
-                }
-                //^ reassaignment as "" satisfies TS-18048
-                line[tokenType] = token.replace(/\s+/g, '');
-                //^ Removes all whitespaces.
-                //^ Learned about 'regular expressions' on https://www.regexone.com/ .
-                line[tokenType] = token.replace(/./g, (char) => char.toUpperCase());
-                //^ capitalises all characters
-            }
-        }
-        return script;
-        //^ returns the script (2D-array of tokens) as parsed
     }
 }
 class IOUI {
@@ -378,7 +380,7 @@ class ALUUI {
             case NumberStatus.underflow:
                 this.flow.value = "-";
                 break;
-            case NumberStatus.underflow:
+            default: //< NumberStatus.overflow:
                 this.flow.value = "+";
                 break;
         }
@@ -409,7 +411,7 @@ class RegistersUI {
             case Register.address:
                 this.memoryAddressRegister.value = newValue;
                 break;
-            case Register.accumulator:
+            default: //< case Register.accumulator
                 this.accumulator.value = newValue;
                 break;
         }
@@ -434,7 +436,7 @@ class MiscellaneousUI {
         this.displayBox.innerHTML = this.displayObjective;
     }
     displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
-    changeStatus(status) { this.status.innerHTML = status; }
+    changeStatus(status) { this.status.textContent = status; }
     toggleDarkMode() {
         //* note: dark/light mode is different to style themes
         const currentMode = this.HTMLEle.getAttribute('data-theme');
@@ -466,12 +468,9 @@ class MiscellaneousUI {
             this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         }
     }
-    disableDuringRun() {
-        this.runButton.disabled = true;
-    }
-    enableAfterRun() {
-        this.runButton.disabled = false;
-    }
+    disableDuringRun() { this.runButton.disabled = true; }
+    enableAfterRun() { this.runButton.disabled = false; }
+    toMenu() { window.location.href = "menu.html"; }
 }
 //#endregion
 //#region main class
@@ -489,12 +488,13 @@ export class SimulatorUI {
             //* For HTML elemets that are not generated after original DOM load.
             document.getElementById('toggleMode').addEventListener("click", () => this.miscellaneousUI.toggleDarkMode());
             document.getElementById('manual').addEventListener("click", () => this.miscellaneousUI.displayManual());
-            document.getElementById('toggleDisplay').addEventListener("click", () => this.toggleDisplayMode());
+            document.getElementById('menu').addEventListener("click", () => this.miscellaneousUI.toMenu());
+            document.getElementById('toggleDisplay').addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
         window.addRowIfNeeded = this.addRowIfNeeded.bind(this);
         window.navigateEditor = this.navigateEditor.bind(this);
-        console.log('simulatorUI has loaded');
+        ///console.log('simulatorUI has loaded');
     }
     //: Not related to backend but for dynamically generated HTML elements laoded after the original DOM
     addRowIfNeeded(textbox) { this.editorUI.generateLine(textbox); }
@@ -513,11 +513,10 @@ export class SimulatorUI {
     }
     //: For the frontend (not relating to backend)
     compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
-    toggleDisplayMode() { this.miscellaneousUI.toggleDisplayMode(false); } //< call by button
     resetRegesters() { this.registerUI.resetRegisters; } //< call by middleware
-    update(catagoty, value) {
+    update(catagory, value) {
         //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
-        switch (catagoty) {
+        switch (catagory) {
             case UICatagory.registerAccumulator:
                 this.registerUI.updateRegister(Register.accumulator, value[0]);
                 break;
@@ -526,7 +525,7 @@ export class SimulatorUI {
                 this.registerUI.updateRegister(Register.instruction, value[0]);
                 break;
             case UICatagory.registerProgramCounter:
-                this.registerUI.updateRegister(Register.instruction, value[0]);
+                this.registerUI.updateRegister(Register.programCounter, value[0]);
                 break;
             case UICatagory.registerAddress:
                 this.registerUI.updateRegister(Register.address, value[0]);

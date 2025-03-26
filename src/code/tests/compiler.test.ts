@@ -447,112 +447,112 @@ describe("Testing validation and compilation by script's opcodes",() => {
                 expect(compiler.getMessage()).toStrictEqual(errorUnexpectedOperandLine0);
             });
         });
-        describe("Specifically the Data Location opcode (DAT)",() => {
-            //* Extra and more vigorous testing for the ‘DAT’ due to its uniqueness as an opcode.
-            //* Unlike all other opcodes:
-            //*     - it is optional to have an corresponding operand
-            //*     - corresponding operand has a larger range than other numerical operands
-            //*     - the instruction itself does not get compiled (only the corresponding operand).
-            describe("Valids",() => {
-                test("just 'DAT' by itself",() => {
-                    const preCompiled:string[][] = [["", "DAT", ""]];
+    describe("Specifically the Data Location opcode (DAT)",() => {
+        //* Extra and more vigorous testing for the ‘DAT’ due to its uniqueness as an opcode.
+        //* Unlike all other opcodes:
+        //*     - it is optional to have an corresponding operand
+        //*     - corresponding operand has a larger range than other numerical operands
+        //*     - the instruction itself does not get compiled (only the corresponding operand).
+        describe("Valids",() => {
+            test("just 'DAT' by itself",() => {
+                const preCompiled:string[][] = [["", "DAT", ""]];
 
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
 
-                    expect(compiled).toStrictEqual([0]);
-                    //^ When without operand, simulator defaults to storing '0' instead of nothing.
-                });
-                test("just 'DAT' and a label",() => {
-                    const preCompiled:string[][] = [["LABEL", "DAT", ""]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([0]);
-                });
-                test("just 'DAT' and a valid numerical operand",() => {
-                    const preCompiled:string[][] = [["", "DAT", "68"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([68]);
-                    //^ compiled is whatever the operand as the instruction 'DAT' itself does not get stored/compiled.
-                });
-                test("'DAT' with a label and valid numerical operand.",() => {
-                    const preCompiled:string[][] = [["LABEL", "DAT", "68"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([68]);
-                });
-                test("using DAT to store the lowest possible integer",() => {
-                    const preCompiled:string[][] = [["", "DAT", "-999"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([-999]);
-                });
-                test("using DAT to store the highest possible integer",() => {
-                    const preCompiled:string[][] = [["", "DAT", "999"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([999]);
-                });
-                test("using DAT to store zero",() => {
-                    const preCompiled:string[][] = [["", "DAT", "0"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([0]);
-                });
+                expect(compiled).toStrictEqual([0]);
+                //^ When without operand, simulator defaults to storing '0' instead of nothing.
             });
-            describe("Invalids",() => {
-                test("DAT refering an non-existant label",() => {
-                    const preCompiled:string[][] = [["", "DAT", "LABEL"]];
+            test("just 'DAT' and a label",() => {
+                const preCompiled:string[][] = [["LABEL", "DAT", ""]];
 
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
 
-                    expect(compiled).toStrictEqual([-1]);
-                    expect(compiler.getMessage()).toStrictEqual('Missing label error at the operand of line 0 - label "LABEL" is called but cannot find code line with that label.');
-                });
-                test("DAT with the highest under-range number",() => {
-                    const preCompiled:string[][] = [["", "DAT", "-1000"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([-1]);
-                    expect(compiler.getMessage()).toStrictEqual('operand not expected error at the operand of line 0 - label "-1000" is integer but out of bounds (-999 - 999)');
-                });
-                test("DAT with the lowest over-range number",() => {
-                    const preCompiled:string[][] = [["", "DAT", "1000"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([-1]);
-                    expect(compiler.getMessage()).toStrictEqual('operand not expected error at the operand of line 0 - label "1000" is integer but out of bounds (-999 - 999)');
-                });
-                test("DAT with a decimal instead of an integer",() => {
-                    const preCompiled:string[][] = [["", "DAT", "5.5"]];
-
-                    const compiler:Compiler = new Compiler();
-                    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
-
-                    expect(compiled).toStrictEqual([-1]);
-                    expect(compiler.getMessage()).toStrictEqual('non-alphanumeric error at the operand of line 0 - token "5.5" is not alphanumeric. Alphanumeric must only comprise of numbers digits (0-9) and letters (A-Z)');
-                });
+                expect(compiled).toStrictEqual([0]);
             });
+            test("just 'DAT' and a valid numerical operand",() => {
+                const preCompiled:string[][] = [["", "DAT", "68"]];
 
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([68]);
+                //^ compiled is whatever the operand as the instruction 'DAT' itself does not get stored/compiled.
+            });
+            test("'DAT' with a label and valid numerical operand.",() => {
+                const preCompiled:string[][] = [["LABEL", "DAT", "68"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([68]);
+            });
+            test("using DAT to store the lowest possible integer",() => {
+                const preCompiled:string[][] = [["", "DAT", "-999"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([-999]);
+            });
+            test("using DAT to store the highest possible integer",() => {
+                const preCompiled:string[][] = [["", "DAT", "999"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([999]);
+            });
+            test("using DAT to store zero",() => {
+                const preCompiled:string[][] = [["", "DAT", "0"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([0]);
+            });
         });
+        describe("Invalids",() => {
+            test("DAT refering an non-existant label",() => {
+                const preCompiled:string[][] = [["", "DAT", "LABEL"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([-1]);
+                expect(compiler.getMessage()).toStrictEqual('Missing label error at the operand of line 0 - label "LABEL" is called but cannot find code line with that label.');
+            });
+            test("DAT with the highest under-range number",() => {
+                const preCompiled:string[][] = [["", "DAT", "-1000"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([-1]);
+                expect(compiler.getMessage()).toStrictEqual('operand not expected error at the operand of line 0 - label "-1000" is integer but out of bounds (-999 - 999)');
+            });
+            test("DAT with the lowest over-range number",() => {
+                const preCompiled:string[][] = [["", "DAT", "1000"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([-1]);
+                expect(compiler.getMessage()).toStrictEqual('operand not expected error at the operand of line 0 - label "1000" is integer but out of bounds (-999 - 999)');
+            });
+            test("DAT with a decimal instead of an integer",() => {
+                const preCompiled:string[][] = [["", "DAT", "5.5"]];
+
+                const compiler:Compiler = new Compiler();
+                const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
+
+                expect(compiled).toStrictEqual([-1]);
+                expect(compiler.getMessage()).toStrictEqual('non-alphanumeric error at the operand of line 0 - token "5.5" is not alphanumeric. Alphanumeric must only comprise of numbers digits (0-9) and letters (A-Z)');
+            });
+        });
+
+    });
     });
 });
 //#endregion

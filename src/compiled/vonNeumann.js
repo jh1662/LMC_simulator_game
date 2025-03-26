@@ -68,19 +68,21 @@ class ALU {
             result = result - this.unflow;
             //^ deals with overflow
             registers.write(Register.accumulator, result);
+            return NumberStatus.overflow;
         }
-        else if (result < -999) { //< underflow
+        if (result < -999) { //< underflow
             this.arithmeticStatus = NumberStatus.underflow;
             result = result + this.unflow;
             //^ deals with underflow
             registers.write(Register.accumulator, result);
+            return NumberStatus.underflow;
         }
-        else { //< in range
-            this.arithmeticStatus = NumberStatus.normal;
-            registers.write(Register.accumulator, result);
-        }
+        //: in range
+        this.arithmeticStatus = NumberStatus.normal;
+        registers.write(Register.accumulator, result);
+        return NumberStatus.normal;
     }
-    minus(input, registers) { this.add(input * -1, registers); } //< self-invoking
+    minus(input, registers) { return this.add(input * -1, registers); } //< self-invoking
     shift(registers, left) {
         //: local variables (non-constant)
         let result;
@@ -270,22 +272,26 @@ export class ControlUnit {
         //: locate and get pointed value
         const address = this.registers.read(Register.address);
         const input = this.ram.read(address);
-        this.alu.add(input, this.registers); //< adding operation
+        const operation = `${input} + ${this.registers.read(Register.accumulator)}`;
+        const flow = this.alu.add(input, this.registers); //< adding operation
         this.displayStatus(UICatagory.status, ["Little man adds mail address " + address + "'s value to calculator."]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
-        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()]);
-        //^ Keeps code simpler by getting directly from register than to get return value from any of the public ALU methods.
-        //^ This way barely take more computional time.
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
+        const result = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.registerAccumulator, [result]);
+        this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
     SUB() {
         //* Subtract memory cell address’ value from accumulator’s value
         //: locate and get pointed value
         const address = this.registers.read(Register.address);
         const input = this.ram.read(address);
-        this.alu.minus(input, this.registers); //< subtraction operation
+        const operation = `${input} + ${this.registers.read(Register.accumulator)}`;
+        const flow = this.alu.minus(input, this.registers); //< subtraction operation
         this.displayStatus(UICatagory.status, ["Little man subtracts mail address " + address + "'s value from calculator."]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
-        this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()]);
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
+        const result = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.registerAccumulator, [result]);
+        this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
     STA() {
         //* Store accumulator’s value in memory cell address
@@ -293,28 +299,33 @@ export class ControlUnit {
         const accumulator = this.registers.read(Register.accumulator);
         this.ram.write(address, accumulator); //< storing operation
         this.displayStatus(UICatagory.status, ["Little man stores calculator's value to mail address " + address]);
-        this.displayStatus(UICatagory.aLU, ["sta.png"]);
+        this.displayStatus(UICatagory.displayImage, ["sta.png"]);
         this.displayStatus(UICatagory.cell, [address.toString(), accumulator.toString()]);
     }
     SH() {
         //* Shift the accumulator value’s base-10 digits of significance, by one digit, to the left or right
+        let operation = "Shift " + this.registers.read(Register.accumulator);
         if (this.registers.read(Register.address) == 1) { //< left
             this.alu.shift(this.registers, true); //< left-shift operation
             this.displayStatus(UICatagory.status, ["Little man left-shifts calculator's value"]);
+            operation = operation + " to the left";
         }
         else { //< right (==2)
             this.alu.shift(this.registers, false); //< right-shift operation
             this.displayStatus(UICatagory.status, ["Little man right-shifts calculator's value"]);
+            operation = operation + " to the right";
         }
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
+        const result = this.registers.read(Register.accumulator).toString();
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
         this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()]);
+        this.displayStatus(UICatagory.aLU, ["SHIFT", operation, result]);
     }
     LDA() {
         //* Load memory address’s value to the accumulator (becomes the new accumulator’s value)
         const address = this.registers.read(Register.address);
         const value = this.ram.read(address);
         this.displayStatus(UICatagory.status, ["Little man loads mail address " + address + "'s value to the calculator as accumulator"]);
-        this.displayStatus(UICatagory.aLU, ["alu.png"]);
+        this.displayStatus(UICatagory.displayImage, ["alu.png"]);
         this.displayStatus(UICatagory.registerAccumulator, [value.toString()]);
         //^ constant 'value' already had the accumulator value.
         this.registers.write(Register.accumulator, value); //< loading operation
