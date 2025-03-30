@@ -8,7 +8,15 @@ export class Middleware{
     private simulatorUI:SimulatorUI;
     //: 'undefined' satisfies TS-2564
     private compiledScript:number[]|undefined;
-    private simulator:ControlUnit|undefined;
+
+    private simulator:ControlUnit;
+
+    //: to control simulator execution
+    private slowestSpeed:number;
+    private fastestSpeed:number;
+    private currentSpeed:number;
+    private speedInterval:number;
+    private cycleModeAutomatic:boolean;
 
     constructor(){
         this.simulatorUI = new SimulatorUI("This is sandbox mode.");
@@ -21,9 +29,19 @@ export class Middleware{
             ///(document.getElementById('timeOrStep') as HTMLButtonElement).addEventListener("click", )
             (document.getElementById('compile') as HTMLButtonElement).addEventListener("click", () => this.compile());
             (document.getElementById('run') as HTMLButtonElement).addEventListener("click", () => this.run())
-
         });
+
+        this.fastestSpeed = 1;
+        this.slowestSpeed = 10001;
+        this.currentSpeed = 4000;
+        this.speedInterval = 2000;
+        //^ ranges between 1 and 10001.
+        this.cycleModeAutomatic = true;
+
+        this.simulator = new ControlUnit([],[]);
+        //^ Better to assaign redundant instance than using "?" sysntax (bad practice) also know as the Optional Chaining Operator.
     }
+
     private compile():void{
         const compiler:Compiler = new Compiler;
         //^ Compiler class instance only needed when compiling.
@@ -59,7 +77,38 @@ export class Middleware{
     }
     ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
     public getInput():number{ return this.simulatorUI.getInput(); }
+    //: Controlling simulator's execution.
+    public changeSpeed(toSlower:boolean):void{
+        //* Make code simpler to use one method for both speeding up and slowing down.
+        //* Due to slowest speed being 10001 instead of 10000, don't need extra code to check if speed is 0 (or lower) or above 10000.
+        //* Only callable when code it running in automatic mode.
+        //: Calculate new speed
+        if (toSlower){
+            //* Slow down execution speed
+            if (this.currentSpeed == this.slowestSpeed){ return; }
+            this.currentSpeed += this.speedInterval;
+        }
+        //: else
+        if (this.currentSpeed == this.fastestSpeed){ return; }
+        this.currentSpeed -= this.speedInterval;
 
+        this.simulator.changeSpeed(this.currentSpeed);
+        this.simulatorUI.update( UICatagory.status, ["execution speed changed to: "+this.currentSpeed] );
+    }
+    public newCycle():void{
+        //* Only callable when code it running in manual mode.
+        //* Did not call '.displayStatus' because next cycle should happen before the status message has a chance to appear (if so not long enough to be noticed by user).
+        this.simulator.newCycle();
+    }
+    public switchCycleModes():void{
+        //* Small chance of not actually changing mode if calling at highly inhuman speeds but is a rare unexpected error so will assume mode was changed.
+        //* If mode does not change, it will not cause error due to the way code works.
+        const cycleModeAutomatic = this.simulator.switchModes(!this.cycleModeAutomatic);
+        if ( this.cycleModeAutomatic == cycleModeAutomatic ){ return; }
+        this.cycleModeAutomatic = cycleModeAutomatic;
+        this.simulatorUI.update( UICatagory.status, ["Execution mode toggled"] );
+
+    }
 }
 
 //@ts-ignore

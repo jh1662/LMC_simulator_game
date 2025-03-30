@@ -480,6 +480,9 @@ class MiscellaneousUI{
     public disableDuringRun():void{ this.runButton.disabled = true; }
     public enableAfterRun():void{ this.runButton.disabled = false; }
     public toMenu():void{ window.location.href = "menu.html"; }
+    public switchCycleModes():void{
+
+    }
 }
 //#endregion
 //#region main class
