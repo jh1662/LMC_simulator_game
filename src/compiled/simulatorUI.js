@@ -24,6 +24,9 @@ export var UICatagory;
     UICatagory[UICatagory["output"] = 8] = "output";
     //^ outputted numbers from LMC simulator
     UICatagory[UICatagory["end"] = 9] = "end";
+    //^ resets for next script
+    UICatagory[UICatagory["switchCycleModes"] = 10] = "switchCycleModes";
+    //^ changes button layout in accordance to toggled cycle execution mode.
 })(UICatagory || (UICatagory = {}));
 //#region frontend connected classes
 //enum UIProperties{};
@@ -334,6 +337,7 @@ class IOUI {
     }
     reset() {
         this.predefinedInput.value = "";
+        this.outputHistory.value = "";
         this.predefinedInput.readOnly = false;
         this.input.readOnly = true;
     }
@@ -471,6 +475,16 @@ class MiscellaneousUI {
     disableDuringRun() { this.runButton.disabled = true; }
     enableAfterRun() { this.runButton.disabled = false; }
     toMenu() { window.location.href = "menu.html"; }
+    switchCycleModes(cycleModeAutomatic) {
+        if (!cycleModeAutomatic) {
+            document.getElementById('executionControl').innerHTML = '<button type="button" class="btn mb-3" id="nextCycle" onclick="newCycle()">Next cycle</button>';
+            //^ toggle from speed control to wait for user's click for executing next cycle
+            return;
+        }
+        document.getElementById('executionControl').innerHTML = '<button type="button" class="btn mb-3" id="faster" onclick="changeSpeed(false)">&lt;&lt;</button>\n<button type="button" class="btn mb-3" id="slower" onclick="changeSpeed(true)">&gt;&gt;</button>';
+        //^ not necessary to use '\n' but makes the HTML code neater
+    }
+    reload() { window.location.reload(); }
 }
 //#endregion
 //#region main class
@@ -490,6 +504,7 @@ export class SimulatorUI {
             document.getElementById('manual').addEventListener("click", () => this.miscellaneousUI.displayManual());
             document.getElementById('menu').addEventListener("click", () => this.miscellaneousUI.toMenu());
             document.getElementById('toggleDisplay').addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
+            document.getElementById('reset').addEventListener("click", () => this.miscellaneousUI.reload());
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
         window.addRowIfNeeded = this.addRowIfNeeded.bind(this);
@@ -548,6 +563,12 @@ export class SimulatorUI {
             case UICatagory.end:
                 this.iOUI.reset();
                 break;
+            case UICatagory.switchCycleModes:
+                this.miscellaneousUI.switchCycleModes(JSON.parse(value[0]));
+                break;
+            //^ TS can parse string to boolean such as: "true" to true and "false" to false.
+            //^ Requires parameter to make sure backend and frontend are in sync.
+            //^ 'JSON.parse' does this parsing - https://www.w3schools.com/js/js_json_parse.asp .
             default: this.miscellaneousUI.changeStatus(value[0]); //< case UICatagory.status
             //^ Made to default for good peactice and code integrety.
             //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
@@ -557,6 +578,7 @@ export class SimulatorUI {
         this.miscellaneousUI.enableAfterRun();
     }
     start() {
+        this.iOUI.reset();
         this.registerUI.resetRegisters();
         this.miscellaneousUI.disableDuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);

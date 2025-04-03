@@ -1,3 +1,4 @@
+"use strict";
 /*
 import { controlUnit } from "./vonNeumann.js";
 
@@ -71,9 +72,11 @@ function testCompiler(){
 }
 testCompiler();
 */
+/*
 import { Compiler } from "../compiler.js";
-function testCompiler() {
-    const preCompiled = [
+function testCompiler(){
+
+    const preCompiled:string[][] = [
         //* represents 2D list values fetched from the frontend's assembly code editor.
         ["", "SHL", ""],
         ["", "SHR", ""],
@@ -82,10 +85,11 @@ function testCompiler() {
         ["", "OCT", ""],
         ["", "HLT", ""]
     ];
+
     //: instantiate then apply compiler to script.
-    const compiler = new Compiler();
+    const compiler:Compiler = new Compiler();
     console.log("ready");
-    const compiled = compiler.validateAndCompile(preCompiled);
+    const compiled:number[]|string = compiler.validateAndCompile(preCompiled);
     //^ If valid, return compiled script as number[],
     //^ otherwise, return error message as string.
     //^ Caller function can know which return kind it is by checking return type.
@@ -93,3 +97,45 @@ function testCompiler() {
     console.log(compiled);
 }
 testCompiler();
+*/
+let fastestSpeed = 1;
+let slowestSpeed = 10001;
+let currentSpeed = 4001;
+let speedInterval = 2000;
+function changeSpeed(toSlower) {
+    //* Make code simpler to use one method for both speeding up and slowing down.
+    //* Due to slowest speed being 10001 instead of 10000, don't need extra code to check if speed is 0 (or lower) or above 10000.
+    //* Only callable when code it running in automatic mode.
+    //: Calculate new speed
+    console.log("Before - " + currentSpeed);
+    if (toSlower) {
+        //* Slow down execution speed
+        if (currentSpeed == slowestSpeed) {
+            console.log("Too high");
+            return;
+        }
+        currentSpeed += speedInterval;
+        return;
+        //^ bug fix
+    }
+    //: else
+    if (currentSpeed == fastestSpeed) {
+        console.log("Too low");
+        return;
+    }
+    currentSpeed -= speedInterval;
+    console.log("After - " + currentSpeed);
+}
+console.log(4001);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);

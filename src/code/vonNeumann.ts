@@ -203,8 +203,9 @@ export class ControlUnit{
 
         //: default values - user can change
         this.cycleReady = false;
-        this.cycleInterval = 2000;
-        //^ default time between actions (2000ms)
+        this.cycleInterval = 4001;
+        //^ Default time between actions (4001ms).
+        //^ Instead of 4000ms to make middleware far easier to implement.
         this.cycleModeAutomatic = true;
         //^ by default, execution mode is automatic.
 
@@ -433,7 +434,12 @@ export class ControlUnit{
             //* most 'displayStatus' calls are done in other method calls as they have the relevant data/varaibles.
 
             //: deals with execution modes
-            if (this.cycleReady){ continue; }
+            if (!this.cycleModeAutomatic && !this.cycleReady){
+                //* cannot perfrom cycle in manual until user deems it so (pressing the next-cycle button)
+                await sleep(this.cycleInterval);
+                //^ prevent busy-waiting that would otherwise freeze the browser tab (which actually happens without the wait).
+                continue;
+            }
             if (!this.cycleModeAutomatic){ this.cycleReady = false; }
 
             //: degugging purposes
@@ -508,4 +514,3 @@ export class ControlUnit{
     }
 }
 //#endregion
-

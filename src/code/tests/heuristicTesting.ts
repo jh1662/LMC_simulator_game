@@ -71,6 +71,7 @@ function testCompiler(){
 }
 testCompiler();
 */
+/*
 import { Compiler } from "../compiler.js";
 function testCompiler(){
 
@@ -95,3 +96,42 @@ function testCompiler(){
     console.log(compiled);
 }
 testCompiler();
+*/
+
+let fastestSpeed = 1;
+let slowestSpeed = 10001;
+let currentSpeed = 4001;
+let speedInterval = 2000;
+function changeSpeed(toSlower:boolean):void{
+    //* Make code simpler to use one method for both speeding up and slowing down.
+    //* Due to slowest speed being 10001 instead of 10000, don't need extra code to check if speed is 0 (or lower) or above 10000.
+    //* Only callable when code it running in automatic mode.
+    //: Calculate new speed
+    console.log("Before - "+currentSpeed);
+    if (toSlower){
+        //* Slow down execution speed
+        if (currentSpeed == slowestSpeed){ console.log("Too high"); return; }
+        currentSpeed += speedInterval;
+        return;
+        //^ bug fix
+    }
+    //: else
+    if (currentSpeed == fastestSpeed){ console.log("Too low"); return; }
+    currentSpeed -= speedInterval;
+
+    console.log("After - "+currentSpeed);
+}
+console.log(4001);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(true);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+changeSpeed(false);
+

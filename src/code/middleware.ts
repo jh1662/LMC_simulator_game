@@ -4,6 +4,15 @@ import { ControlUnit } from './vonNeumann.js';
 import { UICatagory } from "./simulatorUI.js";
 //^ better practice and far more easier to identify by enumeration that string or integer.
 
+declare global {
+    //* For the togglable execution control
+    //* Used because TS/JS files are called as modular files.
+    interface Window {
+        //* Required to listen to HTML elements that are generated after DOM load (e.g.: generating new texboxes for the script editor).
+        newCycle: () => void;
+        changeSpeed: (toSlower:boolean) => void;
+    }
+}
 export class Middleware{
     private simulatorUI:SimulatorUI;
     //: 'undefined' satisfies TS-2564
@@ -25,15 +34,17 @@ export class Middleware{
         document.addEventListener("DOMContentLoaded", () => {
             //* Requires both frontend and backend functionality
             //: HTML button elements
-            ///(document.getElementById('Menu') as HTMLButtonElement).addEventListener("click", )
-            ///(document.getElementById('timeOrStep') as HTMLButtonElement).addEventListener("click", )
             (document.getElementById('compile') as HTMLButtonElement).addEventListener("click", () => this.compile());
-            (document.getElementById('run') as HTMLButtonElement).addEventListener("click", () => this.run())
+            (document.getElementById('run') as HTMLButtonElement).addEventListener("click", () => this.run());
+            (document.getElementById('executionMode') as HTMLButtonElement).addEventListener("click", () => this.switchCycleModes());
         });
+        //: togglable execution control elements (because they dynamicly generate/unload when toggling modes)
+        window.newCycle = this.newCycle.bind(this);
+        window.changeSpeed = this.changeSpeed.bind(this);
 
         this.fastestSpeed = 1;
         this.slowestSpeed = 10001;
-        this.currentSpeed = 4000;
+        this.currentSpeed = 4001;
         this.speedInterval = 2000;
         //^ ranges between 1 and 10001.
         this.cycleModeAutomatic = true;
@@ -43,6 +54,7 @@ export class Middleware{
     }
 
     private compile():void{
+        this.currentSpeed = 4001;
         const compiler:Compiler = new Compiler;
         //^ Compiler class instance only needed when compiling.
         const script:string[][] = this.simulatorUI.getScript();
@@ -65,6 +77,7 @@ export class Middleware{
         this.simulatorUI.start();
 
         this.simulator = new ControlUnit( this.compiledScript as number[], predefinedInputs, this);
+        this.simulatorUI.update(UICatagory.switchCycleModes,["true"]);
         this.simulatorUI.resetRegesters();
         await this.simulator.cycle();
 
@@ -77,6 +90,7 @@ export class Middleware{
     }
     ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
     public getInput():number{ return this.simulatorUI.getInput(); }
+
     //: Controlling simulator's execution.
     public changeSpeed(toSlower:boolean):void{
         //* Make code simpler to use one method for both speeding up and slowing down.
@@ -88,10 +102,10 @@ export class Middleware{
             if (this.currentSpeed == this.slowestSpeed){ return; }
             this.currentSpeed += this.speedInterval;
         }
-        //: else
-        if (this.currentSpeed == this.fastestSpeed){ return; }
-        this.currentSpeed -= this.speedInterval;
-
+        else{
+            if (this.currentSpeed == this.fastestSpeed){ return; }
+            this.currentSpeed -= this.speedInterval;
+        }
         this.simulator.changeSpeed(this.currentSpeed);
         this.simulatorUI.update( UICatagory.status, ["execution speed changed to: "+this.currentSpeed] );
     }
@@ -99,6 +113,7 @@ export class Middleware{
         //* Only callable when code it running in manual mode.
         //* Did not call '.displayStatus' because next cycle should happen before the status message has a chance to appear (if so not long enough to be noticed by user).
         this.simulator.newCycle();
+        this.simulatorUI.update( UICatagory.status, ["Perform current cycle"] );
     }
     public switchCycleModes():void{
         //* Small chance of not actually changing mode if calling at highly inhuman speeds but is a rare unexpected error so will assume mode was changed.
@@ -106,8 +121,8 @@ export class Middleware{
         const cycleModeAutomatic = this.simulator.switchModes(!this.cycleModeAutomatic);
         if ( this.cycleModeAutomatic == cycleModeAutomatic ){ return; }
         this.cycleModeAutomatic = cycleModeAutomatic;
-        this.simulatorUI.update( UICatagory.status, ["Execution mode toggled"] );
-
+        this.simulatorUI.update( UICatagory.switchCycleModes, [String(cycleModeAutomatic)] );
+        this.simulatorUI.update( UICatagory.status, ["Cycle mode toggled"] );
     }
 }
 

@@ -202,8 +202,11 @@ export class ControlUnit {
         this.io = new IO(predefinedInputs);
         //: default values - user can change
         this.cycleReady = false;
-        this.cycleInterval = 3000;
-        //^ default time between actions (3000ms)
+        this.cycleInterval = 4001;
+        //^ Default time between actions (4001ms).
+        //^ Instead of 4000ms to make middleware far easier to implement.
+        this.cycleModeAutomatic = true;
+        //^ by default, execution mode is automatic.
         this.middleware = middleware || undefined;
         //^ So '|' is OR-bitewise and '||' is OR-logical.
         //^ If instantiated in middleware instance, parent class instance assiagns to 'this.middleware',
@@ -429,11 +432,20 @@ export class ControlUnit {
         //^ code source: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep "or in Typescript:" section
         while (true) {
             //* most 'displayStatus' calls are done in other method calls as they have the relevant data/varaibles.
+            //: deals with execution modes
+            if (!this.cycleModeAutomatic && !this.cycleReady) {
+                //* cannot perfrom cycle in manual until user deems it so (pressing the next-cycle button)
+                await sleep(this.cycleInterval);
+                //^ prevent busy-waiting that would otherwise freeze the browser tab (which actually happens without the wait).
+                continue;
+            }
+            if (!this.cycleModeAutomatic) {
+                this.cycleReady = false;
+            }
             //: degugging purposes
             console.log("PC - " + this.registers.read(Register.programCounter));
             console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
-            ///if (!this.cycleReady){ continue; } //! is currently disabled because it depends on second sprint to be of use
             await sleep(this.cycleInterval);
             this.fetch();
             //^ fetch part of the cycle
@@ -463,11 +475,42 @@ export class ControlUnit {
                 this.registers.write(Register.programCounter, 0);
                 this.displayStatus(UICatagory.registerProgramCounter, [String(this.registers.read(Register.programCounter))]);
             }
-            //! more code will be added in the 'cycle' method to sync with the UI in the second sprint
         }
         this.displayStatus(UICatagory.end, []);
         return this.io.getHistory();
     }
     getArithmeticStatus() { return this.alu.getArithmeticStatus(); } //< inter-class getter
+    //^! 'getArithmeticStatus' does not get called in first sprint (hence not tested) but in the second sprint
+    //: Controls how the simulate simulates.
+    //: Does not call 'displayStatus' method because frontend will already know (if 'middleware' field is not undefined).
+    changeSpeed(newSpeed) {
+        //* makes simulator work faster or slower according to user's confort and understanding.
+        this.cycleInterval = newSpeed;
+        //^ assume argument is valid/appropiate - handled by front end
+    }
+    newCycle() {
+        //* manually start new cycle if user chooses this execution mode.
+        this.cycleReady = true;
+        //^ Ready for next cycle regardless of past state.
+        //^ Even if call spammed (fast enough it happens during cycle), it will not be problem.
+    }
+    switchModes(cycleModeAutomatic) {
+        //* To prevent unexpected errors, execution mode is set instead of toggled to make sure both frontend and backend are in sync (hence the 'cycleModeAutomatic' parameter).
+        if (cycleModeAutomatic == this.cycleModeAutomatic) {
+            return cycleModeAutomatic;
+        }
+        //^ Only satisfied in unexpected senarios such as the user calling this methods in succession at highly inhuman speeds.
+        this.cycleModeAutomatic = cycleModeAutomatic;
+        if (cycleModeAutomatic == false) {
+            //* manual mode
+            this.cycleInterval = 1;
+            //^ partially defeats the point of automatic if user still have to waint in manual mode per cycle.
+            return cycleModeAutomatic;
+        }
+        //: automatic mode
+        this.cycleInterval = 2000;
+        //^ to not overwelm user with potentially suprisingly high executing speeds.
+        return cycleModeAutomatic;
+    }
 }
 //#endregion
