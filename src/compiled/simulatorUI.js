@@ -378,20 +378,21 @@ class ALUUI {
     update(flow, operation, result) {
         switch (flow) {
             case NumberStatus.normal:
-                this.flow.value = "=";
+                this.flow.value = "_";
                 break;
             //: better to use plus and minus signs instead of greater/less signs ('>' and '<') to not confuse the HTML.
             case NumberStatus.underflow:
-                this.flow.value = "-";
+                this.flow.value = "V";
                 break;
             default: //< NumberStatus.overflow:
-                this.flow.value = "+";
+                this.flow.value = "^";
                 break;
         }
         this.operation.value = operation;
         //^ formatting the string requires processing outside class
         this.result.value = result;
     }
+    reset() { this.update(NumberStatus.normal, "", ""); }
 }
 class RegistersUI {
     constructor(programCounter, memoryInstructionRegister, memoryAddressRegister, accumulator) {

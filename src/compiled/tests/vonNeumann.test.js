@@ -16,6 +16,7 @@ describe("Testing", () => {
                 //^ inp, sta OPERAND, inp, add OPERAND, out,
                 //^ hlt, OPERAND dat
                 let simulator = new ControlUnit(compiled, [2, 3]);
+                simulator.changeSpeed(1);
                 expect(await simulator.cycle()).toStrictEqual(['5']);
                 //^ expected result
                 expect(simulator.getArithmeticStatus()).toStrictEqual(1);
@@ -28,6 +29,7 @@ describe("Testing", () => {
                 //^ inp, sta OPERAND, inp, sub OPERAND, out,
                 //^ hlt, OPERAND dat
                 let simulator = new ControlUnit(compiled, [5, 2]);
+                simulator.changeSpeed(1);
                 expect(await simulator.cycle()).toStrictEqual(['-3']);
                 expect(simulator.getArithmeticStatus()).toStrictEqual(1);
                 //^ Testing if no underflow or overflow is detected in that one ALU opertaion.
@@ -40,6 +42,7 @@ describe("Testing", () => {
                 //^ inp, sta 9, inp, add 9, out,
                 //^ hlt
                 let simulator = new ControlUnit(compiled, [2, 3]);
+                simulator.changeSpeed(1);
                 expect(await simulator.cycle()).toStrictEqual(['5']);
                 expect(simulator.getArithmeticStatus()).toStrictEqual(1);
                 //^ Testing if no underflow or overflow is detected in that one ALU opertaion.
@@ -55,6 +58,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [123]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["230"]);
                     });
                     test("RSH (123)", async () => {
@@ -62,6 +66,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [123]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["12"]);
                     });
                 });
@@ -71,6 +76,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-123]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-230"]);
                     });
                     test("RSH (-123)", async () => {
@@ -78,6 +84,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-123]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-12"]);
                     });
                 });
@@ -89,6 +96,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [45]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["450"]);
                     });
                     test("RSH (45)", async () => {
@@ -96,6 +104,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [45]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["4"]);
                     });
                 });
@@ -105,6 +114,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-45]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-450"]);
                     });
                     test("RSH (-45)", async () => {
@@ -112,6 +122,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-45]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-4"]);
                     });
                 });
@@ -123,6 +134,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [6]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["60"]);
                     });
                     test("RSH (6)", async () => {
@@ -130,6 +142,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [6]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["0"]);
                     });
                 });
@@ -139,6 +152,7 @@ describe("Testing", () => {
                         //^ inp, lsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-6]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-60"]);
                     });
                     test("RSH (-6)", async () => {
@@ -146,6 +160,7 @@ describe("Testing", () => {
                         //^ inp, rsh, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-6]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["0"]);
                     });
                 });
@@ -160,6 +175,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [6]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual(["6"]);
                     //^ if BRA does not work, it would not output anything
                 });
@@ -171,6 +187,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [0]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual(["0"]);
                     //^ if BRZ does not work, it would not output anything
                 });
@@ -180,6 +197,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [1]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual([]);
                     //^ if BRZ does not work properly, "1" would be outputted
                 });
@@ -189,6 +207,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [-1]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual([]);
                     //^ if BRZ does not work properly, "-1" would be outputted
                 });
@@ -200,6 +219,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [0]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual(["0"]);
                     //^ if BRZ does not work, it would not output anything
                 });
@@ -209,6 +229,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [1]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual(["1"]);
                     //^ if BRZ does not work, it would not output anything
                 });
@@ -218,6 +239,7 @@ describe("Testing", () => {
                     //^ hlt, BRANCH out,
                     //^ hlt
                     let simulator = new ControlUnit(compiled, [-1]);
+                    simulator.changeSpeed(1);
                     expect(await simulator.cycle()).toStrictEqual([]);
                     //^ if BRZ does not work properly, "-1" would be outputted
                 });
@@ -232,6 +254,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [-999]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['-999']);
                     });
                     test("input '0'", async () => {
@@ -239,6 +262,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [0]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['0']);
                     });
                     test("input '999'", async () => {
@@ -246,6 +270,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [999]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['999']);
                     });
                 });
@@ -255,6 +280,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [5]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['5']);
                     });
                     test("input two digits ('50')", async () => {
@@ -262,6 +288,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [50]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['50']);
                     });
                     test("input three digits ('500')", async () => {
@@ -269,6 +296,7 @@ describe("Testing", () => {
                         //^ inp, out,
                         //^ hlt
                         let simulator = new ControlUnit(compiled, [500]);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(['500']);
                     });
                     //* cannot test redundant digits (like '005') becuase inputs are integers.
@@ -282,6 +310,7 @@ describe("Testing", () => {
                         //^ lda TEN, out,
                         //^ hlt, TEN dat 10
                         let simulator = new ControlUnit(compiled, []);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["10"]);
                     });
                     test("output '-10' as negative (without input)", async () => {
@@ -290,6 +319,7 @@ describe("Testing", () => {
                         //^ lda TEN, out,
                         //^ hlt, TEN dat -10
                         let simulator = new ControlUnit(compiled, []);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["-10"]);
                     });
                     //* testing outputting extremities (-999, 0, and 999) and digits (5, 50, and 500)
@@ -302,6 +332,7 @@ describe("Testing", () => {
                         //^ lda TEN, oct,
                         //^ hlt, TEN dat 65
                         let simulator = new ControlUnit(compiled, []);
+                        simulator.changeSpeed(1);
                         expect(await simulator.cycle()).toStrictEqual(["A"]);
                     });
                     describe("extremities", () => {
@@ -311,6 +342,7 @@ describe("Testing", () => {
                             //^ lda TEN, oct,
                             //^ hlt, TEN dat 33
                             let simulator = new ControlUnit(compiled, []);
+                            simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["!"]);
                         });
                         test("output 'ÿ' - last visable extended ASCII char (without input)", async () => {
@@ -319,6 +351,7 @@ describe("Testing", () => {
                             //^ lda TEN, oct,
                             //^ hlt, TEN dat 255
                             let simulator = new ControlUnit(compiled, []);
+                            simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["ÿ"]);
                         });
                     });
@@ -329,6 +362,7 @@ describe("Testing", () => {
                             //^ lda TEN, oct,
                             //^ hlt, TEN dat 31
                             let simulator = new ControlUnit(compiled, []);
+                            simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["[?]"]);
                         });
                         test("output from number 256 (without input)", async () => {
@@ -337,6 +371,7 @@ describe("Testing", () => {
                             //^ lda TEN, oct,
                             //^ hlt, TEN dat 256
                             let simulator = new ControlUnit(compiled, []);
+                            simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["[?]"]);
                         });
                         test("output from number -1 (without input)", async () => {
@@ -345,6 +380,7 @@ describe("Testing", () => {
                             //^ lda TEN, oct,
                             //^ hlt, TEN dat -1
                             let simulator = new ControlUnit(compiled, []);
+                            simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["[?]"]);
                         });
                     });
@@ -357,6 +393,7 @@ describe("Testing", () => {
             //^ inp, sta FIRST, inp, lda FIRST, out
             //^ hlt, FIRST dat
             let simulator = new ControlUnit(compiled, [10, 20]);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['10']);
         });
         test("LDA", async () => {
@@ -365,6 +402,7 @@ describe("Testing", () => {
             //^ lda STORAGE, out,
             //^ hlt, STORAGE dat 6
             let simulator = new ControlUnit(compiled, []);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["6"]);
         });
     });
@@ -376,6 +414,7 @@ describe("Testing", () => {
             //^ lda NUM, sub ONE, out,
             //^ hlt, NUM dat -999, ONE dat 1
             let simulator = new ControlUnit(compiled, []);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['999']);
             //^ expect result of operation to be "999"
             expect(simulator.getArithmeticStatus()).toStrictEqual(0);
@@ -387,6 +426,7 @@ describe("Testing", () => {
             //^ lda NUM, add ONE, out,
             //^ hlt, NUM dat 999, ONE dat 1
             let simulator = new ControlUnit(compiled, []);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['-999']);
             //^ expect result of operation to be "-999"
             expect(simulator.getArithmeticStatus()).toStrictEqual(2);
@@ -398,6 +438,7 @@ describe("Testing", () => {
             //^ lda NUM, add ONE, out,
             //^ hlt, NUM dat 999, ONE dat 1
             let simulator = new ControlUnit(compiled, []);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['-1']);
             //^ expect result of operation to be "-1"
             //^ Is '-1' instead of '0' because it takes one increment to do overflow/underflow.
@@ -413,6 +454,7 @@ describe("Testing", () => {
             //^ lda CHANGE, sta 98, lda STORE, sta 99, lda CURRENT, out, brz 98,
             //^ hlt, CHANGE dat 111, STORE dat 310, CURRENT dat 0, dat -1
             let simulator = new ControlUnit(compiled, []);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['0', '-1']);
             //^ if PC doesn't reset it would only '0'.
         });
