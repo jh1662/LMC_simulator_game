@@ -19,6 +19,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 399, 901, 199, 902, 0];
             let predefinedInputs = [20, 300];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['320']);
         });
         test('"add/subtr" program', async () => {
@@ -40,6 +41,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 309, 901, 109, 902, 901, 209, 902, 0, 0];
             let predefinedInputs = [20, 300, 41];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['320', '21']);
         });
         test('"ascii" program', async () => {
@@ -63,6 +65,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [510, 313, 513, 903, 111, 313, 212, 709, 602, 0, 32, 1, 127, 0];
             let predefinedInputs = [20, 300, 41];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual([" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "\\", "]", "^", "_", "`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~"]);
         });
         test('"ascii table" program', async () => {
@@ -89,6 +92,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [514, 317, 517, 902, 514, 903, 517, 903, 115, 317, 216, 713, 602, 0, 32, 1, 97, 0];
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["32", " ", " ", "33", " ", "!", "34", " ", "\"", "35", " ", "#", "36", " ", "$", "37", " ", "%", "38", " ", "&", "39", " ", "'", "40", " ", "(", "41", " ", ")", "42", " ", "*", "43", " ", "+", "44", " ", ",", "45", " ", "-", "46", " ", ".", "47", " ", "/", "48", " ", "0", "49", " ", "1", "50", " ", "2", "51", " ", "3", "52", " ", "4", "53", " ", "5", "54", " ", "6", "55", " ", "7", "56", " ", "8", "57", " ", "9", "58", " ", ":", "59", " ", ";", "60", " ", "<", "61", " ", "=", "62", " ", ">", "63", " ", "?", "64", " ", "@", "65", " ", "A", "66", " ", "B", "67", " ", "C", "68", " ", "D", "69", " ", "E", "70", " ", "F", "71", " ", "G", "72", " ", "H", "73", " ", "I", "74", " ", "J", "75", " ", "K", "76", " ", "L", "77", " ", "M", "78", " ", "N", "79", " ", "O", "80", " ", "P", "81", " ", "Q", "82", " ", "R", "83", " ", "S", "84", " ", "T", "85", " ", "U", "86", " ", "V", "87", " ", "W", "88", " ", "X", "89", " ", "Y", "90", " ", "Z", "91", " ", "[", "92", " ", "\\", "93", " ", "]", "94", " ", "^", "95", " ", "_", "96", " ", "`"]);
         });
     });
@@ -108,6 +112,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 306, 901, 106, 902, 0, 0];
             let predefinedInputs = [20, 300];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["320"]);
         });
         test('"Max of 2 inputs" program', async () => {
@@ -130,6 +135,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 312, 901, 313, 212, 809, 512, 902, 611, 513, 902, 0, 0, 0];
             let predefinedInputs = [20, 300];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["300"]);
         });
         test('"Count down timer" program', async () => {
@@ -147,6 +153,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 902, 308, 207, 308, 801, 0, 1, 0];
             let predefinedInputs = [10];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"]);
         });
         test('"Multiplying 2 inputs" program', async () => {
@@ -175,6 +182,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 316, 901, 317, 519, 116, 319, 517, 218, 317, 804, 519, 216, 319, 902, 0, 0, 0, 1, 0];
             let predefinedInputs = [10, 11];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["110"]);
         });
         test('"Triangluar Numbers" program', async () => {
@@ -200,6 +208,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [512, 111, 902, 312, 511, 113, 311, 514, 211, 80, 0, 1, 0, 1, 10];
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["1", "3", "6", "10", "15", "21", "28", "36", "45", "55"]);
         });
         test('"Factorial of..." program', async () => {
@@ -249,6 +258,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 336, 733, 238, 339, 337, 536, 340, 539, 730, 238, 730, 536, 140, 336, 537, 238, 337, 238, 721, 608, 536, 340, 539, 238, 339, 337, 238, 730, 608, 536, 902, 0, 538, 902, 0, 0, 0, 1, 0, 0];
             let predefinedInputs = [5];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["120"]);
         });
         //* missing Indirect Addressing and Immediate Addressing because they contradict the LMC standard
@@ -270,6 +280,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 308, 901, 309, 508, 209, 902, 0, 0, 0];
             let predefinedInputs = [300, 20];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["280"]);
         });
     });
@@ -290,6 +301,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 320, 901, 120, 902, 0, 0];
             let predefinedInputs = [600, 40];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["640"]);
         });
         test('"Example 2 - Output a pattern of 1s and 0s" program', async () => {
@@ -310,6 +322,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [520, 902, 521, 902, 522, 220, 322, 800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3];
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["1", "0", "1", "0", "1", "0", "1", "0"]);
         });
         test('"Example 3 - Calculate the square of a number', async () => {
@@ -340,6 +353,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 330, 533, 331, 332, 531, 130, 331, 532, 134, 332, 230, 814, 605, 531, 902, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
             let predefinedInputs = [9];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["81"]);
         });
         test('"Example 4 - Integer division', async () => {
@@ -371,6 +385,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 323, 901, 324, 520, 322, 523, 224, 323, 813, 522, 902, 0, 522, 121, 322, 523, 607, 0, 0, 0, 1, 0, 0, 0];
             let predefinedInputs = [19, 4];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["4"]);
         });
     });
@@ -405,6 +420,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 318, 901, 319, 901, 320, 219, 810, 519, 320, 520, 218, 815, 518, 320, 520, 902, 0, 0, 0, 0];
             let predefinedInputs = [213, 987, 88];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["987"]);
         });
         test('"Multiply 2 numbers" program', async () => {
@@ -431,6 +447,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 315, 901, 314, 514, 712, 217, 314, 516, 115, 316, 604, 516, 902, 0, 0, 0, 1];
             let predefinedInputs = [4, 5];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["20"]);
         });
         //* As of this moment, the "Shift left" program is inaccessable (404 error)
@@ -458,6 +475,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [901, 314, 514, 714, 215, 314, 517, 115, 317, 116, 312, 901, 0, 602, 0, 1, 300, 49];
             let predefinedInputs = [5, 10, 101, 14, 998, 8];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual([]);
         });
         test('"Sieve of Erastothenes" (self-modifying) program', async () => {
@@ -499,6 +517,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let compiled = [530, 131, 330, 227, 826, 530, 128, 308, 0, 711, 600, 530, 902, 332, 532, 227, 800, 532, 129, 321, 530, 0, 532, 130, 332, 614, 0, 69, 531, 331, 1, 1, 0];
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
+            simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["2", "3", "5", "7", "11", "13", "17", "19", "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67"]);
         });
         //* Cannot use "Sort input" program because it puposely uterilise overflows but value range is 0 to 999 instead of -999 to 999 - giving different results.
