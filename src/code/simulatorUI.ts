@@ -12,7 +12,10 @@ export enum UICatagory {
     //: relating to IOUI
     output,
     //^ outputted numbers from LMC simulator
-    end
+    end,
+    //^ resets for next script
+    switchCycleModes
+    //^ changes button layout in accordance to toggled cycle execution mode.
 }
 declare global {
     //* Used because TS/JS files are called as modular files.
@@ -327,6 +330,7 @@ class IOUI{
 
     public reset():void{
         this.predefinedInput.value = "";
+        this.outputHistory.value = "";
         this.predefinedInput.readOnly = false;
         this.input.readOnly = true;
     }
@@ -369,20 +373,21 @@ class ALUUI{
         this.operation = document.getElementById(operation) as HTMLInputElement;
         this.result = document.getElementById(result) as HTMLInputElement;
     }
-    update(flow:NumberStatus, operation:string, result:string){
+    public update(flow:NumberStatus, operation:string, result:string){
         switch(flow){
-            case NumberStatus.normal: this.flow.value = "="; break;
+            case NumberStatus.normal: this.flow.value = "_"; break;
             //: better to use plus and minus signs instead of greater/less signs ('>' and '<') to not confuse the HTML.
-            case NumberStatus.underflow: this.flow.value = "-"; break;
+            case NumberStatus.underflow: this.flow.value = "V"; break;
             default: //< NumberStatus.overflow:
-                this.flow.value = "+";
+                this.flow.value = "^";
                 break;
-
         }
         this.operation.value = operation;
         //^ formatting the string requires processing outside class
         this.result.value = result;
     }
+    public reset(){ this.update(NumberStatus.normal, "", "") }
+    //^ used before next script execution
 }
 
 class RegistersUI{
@@ -480,9 +485,18 @@ class MiscellaneousUI{
     public disableDuringRun():void{ this.runButton.disabled = true; }
     public enableAfterRun():void{ this.runButton.disabled = false; }
     public toMenu():void{ window.location.href = "menu.html"; }
-    public switchCycleModes():void{
-
+    public switchCycleModes(cycleModeAutomatic:boolean):void{
+        if (!cycleModeAutomatic){
+            (document.getElementById('executionControl') as HTMLOptGroupElement).innerHTML = '<button type="button" class="btn mb-3" id="nextCycle" onclick="newCycle()">Next cycle</button>'
+            //^ toggle from speed control to wait for user's click for executing next cycle
+            return
+        }
+        (document.getElementById('executionControl') as HTMLOptGroupElement).innerHTML = '<button type="button" class="btn mb-3" id="faster" onclick="changeSpeed(false)">&lt;&lt;</button>\n<button type="button" class="btn mb-3" id="slower" onclick="changeSpeed(true)">&gt;&gt;</button>'
+        //^ not necessary to use '\n' but makes the HTML code neater
     }
+    public reload(){ window.location.reload(); }
+    //^ Reload the entire page instead of just the class instance.
+    //^ Important as it allows user to deal with unexpected errors.
 }
 //#endregion
 //#region main class
@@ -511,6 +525,7 @@ export class SimulatorUI{
             (document.getElementById('manual') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.displayManual());
             (document.getElementById('menu') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toMenu());
             (document.getElementById('toggleDisplay') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
+            (document.getElementById('reset') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.reload());
 
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
@@ -556,6 +571,10 @@ export class SimulatorUI{
             case UICatagory.cell: this.memoryUI.writeToCell(parseInt(value[0] as string, 10),parseInt(value[1] as string, 10)); break;
             case UICatagory.output: this.iOUI.output(value[0] as string); break;
             case UICatagory.end: this.iOUI.reset(); break;
+            case UICatagory.switchCycleModes: this.miscellaneousUI.switchCycleModes(JSON.parse(value[0] as string)); break;
+            //^ TS can parse string to boolean such as: "true" to true and "false" to false.
+            //^ Requires parameter to make sure backend and frontend are in sync.
+            //^ 'JSON.parse' does this parsing - https://www.w3schools.com/js/js_json_parse.asp .
             default: this.miscellaneousUI.changeStatus(value[0] as string); //< case UICatagory.status
             //^ Made to default for good peactice and code integrety.
             //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
@@ -565,6 +584,7 @@ export class SimulatorUI{
         this.miscellaneousUI.enableAfterRun();
     }
     public start(){
+        this.iOUI.reset();
         this.registerUI.resetRegisters();
         this.miscellaneousUI.disableDuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);
