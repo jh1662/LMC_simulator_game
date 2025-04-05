@@ -1,0 +1,123 @@
+<!-- Made rapidly without comments because this is only for the hi-fi framework. -->
+<!-- Links/names to CSS and scripts will change when making the real deal / physical model with -->
+<!-- more appropiate naming and comments. -->
+<!DOCTYPE html>
+<head>
+    <title>Manual</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="modal-content">
+        <span class="close" onclick="window.close()">&times;</span>
+        <h2>Instruction Manual</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <th>Name</th>
+                    <th>Mnemonic</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Addition</td>
+                    <td>ADD</td>
+                    <td>1XX</td>
+                    <td>Add memory cell address’ value to accumulator’s value</td>
+                </tr>
+                <tr>
+                    <td>Subtraction</td>
+                    <td>SUB</td>
+                    <td>2XX</td>
+                    <td>Subtract memory cell address’ value from accumulator’s value</td>
+                </tr>
+                <tr>
+                    <td>Store from Accumulator</td>
+                    <td>STA</td>
+                    <td>3XX</td>
+                    <td>Store accumulator’s value in memory cell address</td>
+                </tr>
+                <tr>
+                    <td>Left Shift</td>
+                    <td>LSH</td>
+                    <td>401</td>
+                    <td>Shift the accumulator value’s base-10 digits of significance to the left by one digit.</td>
+                </tr>
+                <tr>
+                    <td>Right Shift</td>
+                    <td>RSH</td>
+                    <td>402</td>
+                    <td>Shift the accumulator value’s base-10 digits of significance to the right by one digit.</td>
+                </tr>
+                <tr>
+                    <td>Load to Accumulator</td>
+                    <td>LDA</td>
+                    <td>5XX</td>
+                    <td>Load memory address’s value to the accumulator (becomes the new accumulator’s value).</td>
+                </tr>
+                <tr>
+                    <td>Branch Always</td>
+                    <td>BRA</td>
+                    <td>6XX</td>
+                    <td>Branch – change PC’s value to – the address value (regardless of accumulator’s value).</td>
+                </tr>
+                <tr>
+                    <td>Branch if Zero</td>
+                    <td>BRZ</td>
+                    <td>7XX</td>
+                    <td>Branch – change PC’s value to – the address value if accumulator’s value is zero.</td>
+                </tr>
+                <tr>
+                    <td>Branch if Positive</td>
+                    <td>BRP</td>
+                    <td>8XX</td>
+                    <td>Branch – change PC’s value to – the address value if accumulator’s value is positive or zero (not negative).</td>
+                </tr>
+                <tr>
+                    <td>Input</td>
+                    <td>INP</td>
+                    <td>901</td>
+                    <td>Takes user’s or predefined input and store it as accumulator’s value.</td>
+                </tr>
+                <tr>
+                    <td>Output</td>
+                    <td>OUT</td>
+                    <td>902</td>
+                    <td>Outputs from accumulator’s value (as integer).</td>
+                </tr>
+                <tr>
+                    <td>Output as Character</td>
+                    <td>OCT</td>
+                    <td>903</td>
+                    <td>Outputs from accumulator’s value as an ASCII character</td>
+                </tr>
+                <tr>
+                    <td>Halt</td>
+                    <td>HLT</td>
+                    <td>0</td>
+                    <td>Stops program</td>
+                </tr>
+                <tr>
+                    <td>Data location</td>
+                    <td>DAT</td>
+                    <td>N/A</td>
+                    <td>Compile data into memory before program starts (can be used as variables)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Use the following keys to navigate:</p>
+        <ul>
+            <li>Tab key - Go down a line if in an operand box.</li>
+            <li>Space key - Go down a line if in an operand box.</li>
+            <li>Shift key + right arrow key - Go down a line if in an operand box.</li>
+            <li>Enter key - Go back to the top line if on the bottom line.</li>
+            <li>Downwards key - Go back to the top line if on the bottom line.</li>
+            <li>Upwards key - Go to the bottom line if on the top line.</li>
+            <li>Shift key + enter key - Go to the bottom line if on the top line.</li>
+            <li>Shift key + left key - Go to the line like above if in a label box.</li>
+            <li>Shift key + space key - Go to the line like above if in a label box.</li>
+        </ul>
+        <p>Additional information about navigating the IDE table.</p>
+        <button onclick="window.open('full-manual.html', '_blank')">Full Manual</button>
+    </div>
+</body>
+</html>

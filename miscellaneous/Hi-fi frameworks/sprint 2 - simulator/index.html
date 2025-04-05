@@ -1,0 +1,100 @@
+<!-- Made rapidly without comments because this is only for the hi-fi framework. -->
+<!-- Links/names to CSS and scripts will change when making the real deal / physical model with -->
+<!-- more appropiate naming and comments. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LMC</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="section left-section">
+            <div class="sub-section ide-section">
+                <table id="ide-table">
+                    <tr>
+                        <th>#</th>
+                        <th>Label</th>
+                        <th>Opcode</th>
+                        <th>Operand</th>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                        <td><input type="text" class="input-box" oninput="addRowIfNeeded(this)" onkeydown="navigateIDE(event)"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="sub-section button-section">
+                <button>Back to menu</button>
+                <button>Time or Step</button>
+                <button onclick="resetTextBoxes()">Reset</button>
+                <button>Run Settings</button>
+                <button>Button</button>
+                <button onclick="assembleValues()">Assemble</button>
+                <button onclick="openManual()">Manual</button>
+            </div>
+        </div>
+        <div class="section middle-section">
+            <div class="sub-section list-section">
+                <div class="list-item">
+                    <span>Program Counter</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Memory Instruction Register</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Memory Address Register</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+                <div class="list-item">
+                    <span>Accumulator</span>
+                    <input type="text" class="readonly-input" readonly>
+                </div>
+            </div>
+            <div class="sub-section readonly-text-boxes">
+                <span>Arithmetic Logical Unit status</span>
+                <div class="boxes">
+                    <input type="text" class="readonly-input small" readonly>
+                    <input type="text" class="readonly-input large" readonly>
+                    <input type="text" class="readonly-input small" readonly>
+                </div>
+            </div>
+            <div class="sub-section display-section">
+                <button onclick="toggleDisplay()">Display Button</button>
+                <div id="display-box" class="display-box">Text or Image</div>
+            </div>
+            <div class="sub-section readonly-section">
+                <span>Readonly Section</span>
+            </div>
+        </div>
+        <div class="section right-section">
+            <div class="sub-section text-box-groups">
+                <div class="group">
+                    <span>Input</span>
+                    <input type="text" class="fixed-width-input">
+                    <span>Output</span>
+                    <input type="text" class="expandable-output" readonly>
+                </div>
+            </div>
+            <div class="sub-section full-width-text-box">
+                <span>Pre-defined Inputs</span>
+                <input type="text" class="full-width">
+            </div>
+            <div class="sub-section table-section">
+                <table id="generated-table"></table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
