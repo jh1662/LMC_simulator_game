@@ -1,0 +1,118 @@
+/*AI WAS USED TO GENERATE THIS SPECIFIC CSS FILE!!*/
+/*This CSS is only used to make the hi-fi framework and WILL NOT be used in any sprint of the LMC project!!*/
+body, html {
+    height: 100%; /* Ensure body and html take up full height */
+    margin: 0; /* Remove default margin */
+    font-family: Arial, sans-serif; /* Set font */
+    background-color: #FFB; /* Set background color */
+    color: #000; /* Set text color */
+    font-size: 20px; /* 1.25 times the base font size */
+}
+
+.container {
+    display: flex; /* Use flexbox for layout */
+    height: 100%; /* Full height */
+}
+
+.section {
+    flex: 1; /* Ensure sections expand equally */
+    padding: 10px; /* Add padding */
+    box-sizing: border-box; /* Include padding in width/height calculations */
+    margin: 5px; /* Add margin between sections */
+}
+
+.sub-section {
+    border: 1px solid #00F; /* Add border */
+    padding: 10px; /* Add padding */
+    margin-bottom: 10px; /* Add margin at bottom */
+    background-color: #FFF; /* Set background color */
+}
+
+.input-box, .readonly-input, .fixed-width-input, .expandable-output, td input {
+    font-size: 20px; /* 1.25 times the font size for textboxes */
+}
+
+.readonly-input {
+    margin-left: 10px; /* Add left margin */
+}
+
+.small {
+    width: 50px; /* Set small width */
+}
+
+.large, .expandable-output {
+    flex: 1; /* Ensure element expands */
+}
+
+.fixed-width-input {
+    width: 150px; /* Fixed width for input text box */
+}
+
+.full-width {
+    width: 100%; /* Full width */
+}
+
+.display-box {
+    margin-top: 10px; /* Add top margin */
+    border: 1px solid #00F; /* Add border */
+    padding: 10px; /* Add padding */
+    text-align: center; /* Center text */
+    background-color: #FFF; /* Set background color */
+    display: inline-block;
+}
+
+table {
+    width: 100%; /* Full width */
+    border-collapse: collapse; /* Collapse borders */
+}
+
+th, td {
+    border: 1px solid #00F; /* Add border */
+    padding: 5px; /* Add padding */
+    text-align: left; /* Left-align text */
+    background-color: #FFF; /* Set background color */
+}
+
+td input {
+    width: 100%; /* Full width */
+    border: none; /* Remove border */
+    background: none; /* Remove background */
+}
+
+button {
+    background-color: #0F0; /* Set button background color */
+    color: #000; /* Set button text color */
+    border: none; /* Remove border */
+    padding: 10px; /* Add padding */
+    cursor: pointer; /* Change cursor on hover */
+    font-size: 20px; /* 1.25 times the font size */
+    margin: 5px 0; /* Vertical spacing between buttons */
+}
+
+.list-section .list-item, .readonly-text-boxes .boxes, .text-box-groups .group {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Align items vertically center */
+    margin-bottom: 10px; /* Add bottom margin */
+}
+
+.text-box-groups .group {
+    justify-content: space-between; /* Space out items */
+    width: 100%; /* Full width */
+}
+
+.text-box-groups .group span, .text-box-groups .group input, .table-section label, p, span {
+    font-size: 20px; /* 1.25 times the font size */
+}
+
+.text-box-groups .group span {
+    margin-right: 10px; /* Add right margin */
+}
+
+.text-box-groups .group input {
+    margin-right: 20px; /* Add right margin */
+}
+
+img {
+    width: 100%;
+    height: auto;
+}
