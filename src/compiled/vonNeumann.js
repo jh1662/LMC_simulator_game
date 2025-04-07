@@ -211,6 +211,8 @@ export class ControlUnit {
         //^ So '|' is OR-bitewise and '||' is OR-logical.
         //^ If instantiated in middleware instance, parent class instance assiagns to 'this.middleware',
         //^ otherwise 'undefined' assaigns to it which is used in test files.
+        this.cycleCountLimit = 300;
+        //^ by default, the LMC assemly program will end after 300 cycles
         this.displayStatus(UICatagory.status, ["Program starting"]);
     }
     //: private methods
@@ -430,6 +432,7 @@ export class ControlUnit {
     async cycle() {
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         //^ code source: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep "or in Typescript:" section
+        let cycleCount = 0;
         while (true) {
             //* most 'displayStatus' calls are done in other method calls as they have the relevant data/varaibles.
             //: deals with execution modes
@@ -444,7 +447,13 @@ export class ControlUnit {
             }
             //: degugging purposes
             console.log("PC - " + this.registers.read(Register.programCounter));
-            console.log("Instruction - " + String(this.registers.read(Register.instruction)) + String(this.registers.read(Register.instruction)));
+            console.log("Instruction - " + String(this.registers.read(Register.instruction)));
+            console.log("Cycle count - " + cycleCount);
+            cycleCount++;
+            if (cycleCount >= this.cycleCountLimit) {
+                this.displayStatus(UICatagory.status, ["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
+                break;
+            }
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
             await sleep(this.cycleInterval);
             this.fetch();
@@ -508,9 +517,10 @@ export class ControlUnit {
             return cycleModeAutomatic;
         }
         //: automatic mode
-        this.cycleInterval = 2000;
+        this.cycleInterval = 4001;
         //^ to not overwelm user with potentially suprisingly high executing speeds.
         return cycleModeAutomatic;
     }
+    timeout() { this.cycleCountLimit = 0; }
 }
 //#endregion

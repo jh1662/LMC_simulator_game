@@ -27,7 +27,7 @@ declare global {
 }
 //#region frontend connected classes
 //enum UIProperties{};
-export class MemoryUI{
+class MemoryUI{
     //* Class to generate the memory table once per simulator page load
     //* and to write to its cells (the textboxes).
     private HTMLTable: HTMLTableElement;
@@ -82,7 +82,7 @@ export class MemoryUI{
         }
     }
 }
-export class EditorUI{
+class EditorUI{
     private HTMLTable: HTMLTableElement;
     constructor(tableId:string){
         this.HTMLTable = document.getElementById(tableId) as HTMLTableElement;
@@ -96,7 +96,7 @@ export class EditorUI{
         //^ exclamation mark assures the code that the cell is not null/undifined - satisfying TS-18047
         //^ "as HTMLTableRowElement" satisfies TS-2322
 
-        const lastRowID:number = this.HTMLTable.rows.length - 1
+        const lastRowID:number = this.HTMLTable.rows.length - 1;
         //^ this id included the top row (label opcode operand).
         const lastRow:HTMLTableRowElement = this.HTMLTable.rows[lastRowID] as HTMLTableRowElement;
         //^ to see compare with current row
@@ -271,6 +271,7 @@ export class EditorUI{
 }
 class IOUI{
     //: textboxes
+    //@ts-ignore ignored because is disabled until it gets fixed VVV
     private input:HTMLInputElement; //< input
     private predefinedInput:HTMLInputElement; //< input and output
     private outputHistory:HTMLInputElement;//< output (read-only)
@@ -330,13 +331,16 @@ class IOUI{
 
     public reset():void{
         this.predefinedInput.value = "";
-        this.outputHistory.value = "";
         this.predefinedInput.readOnly = false;
-        this.input.readOnly = true;
+        ///this.input.readOnly = true;
     }
 
     public start():number[]{
         //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file (and resetting output).
+        //: for resetting the output
+        this.firstOutput = true;
+        this.outputHistory.value = "";
+
         //: for the pre-defined inputs
         this.predefinedInput.readOnly = true;
         let compiledInputs:number[] = [];
@@ -352,10 +356,6 @@ class IOUI{
             //x Can allow user to know what pre-defined input is invalid but is a lower priority, so will do after 3rd sprint if have time.
             compiledInputs.push(parseInt(input, 10));
         }
-
-        //: for resetting the output
-        this.firstOutput = true;
-        this.outputHistory.value = "";
 
         return compiledInputs;
         //^ parsed pre-defined inputs as integer array.
@@ -432,15 +432,17 @@ class RegistersUI{
 
 class MiscellaneousUI{
     //* Collection of managing single UI attributes that are not belong to a group.
-    private HTMLEle:HTMLElement; //< the HTML tag itself - "<html lang="en" data-theme="light">"
-    private status:HTMLSpanElement; //<
+    private HTMLEle:HTMLElement;
+    //^ the HTML tag itself - "<html lang="en" data-theme="light">"
+    private status:HTMLSpanElement;
     private displayBox:HTMLElement;
     private runButton:HTMLButtonElement;
+    private stopButton:HTMLButtonElement;
 
     private displayImage:string;
     private displayObjective:string;
 
-    constructor(status:string, displayBox:string, objective:string, runButton:string){
+    constructor(status:string, displayBox:string, objective:string, runButton:string, stopButton:string){
         this.status = document.getElementById(status) as HTMLSpanElement;
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox) as HTMLElement;
@@ -449,6 +451,7 @@ class MiscellaneousUI{
         //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
 
+        this.stopButton = document.getElementById(stopButton) as HTMLButtonElement;
         this.runButton =  document.getElementById(runButton) as HTMLButtonElement;
 
         this.displayBox.innerHTML = this.displayObjective;
@@ -482,8 +485,14 @@ class MiscellaneousUI{
             this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         }
     }
-    public disableDuringRun():void{ this.runButton.disabled = true; }
-    public enableAfterRun():void{ this.runButton.disabled = false; }
+    public DuringRun():void{
+        this.stopButton.disabled = false;
+        this.runButton.disabled = true;
+    }
+    public afterRun():void{
+        this.stopButton.disabled = true;
+        this.runButton.disabled = false;
+    }
     public toMenu():void{ window.location.href = "menu.html"; }
     public switchCycleModes(cycleModeAutomatic:boolean):void{
         if (!cycleModeAutomatic){
@@ -515,7 +524,7 @@ export class SimulatorUI{
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input','predefinedInputs','output','submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective,'run');
+        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective,'run','stop');
         this.aLUUI = new ALUUI('flow','operation','result');
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -570,7 +579,7 @@ export class SimulatorUI{
             //^ string is name of image file but not path (path is handled by called method)
             case UICatagory.cell: this.memoryUI.writeToCell(parseInt(value[0] as string, 10),parseInt(value[1] as string, 10)); break;
             case UICatagory.output: this.iOUI.output(value[0] as string); break;
-            case UICatagory.end: this.iOUI.reset(); break;
+            case UICatagory.end: this.end(); break;
             case UICatagory.switchCycleModes: this.miscellaneousUI.switchCycleModes(JSON.parse(value[0] as string)); break;
             //^ TS can parse string to boolean such as: "true" to true and "false" to false.
             //^ Requires parameter to make sure backend and frontend are in sync.
@@ -581,12 +590,13 @@ export class SimulatorUI{
         }
     }
     public end(){
-        this.miscellaneousUI.enableAfterRun();
+        this.miscellaneousUI.afterRun();
     }
     public start(){
+        this.aLUUI.reset();
         this.iOUI.reset();
         this.registerUI.resetRegisters();
-        this.miscellaneousUI.disableDuringRun();
+        this.miscellaneousUI.DuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);
     }
 }

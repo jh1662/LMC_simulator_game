@@ -412,7 +412,7 @@ describe("Testing",() => {
 
     });
     describe("Testing ALU's operation extremities",() => {
-        //* addition or subtraction beyond the range (-999 to 999).
+        //* Addition or subtraction beyond the range (-999 to 999).
         //* Load number the add/sub with another number and let the ALU deal with the overflow and underflows.
         test("Underflow - -999 minus 1", async () => {
             let compiled:number[] = [504, 205, 902, 0, -999, 1];
@@ -453,7 +453,7 @@ describe("Testing",() => {
         });
     });
     describe("Testing PC's extremity - by breaking loop",() => {
-        //* Pprogram Counter at 99 and increments but resets to zero instead to stay within memomry address contraints.
+        //* Program Counter at 99 and increments but resets to zero instead to stay within memomry address contraints.
         test("Incrementing the maximum value (should reset to 0)", async () => {
             let compiled:number[] = [508, 398, 509, 399, 510, 902, 798, 0, 111, 310, 0, -1];
             //^ lda CHANGE, sta 98, lda STORE, sta 99, lda CURRENT, out, brz 98,
@@ -463,6 +463,17 @@ describe("Testing",() => {
             expect(await simulator.cycle()).toStrictEqual(['0','-1']);
             //^ if PC doesn't reset it would only '0'.
         });
+    });
+    test("Testing automatic timeout by the cycle count limit", async () => {
+        //* Cannot test manual timeout/stop due to requiring use of user interaction, let alone with frontend.
+        let compiled:number[] = [505, 106, 902, 305, 600, 0, 1];
+        //^ lda CHANGE, sta 98, lda STORE, sta 99, lda CURRENT, out, brz 98,
+        //^ hlt, CHANGE dat 111, STORE dat 310, CURRENT dat 0, dat -1
+        let simulator:ControlUnit = new ControlUnit(compiled, []);
+        simulator.changeSpeed(1);
+        expect(await simulator.cycle()).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60"]);
+        //^ Only goes up to "60" for output because the first 5 lines are continuously looped 60 times.
+        //^ 5 multiplied by 60 is 300 which is the cycle count limit for timeout - does exectly as expected.
     });
 });
 
