@@ -23,7 +23,6 @@ input-1-1
 1-2
 input-1-2
 menu
-timeOrStep
 reset
 compile
 run
@@ -258,6 +257,15 @@ describe("The first two lines of texboxes in the script editor", () => {
     });
 });
 describe("Simulator's status", () => {
-    //! status
-    //! objective
+    test("current status",() => {
+        const htmlElement:any = document.getElementById('status');
+        expect(htmlElement).not.toEqual(null);
+        expect(htmlElement instanceof HTMLSpanElement).toEqual(true);
+    })
+    test("dispay box",() => {
+        const htmlElement:any = document.getElementById('displayBox');
+        expect(htmlElement).not.toEqual(null);
+        expect(htmlElement instanceof HTMLDivElement).toEqual(true);
+        //^ is 'Div' instead of 'Span' because it can display either text of an image
+    })
 });

@@ -30,7 +30,7 @@ export var UICatagory;
 })(UICatagory || (UICatagory = {}));
 //#region frontend connected classes
 //enum UIProperties{};
-export class MemoryUI {
+class MemoryUI {
     constructor(tableId) {
         this.HTMLTable = document.getElementById(tableId);
         //^ "as HTMLTableElement" assures code that argument isn't null
@@ -85,7 +85,7 @@ export class MemoryUI {
         }
     }
 }
-export class EditorUI {
+class EditorUI {
     constructor(tableId) {
         this.HTMLTable = document.getElementById(tableId);
         //^ "as HTMLTableElement" assures code that argument isn't null
@@ -337,12 +337,14 @@ class IOUI {
     }
     reset() {
         this.predefinedInput.value = "";
-        this.outputHistory.value = "";
         this.predefinedInput.readOnly = false;
-        this.input.readOnly = true;
+        ///this.input.readOnly = true;
     }
     start() {
         //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file (and resetting output).
+        //: for resetting the output
+        this.firstOutput = true;
+        this.outputHistory.value = "";
         //: for the pre-defined inputs
         this.predefinedInput.readOnly = true;
         let compiledInputs = [];
@@ -362,9 +364,6 @@ class IOUI {
             //x Can allow user to know what pre-defined input is invalid but is a lower priority, so will do after 3rd sprint if have time.
             compiledInputs.push(parseInt(input, 10));
         }
-        //: for resetting the output
-        this.firstOutput = true;
-        this.outputHistory.value = "";
         return compiledInputs;
         //^ parsed pre-defined inputs as integer array.
     }
@@ -429,7 +428,7 @@ class RegistersUI {
     }
 }
 class MiscellaneousUI {
-    constructor(status, displayBox, objective, runButton) {
+    constructor(status, displayBox, objective, runButton, stopButton) {
         this.status = document.getElementById(status);
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox);
@@ -437,6 +436,7 @@ class MiscellaneousUI {
         //^ Name for default image and image for program stopping or not currently running.
         //^ File path is handled by 'changeDisplayImage' method.
         this.displayObjective = objective;
+        this.stopButton = document.getElementById(stopButton);
         this.runButton = document.getElementById(runButton);
         this.displayBox.innerHTML = this.displayObjective;
     }
@@ -473,8 +473,14 @@ class MiscellaneousUI {
             this.displayBox.innerHTML = `<img src=../assets/littleManActions/${this.displayImage}>`;
         }
     }
-    disableDuringRun() { this.runButton.disabled = true; }
-    enableAfterRun() { this.runButton.disabled = false; }
+    DuringRun() {
+        this.stopButton.disabled = false;
+        this.runButton.disabled = true;
+    }
+    afterRun() {
+        this.stopButton.disabled = true;
+        this.runButton.disabled = false;
+    }
     toMenu() { window.location.href = "menu.html"; }
     switchCycleModes(cycleModeAutomatic) {
         if (!cycleModeAutomatic) {
@@ -496,7 +502,7 @@ export class SimulatorUI {
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input', 'predefinedInputs', 'output', 'submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', objective, 'run');
+        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', objective, 'run', 'stop');
         this.aLUUI = new ALUUI('flow', 'operation', 'result');
         document.addEventListener("DOMContentLoaded", () => {
             //* Handle functionality that only requires frontend (no relation to backend).
@@ -562,7 +568,7 @@ export class SimulatorUI {
                 this.iOUI.output(value[0]);
                 break;
             case UICatagory.end:
-                this.iOUI.reset();
+                this.end();
                 break;
             case UICatagory.switchCycleModes:
                 this.miscellaneousUI.switchCycleModes(JSON.parse(value[0]));
@@ -576,12 +582,13 @@ export class SimulatorUI {
         }
     }
     end() {
-        this.miscellaneousUI.enableAfterRun();
+        this.miscellaneousUI.afterRun();
     }
     start() {
+        this.aLUUI.reset();
         this.iOUI.reset();
         this.registerUI.resetRegisters();
-        this.miscellaneousUI.disableDuringRun();
+        this.miscellaneousUI.DuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);
     }
 }

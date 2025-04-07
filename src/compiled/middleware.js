@@ -12,6 +12,7 @@ export class Middleware {
             document.getElementById('compile').addEventListener("click", () => this.compile());
             document.getElementById('run').addEventListener("click", () => this.run());
             document.getElementById('executionMode').addEventListener("click", () => this.switchCycleModes());
+            document.getElementById('stop').addEventListener("click", () => this.stop());
         });
         //: togglable execution control elements (because they dynamicly generate/unload when toggling modes)
         window.newCycle = this.newCycle.bind(this);
@@ -38,6 +39,7 @@ export class Middleware {
         //^ Comparing first element instead of whole due to TS-2839 - comparing referance to literal.
         //^ If invalid script, show error to user and stop.
         this.simulatorUI.compile(this.compiledScript); //< calls global variable
+        this.simulatorUI.update(UICatagory.status, ["Compilation successful"]);
     }
     async run() {
         const predefinedInputs = this.simulatorUI.getPredefinedInputs();
@@ -62,8 +64,12 @@ export class Middleware {
         this.simulatorUI.update(UICatagory.switchCycleModes, ["true"]);
         this.simulatorUI.resetRegesters();
         await this.simulator.cycle();
-        this.simulatorUI.end();
+        this.currentSpeed = 4001;
+        //^ back to default value.
+        this.simulatorUI.update(UICatagory.end, []);
     }
+    stop() { this.simulator.timeout(); }
+    //^ Stops currently executing assembly program.
     //: called by VonNeuman.ts
     updateUI(uIcatagory, content) {
         console.log("update: " + uIcatagory + "-" + content);

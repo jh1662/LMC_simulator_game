@@ -37,6 +37,7 @@ export class Middleware{
             (document.getElementById('compile') as HTMLButtonElement).addEventListener("click", () => this.compile());
             (document.getElementById('run') as HTMLButtonElement).addEventListener("click", () => this.run());
             (document.getElementById('executionMode') as HTMLButtonElement).addEventListener("click", () => this.switchCycleModes());
+            (document.getElementById('stop') as HTMLButtonElement).addEventListener("click", () => this.stop());
         });
         //: togglable execution control elements (because they dynamicly generate/unload when toggling modes)
         window.newCycle = this.newCycle.bind(this);
@@ -63,6 +64,7 @@ export class Middleware{
         //^ Comparing first element instead of whole due to TS-2839 - comparing referance to literal.
         //^ If invalid script, show error to user and stop.
         this.simulatorUI.compile(this.compiledScript); //< calls global variable
+        this.simulatorUI.update(UICatagory.status,["Compilation successful"]);
     }
     private async run():Promise<void>{
         const predefinedInputs:number[] = this.simulatorUI.getPredefinedInputs();
@@ -81,8 +83,13 @@ export class Middleware{
         this.simulatorUI.resetRegesters();
         await this.simulator.cycle();
 
-        this.simulatorUI.end();
+        this.currentSpeed = 4001;
+        //^ back to default value.
+        this.simulatorUI.update(UICatagory.end,[]);
     }
+    private stop():void{ this.simulator.timeout(); }
+    //^ Stops currently executing assembly program.
+
     //: called by VonNeuman.ts
     public updateUI(uIcatagory:UICatagory, content:string[]):void{
         console.log("update: "+uIcatagory+"-"+content);
