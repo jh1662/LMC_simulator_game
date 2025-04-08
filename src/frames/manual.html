@@ -6,15 +6,20 @@
     <link rel="stylesheet" href="../styles/default.css">
 </head>
 <body>
-    <h2>Instruction Manual</h2>
+    <h1>Instruction Manual</h1>
+    <!--#region Instruction Set-->
+    <h2>Instruction Set</h2>
     <table class="class-striped">
-        <tbody>
+        <head>
             <tr>
+                <!--^ 'tr' tags are still needed in header section for of semantic clarity and structural consistency-->
                 <th>Name</th>
                 <th>Mnemonic</th>
                 <th>Code</th>
                 <th>Description</th>
             </tr>
+        </head>
+        <tbody>
             <tr>
                 <td>Addition</td>
                 <td>ADD</td>
@@ -101,18 +106,71 @@
             </tr>
         </tbody>
     </table>
+    <!--#endregion-->
+    <!--#region Editor Navigation-->
+    <h2>Script Editor</h2>
     <p>Use the following keys to navigate:</p>
     <ul>
         <li>Tab key - Go down a line if in an operand box.</li>
         <li>Space key - Go down a line if in an operand box.</li>
-        <li>Shift key + right arrow key - Go down a line if in an operand box.</li>
+
         <li>Enter key - Go back to the top line if on the bottom line.</li>
         <li>Downwards key - Go back to the top line if on the bottom line.</li>
         <li>Upwards key - Go to the bottom line if on the top line.</li>
+        <!-- Lower priority
+        <li>Shift key + right arrow key - Go down a line if in an operand box.</li>
         <li>Shift key + enter key - Go to the bottom line if on the top line.</li>
         <li>Shift key + left key - Go to the line like above if in a label box.</li>
         <li>Shift key + space key - Go to the line like above if in a label box.</li>
+        -->
     </ul>
-    <p>Additional information about navigating the IDE table.</p>
+    <p> Typing on the bottom code line/row will generate a new empty one underneath.</p>
+    <!--#endregion-->
+    <!--#region Registers-->
+    <h2>Registers</h2>
+    <table class="class-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Valid range</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Program Counter (PC)</td>
+                <td>Dictates where the simulator fetches its next instruction (which RAM cell).</td>
+                <td>0 to 99</td>
+            </tr>
+            <tr>
+                <td>Memory Instruction Register (MIR)</td>
+                <td>Gathered from the first digit of the fetched instruction from memory.</td>
+                <td>0 to 9</td>
+            </tr>
+            <tr>
+                <td>Memory Address Register (MAR)</td>
+                <td>Gathered from the last two digits of the fetched instruction from memory.</td>
+                <td>0 to 99</td>
+            </tr>
+            <tr>
+                <td>Accumulator</td>
+                <td>A form of immediate storage for processor operations such as adding, outputing, inputing, etc.</td>
+                <td>-999 to 999</td>
+            </tr>
+        </tbody>
+    </table>
+    <!--#endregion-->
+    <!--#region Simulator Controls-->
+    <h2>Simulator Controls</h2>
+    <p>Controls relavent to simulator</p>
+    <ul>
+        <li>Run - Runs the compiled program as seen in the RAM table (requires valid compilation first)</li>
+        <li>Compile - Attempts to compile script and store in memory.</li>
+        <li>Stop - Stops currently executing assembly program.</li>
+        <li>Reset - Reloads page to rid off unexpected errors (and current script, so think twice before reloading).</li>
+        <li>Toggle Display - Switches between Little Man action display and the current campain level objective (does not really matter if in sandbox mode).</li>
+        <li>Toggle Execution Mode - Switches between continuously running each cycle, but with configurable speeds, or only execute next cycle when "New Cycle" button is pressed.</li>
+    </ul>
+    <!--#endregion-->
 </body>
 </html>
