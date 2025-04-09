@@ -1,3 +1,4 @@
+/*#region From Sprint 2*/
 .table td, .table th {
     background-color: transparent !important;
     padding: 0;
@@ -22,4 +23,28 @@ img {
     display: inline-block;
     /*^ match width to image's*/
 }
-
+/*#endregion*/
+/*#region From Sprint 3*/
+.middle{
+    display: flex;
+    /*^ uses flexbox to allow realignment */
+    justify-content: center;
+    /*^ centers content to the middle horizontally */
+    text-align: center;
+    /*^ allows contents inside to be centured - usually effective when it is a div or table*/
+    margin-top: 8rem;
+    /*^ allows space between it and elements above it vertically*/
+}
+.mascot{
+    /** using viewport fix instead of flexbox because "flex-end" does not appear to work*/
+    position: fixed;
+    bottom: -50px;
+    /*^ Is in negative because the SVG itself has empty space arounf the actual mascot*/
+    right: 0;
+    height: auto;
+    width: 10rem;
+}
+.square{
+    aspect-ratio: 1/1 !important;
+}
+/*#endregion*/
