@@ -61,4 +61,6 @@ input {
     padding: 0;
     border-color: var(--primary-color);
 }
+/*: for sprint 3*/
+.border { border-color: var(--primary-color) !important;}
 /*#endregion*/
