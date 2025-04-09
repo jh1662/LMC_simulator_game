@@ -452,7 +452,7 @@ describe("Testing", () => {
         test("Incrementing the maximum value (should reset to 0)", async () => {
             let compiled = [508, 398, 509, 399, 510, 902, 798, 0, 111, 310, 0, -1];
             //^ lda CHANGE, sta 98, lda STORE, sta 99, lda CURRENT, out, brz 98,
-            //^ hlt, CHANGE dat 111, STORE dat 310, CURRENT dat 0, dat -1.
+            //^ hlt, CHANGE dat 111, STORE dat 310, CURRENT dat 0, dat -1
             let simulator = new ControlUnit(compiled, []);
             simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(['0', '-1']);
@@ -462,8 +462,8 @@ describe("Testing", () => {
     test("Testing automatic timeout by the cycle count limit", async () => {
         //* Cannot test manual timeout/stop due to requiring use of user interaction, let alone with frontend.
         let compiled = [505, 106, 902, 305, 600, 0, 1];
-        //^ start LDA counter, ADD one, OUT, STA counter, BRA start, counter DAT, one DAT 1.
-        //^ No need for "HLT" because program is expected to stop by automatic timeout otherwise go forever.
+        //^ lda CHANGE, sta 98, lda STORE, sta 99, lda CURRENT, out, brz 98,
+        //^ hlt, CHANGE dat 111, STORE dat 310, CURRENT dat 0, dat -1
         let simulator = new ControlUnit(compiled, []);
         simulator.changeSpeed(1);
         expect(await simulator.cycle()).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60"]);

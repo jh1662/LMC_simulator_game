@@ -8,9 +8,12 @@
 </head>
 <body>
     <h1>Instruction Manual</h1>
+    <p class="border rounded p-3">Little Man Computer (LMC) is a visual simulator of a simplied version of the Von Neumann architecture CPU (computer processing).
+        Below is a quick guide that will assist helping inexperienced users whether they are stuck on a campain level or just want to play around in the sandbox mode.
+    </p>
     <!--#region Instruction Set-->
     <h2>Instruction Set</h2>
-    <table class="class-striped">
+    <table class="table">
         <head>
             <tr>
                 <!--^ 'tr' tags are still needed in header section for of semantic clarity and structural consistency-->
@@ -129,7 +132,7 @@
     <!--#endregion-->
     <!--#region Registers-->
     <h2>Registers</h2>
-    <table class="class-striped">
+    <table class="table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -173,11 +176,48 @@
         <li>Toggle Execution Mode - Switches between continuously running each cycle, but with configurable speeds, or only execute next cycle when "New Cycle" button is pressed.</li>
     </ul>
     <!--#endregion-->
+    <!--#region ALU labelling-->
+    <div class="well border rounded col-md-4 p-3">
+        <span>Arithmetic Logical Unit status</span>
+        <div class="d-flex">
+            <input type="text" class="form-control" style="flex: 0.5;" value="[1]" readonly>
+            <input type="text" class="form-control" style="flex: 2;" value="[2]" readonly>
+            <input type="text" class="form-control" style="flex: 0.5;" value="[3]" readonly>
+        </div>
+        <ol>
+            <li>
+                Flow:
+                <table class="table">
+                    <header><tr><td>Symbol</td><td>Meaning</td><td>Explaination</td></tr></header>
+                    <tr>
+                        <td>_</td>
+                        <td>Normal</td>
+                        <td>Initial result in range (-999 to 999).</td>
+                    </tr>
+                    <tr>
+                        <td>^</td>
+                        <td>Overflow</td>
+                        <td>Result of operation exceeded 999 and thus resets back from -999.</td>
+                    </tr>
+                    <tr>
+                        <td>V</td>
+                        <td>Underflow</td>
+                        <td>Result of operation exceeded -999 and thus resets back from 999.</td>
+                    </tr>
+                </table>
+                <p>None of these indicate error with the simulator - fully informative.</p>
+            </li>
+            <li>Operation - Last operation performed in the Arithmetic Logical Unit.</li>
+            <li>Result - Result of the last operation performed in the Arithmetic Logical Unit.</li>
+        </ol>
+    </div>
+    <!--#endregion-->
     <!--#region legalities-->
     <h2>Legal claimers</h2>
     <p>Created by James Haddad 2025</p>
     <p>The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.</p>
-    <p>Vectors and icons by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a></p>
+    <p class="manualBottom">Vectors and icons by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a></p>
     <!--#endregion-->
+    <embed class="bottomMiddle mascot" src="..\assets\mascot.svg" type="image/svg+xml">
 </body>
 </html>

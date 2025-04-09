@@ -10,19 +10,15 @@
     font-size: 1.25rem !important;
     /*^ "!important" overwrites bootstrap classes (such as "input-group-text") which are not possible to overwite without */
 }
-.zoom-out {
-    transform: scale(0.8);
-    /*^ sooms out by 20% but text is still bigger for readability purposes*/
-}
+.zoom-out { transform: scale(0.8); }
+/*^ sooms out by 20% but text is still bigger for readability purposes*/
 img {
     width: 100%;
     /*^ match its div container*/
     height: auto;
 }
-.display-box {
-    display: inline-block;
-    /*^ match width to image's*/
-}
+.display-box { display: inline-block; }
+/*^ match width to image's*/
 /*#endregion*/
 /*#region From Sprint 3*/
 .middle{
@@ -45,6 +41,16 @@ img {
     width: 10rem;
 }
 .square{
-    aspect-ratio: 1/1 !important;
+    aspect-ratio: 1/1;
+    width: 3rem;
+    /*^ 'aspect-ratio' will not apply unless a fix dimension is specified*/
 }
+.bottomMiddle{ left: 45%; }
+/*^ for the manual page mascot to be in the middle bottom instead of right bottom*/
+.layout, .layout tr, .layout td {
+    border-color: transparent;
+    /*^ "border: none" does not remove the outer-most boarders, so used transparent colouring instead.*/
+}
+.manualBottom{ padding-bottom: 8rem; }
+/*^ lets the user see the legal claimers without the mascot being in the way*/
 /*#endregion*/
