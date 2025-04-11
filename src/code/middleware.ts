@@ -3,6 +3,7 @@ import { Compiler } from './compiler.js';
 import { ControlUnit } from './vonNeumann.js';
 import { UICatagory } from "./simulatorUI.js";
 //^ better practice and far more easier to identify by enumeration that string or integer.
+import { URLQuery } from "./URLQuery.js";
 
 declare global {
     //* For the togglable execution control
@@ -133,6 +134,8 @@ export class Middleware{
     }
 }
 
-//@ts-ignore
+//@ts-ignore (TS-6133)
 const middleware:Middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
+//@ts-ignore (TS-6133)
+const uRlQuery:URLQuery = new URLQuery(false);
