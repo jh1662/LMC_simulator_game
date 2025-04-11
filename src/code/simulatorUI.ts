@@ -460,10 +460,14 @@ class MiscellaneousUI{
     public changeStatus(status:string):void{ this.status.textContent = status; }
     public toggleDarkMode():void{
         //* note: dark/light mode is different to style themes
-        const currentMode:string|null = this.HTMLEle.getAttribute('data-theme');
+        const currentMode:string = this.HTMLEle.getAttribute('data-theme') as string;
         //^ Cannot get property directly due to name composition (use of dashes in name).
-        if (currentMode == "light") { this.HTMLEle.setAttribute('data-theme', 'dark'); }
-        else { this.HTMLEle.setAttribute('data-theme', 'light'); }
+        let newMode:string|undefined = currentMode.split("-")[0];
+        if (newMode == undefined){ newMode = "default"; }
+        //^ TS-2322 and to deal with any unexpected error
+        if (currentMode.includes("light")) { this.HTMLEle.setAttribute('data-theme', newMode+'-dark'); }
+        //^ ".include()" https://www.w3schools.com/jsref/jsref_includes.asp
+        else { this.HTMLEle.setAttribute('data-theme', newMode+'-light'); }
     }
     public toggleDisplayMode(start:boolean):void{
         //* Switch between objective and image.
@@ -493,7 +497,7 @@ class MiscellaneousUI{
         this.stopButton.disabled = true;
         this.runButton.disabled = false;
     }
-    public toMenu():void{ window.location.href = "menu.html"; }
+    public toMenu():void{ window.location.href = "menu.html"+window.location.search; }
     public switchCycleModes(cycleModeAutomatic:boolean):void{
         if (!cycleModeAutomatic){
             (document.getElementById('executionControl') as HTMLOptGroupElement).innerHTML = '<button type="button" class="btn mb-3" id="nextCycle" onclick="newCycle()">Next cycle</button>'

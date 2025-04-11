@@ -1,6 +1,8 @@
 export {};
 //^ Required to TS-2669 - can only declare 'Global' if file is external module.
 //^ the hallow/empty export states that this file is an external module file.
+import { URLQuery } from "./URLQuery.js";
+
 declare global { interface Window { selectLevel: (level: number) => void; } };
 //^ Allows the level buttons to be linked to code due them being dynamicly generated after original DOM load.
 
@@ -41,7 +43,7 @@ class LevelSelection{
             }
         }
     }
-    private menu(){ window.location.href = "menu.html"; }
+    private menu(){ window.location.href = "menu.html"+window.location.search; }
     public selectLevel(level:number){
         console.log(level);
     }
@@ -49,3 +51,6 @@ class LevelSelection{
 
 //@ts-ignore Says not used but is by HTML (VS TS compiler just do not know that) VVV
 const levelSelection:LevelSelection = new LevelSelection("menu","mainContents",30);
+
+//@ts-ignore (TS-6133)
+const uRlQuery:URLQuery = new URLQuery(false);

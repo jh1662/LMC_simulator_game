@@ -446,11 +446,17 @@ class MiscellaneousUI {
         //* note: dark/light mode is different to style themes
         const currentMode = this.HTMLEle.getAttribute('data-theme');
         //^ Cannot get property directly due to name composition (use of dashes in name).
-        if (currentMode == "light") {
-            this.HTMLEle.setAttribute('data-theme', 'dark');
+        let newMode = currentMode.split("-")[0];
+        if (newMode == undefined) {
+            newMode = "default";
         }
+        //^ TS-2322 and to deal with any unexpected error
+        if (currentMode.includes("light")) {
+            this.HTMLEle.setAttribute('data-theme', newMode + '-dark');
+        }
+        //^ ".include()" https://www.w3schools.com/jsref/jsref_includes.asp
         else {
-            this.HTMLEle.setAttribute('data-theme', 'light');
+            this.HTMLEle.setAttribute('data-theme', newMode + '-light');
         }
     }
     toggleDisplayMode(start) {
@@ -481,7 +487,7 @@ class MiscellaneousUI {
         this.stopButton.disabled = true;
         this.runButton.disabled = false;
     }
-    toMenu() { window.location.href = "menu.html"; }
+    toMenu() { window.location.href = "menu.html" + window.location.search; }
     switchCycleModes(cycleModeAutomatic) {
         if (!cycleModeAutomatic) {
             document.getElementById('executionControl').innerHTML = '<button type="button" class="btn mb-3" id="nextCycle" onclick="newCycle()">Next cycle</button>';

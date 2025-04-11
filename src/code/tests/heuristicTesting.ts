@@ -97,7 +97,7 @@ function testCompiler(){
 }
 testCompiler();
 */
-
+/*
 let fastestSpeed = 1;
 let slowestSpeed = 10001;
 let currentSpeed = 4001;
@@ -134,4 +134,5 @@ changeSpeed(false);
 changeSpeed(false);
 changeSpeed(false);
 changeSpeed(false);
+*/
 
