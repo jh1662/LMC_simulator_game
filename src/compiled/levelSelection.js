@@ -10,6 +10,8 @@ class LevelSelection {
             //* button to go back to the game menu
             document.getElementById(menuId).addEventListener("click", () => this.menu());
         });
+        window.selectLevel = this.selectLevel.bind(this);
+        //^ link the method to the global window declaration
         this.HTMLTable = document.getElementById(tableId);
         /// this.levelIdPrefix = levelIdPrefix;
         this.levelCount = levelCount;
@@ -35,11 +37,11 @@ class LevelSelection {
     }
     menu() { window.location.href = "menu.html" + window.location.search; }
     selectLevel(level) {
-        console.log(level);
+        window.location.href = "simulator.html" + window.location.search + "#" + level;
     }
 }
 ;
 //@ts-ignore Says not used but is by HTML (VS TS compiler just do not know that) VVV
 const levelSelection = new LevelSelection("menu", "mainContents", 30);
 //@ts-ignore (TS-6133)
-const uRlQuery = new URLQuery(false);
+const uRlQuery = new URLQuery();

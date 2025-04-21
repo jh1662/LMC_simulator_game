@@ -26,3 +26,21 @@ const list:string[] = ["1","2","3"];
 
 //@ts-ignore
 const element:string = list[1];
+
+const regex = /^-?\d{1,3}$/;
+
+//: success
+console.log(regex.test("000"));
+console.log(regex.test("00"));
+console.log(regex.test("0"));
+console.log(regex.test("1"));
+console.log(regex.test("12"));
+console.log(regex.test("123"));
+console.log(regex.test("999"));
+console.log(regex.test("-999"));
+console.log(regex.test("-023"));
+
+//: fail
+console.log(regex.test("-1000"));
+console.log(regex.test("1000"));
+console.log(regex.test("10.0"));

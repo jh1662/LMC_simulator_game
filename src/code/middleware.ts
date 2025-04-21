@@ -4,6 +4,7 @@ import { ControlUnit } from './vonNeumann.js';
 import { UICatagory } from "./simulatorUI.js";
 //^ better practice and far more easier to identify by enumeration that string or integer.
 import { URLQuery } from "./URLQuery.js";
+///import { LevelChecker } from './levelChecker.js';
 
 declare global {
     //* For the togglable execution control
@@ -15,10 +16,11 @@ declare global {
     }
 }
 export class Middleware{
+    //^ is export so ControlUnit has access to its parent class instance referance
     private simulatorUI:SimulatorUI;
     //: 'undefined' satisfies TS-2564
     private compiledScript:number[]|undefined;
-
+    ///private levelChecker:LevelChecker|undefined;
     private simulator:ControlUnit;
 
     //: to control simulator execution
@@ -29,7 +31,7 @@ export class Middleware{
     private cycleModeAutomatic:boolean;
 
     constructor(){
-        this.simulatorUI = new SimulatorUI("This is sandbox mode.");
+        this.simulatorUI = new SimulatorUI();
         //^ Single parameter is the text for the current objective.
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -53,8 +55,39 @@ export class Middleware{
 
         this.simulator = new ControlUnit([],[]);
         //^ Better to assaign redundant instance than using "?" sysntax (bad practice) also know as the Optional Chaining Operator.
-    }
 
+        const levelNum:number = this.campainLevel();
+        if (levelNum == 0){ return; }
+        //^ stop everything as URL is an invalid one
+        /*
+        if (levelNum != -1){ this.levelChecker = new LevelChecker(levelNum); return; }
+        //: reached if in campain mode
+        this.updateUI(UICatagory.status, [this.levelChecker?.getObjective() as string]);
+        */
+    }
+    //#region campain
+    private campainLevel():number{
+        //* Mere method is not worth being its own class.
+        //* -1 for sandbox, 0 for invalid, 1-30 for level number.
+        let fragmentId:string = window.location.hash;
+        console.log(fragmentId);
+        fragmentId = fragmentId.slice(1);
+        if (fragmentId == ""){ return -1; }
+        //^ Means sandbox mode as no level is specified
+        //: copied stragety from uRLQuery.ts
+        const level:number = Number(fragmentId);
+        if (Number.isNaN(level) || !Number.isInteger(level)){
+            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer only)</p>`;
+            return 0;
+        }
+        if (!(0<level && level<31)){
+            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer 1-30 only)</p>`;
+            return 0;
+        }
+        return level;
+    }
+    //#endregion
+    //#region Links with simulator (ControlUnit)
     private compile():void{
         this.currentSpeed = 4001;
         const compiler:Compiler = new Compiler;
@@ -132,10 +165,11 @@ export class Middleware{
         this.simulatorUI.update( UICatagory.switchCycleModes, [String(cycleModeAutomatic)] );
         this.simulatorUI.update( UICatagory.status, ["Cycle mode toggled"] );
     }
+    //#endregion
 }
 
 //@ts-ignore (TS-6133)
 const middleware:Middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
 //@ts-ignore (TS-6133)
-const uRlQuery:URLQuery = new URLQuery(false);
+const uRlQuery:URLQuery = new URLQuery();

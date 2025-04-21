@@ -66,7 +66,10 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let predefinedInputs = [20, 300, 41];
             let simulator = new ControlUnit(compiled, predefinedInputs);
             simulator.changeSpeed(1);
-            expect(await simulator.cycle()).toStrictEqual([" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "\\", "]", "^", "_", "`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~"]);
+            expect(await simulator.cycle()).toStrictEqual(
+            //: now limited output due to new auto-timeout feature
+            /// [" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "\\", "]", "^", "_", "`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~"]
+            [" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]);
         });
         test('"ascii table" program', async () => {
             /*
@@ -93,7 +96,10 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
             simulator.changeSpeed(1);
-            expect(await simulator.cycle()).toStrictEqual(["32", " ", " ", "33", " ", "!", "34", " ", "\"", "35", " ", "#", "36", " ", "$", "37", " ", "%", "38", " ", "&", "39", " ", "'", "40", " ", "(", "41", " ", ")", "42", " ", "*", "43", " ", "+", "44", " ", ",", "45", " ", "-", "46", " ", ".", "47", " ", "/", "48", " ", "0", "49", " ", "1", "50", " ", "2", "51", " ", "3", "52", " ", "4", "53", " ", "5", "54", " ", "6", "55", " ", "7", "56", " ", "8", "57", " ", "9", "58", " ", ":", "59", " ", ";", "60", " ", "<", "61", " ", "=", "62", " ", ">", "63", " ", "?", "64", " ", "@", "65", " ", "A", "66", " ", "B", "67", " ", "C", "68", " ", "D", "69", " ", "E", "70", " ", "F", "71", " ", "G", "72", " ", "H", "73", " ", "I", "74", " ", "J", "75", " ", "K", "76", " ", "L", "77", " ", "M", "78", " ", "N", "79", " ", "O", "80", " ", "P", "81", " ", "Q", "82", " ", "R", "83", " ", "S", "84", " ", "T", "85", " ", "U", "86", " ", "V", "87", " ", "W", "88", " ", "X", "89", " ", "Y", "90", " ", "Z", "91", " ", "[", "92", " ", "\\", "93", " ", "]", "94", " ", "^", "95", " ", "_", "96", " ", "`"]);
+            expect(await simulator.cycle()).toStrictEqual(
+            //: now limited output due to new auto-timeout feature
+            ///["32", " "," ", "33", " ", "!", "34", " ", "\"", "35", " ", "#", "36", " ", "$", "37", " ", "%", "38", " ", "&", "39", " ", "'", "40", " ", "(", "41", " ", ")", "42", " ", "*", "43", " ", "+", "44", " ", ",", "45", " ", "-", "46", " ", ".", "47", " ", "/", "48", " ", "0", "49", " ", "1", "50", " ", "2", "51", " ", "3", "52", " ", "4", "53", " ", "5", "54", " ", "6", "55", " ", "7", "56", " ", "8", "57", " ", "9", "58", " ", ":", "59", " ", ";", "60", " ", "<", "61", " ", "=", "62", " ", ">", "63", " ", "?", "64", " ", "@", "65", " ", "A", "66", " ", "B", "67", " ", "C", "68", " ", "D", "69", " ", "E", "70", " ", "F", "71", " ", "G", "72", " ", "H", "73", " ", "I", "74", " ", "J", "75", " ", "K", "76", " ", "L", "77", " ", "M", "78", " ", "N", "79", " ", "O", "80", " ", "P", "81", " ", "Q", "82", " ", "R", "83", " ", "S", "84", " ", "T", "85", " ", "U", "86", " ", "V", "87", " ", "W", "88", " ", "X", "89", " ", "Y", "90", " ", "Z", "91", " ", "[", "92", " ", "\\", "93", " ", "]", "94", " ", "^", "95", " ", "_", "96", " ", "`"]
+            ["32", " ", " ", "33", " ", "!", "34", " ", "\"", "35", " ", "#", "36", " ", "$", "37", " ", "%", "38", " ", "&", "39", " ", "'", "40", " ", "(", "41", " ", ")", "42", " ", "*", "43", " ", "+", "44", " ", ",", "45", " ", "-", "46", " ", ".", "47", " ", "/", "48", " ", "0", "49", " ", "1", "50", " ", "2", "51", " ", "3", "52", " ", "4", "53", " ", "5", "54", " ", "6", "55", " ", "7", "56", " ", "8", "57", " ", "9", "58", " ", ":"]);
         });
     });
     describe("101 Computing's LMC assembly program examples", () => {
@@ -518,7 +524,10 @@ describe("Testing based on other LMC program's examples to test if this is up to
             let predefinedInputs = [];
             let simulator = new ControlUnit(compiled, predefinedInputs);
             simulator.changeSpeed(1);
-            expect(await simulator.cycle()).toStrictEqual(["2", "3", "5", "7", "11", "13", "17", "19", "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67"]);
+            /// expect(await simulator.cycle()).toStrictEqual(["2", "3", "5", "7", "11", "13", "17", "19", "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67"]);
+            //^ No longer expects this because of the newly imposed auto-timeout limit which restricts cycle count per script execution to 300 max.
+            expect(await simulator.cycle()).toStrictEqual(["2"]);
+            //^ With the auto-timeout, program can only output the first element/number before reaching the limit.
         });
         //* Cannot use "Sort input" program because it puposely uterilise overflows but value range is 0 to 999 instead of -999 to 999 - giving different results.
     });

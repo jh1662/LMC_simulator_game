@@ -185,6 +185,7 @@ class EditorUI {
         console.log(this.parseScript(script));
         */
         console.log(script);
+        //! To help develop to help develop the level data in sprint 3^^^
         return this.parseScript(script);
         //^ Script is either a 2D array of tokens or an empty array.
         //^ If caller detects emty array, it will exit/stop.
@@ -428,17 +429,19 @@ class RegistersUI {
     }
 }
 class MiscellaneousUI {
-    constructor(status, displayBox, objective, runButton, stopButton) {
+    constructor(status, displayBox, example, runButton, stopButton, objective, objectiveBox) {
         this.status = document.getElementById(status);
+        this.objectiveBox = document.getElementById(objectiveBox);
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox);
         this.displayImage = "hlt.png";
         //^ Name for default image and image for program stopping or not currently running.
         //^ File path is handled by 'changeDisplayImage' method.
-        this.displayObjective = objective;
+        this.displayExample = example;
         this.stopButton = document.getElementById(stopButton);
         this.runButton = document.getElementById(runButton);
-        this.displayBox.innerHTML = this.displayObjective;
+        this.displayBox.innerHTML = this.displayExample;
+        this.objectiveBox.textContent = objective;
     }
     displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
     changeStatus(status) { this.status.textContent = status; }
@@ -464,7 +467,7 @@ class MiscellaneousUI {
         //* Unless is start of execution then make it Little Man action.
         if (this.displayBox.innerHTML.slice(0, 9) == "<img src=" && !start) {
             //^ simplistic way to tell if display
-            this.displayBox.innerHTML = this.displayObjective;
+            this.displayBox.innerHTML = this.displayExample;
             //^ switch to displaying objective in box
             return;
         }
@@ -502,13 +505,14 @@ class MiscellaneousUI {
 //#endregion
 //#region main class
 export class SimulatorUI {
-    constructor(objective) {
+    constructor(example = "This is sandbox mode.", objective = "") {
+        //^ Default arguments from source - https://www.w3schools.com/typescript/typescript_functions.php .
         //: ids as arguments for simplicity and ease when maintaining/updating/developing
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter', 'registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input', 'predefinedInputs', 'output', 'submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', objective, 'run', 'stop');
+        this.miscellaneousUI = new MiscellaneousUI('status', 'displayBox', example, 'run', 'stop', objective, 'objectiveBox');
         this.aLUUI = new ALUUI('flow', 'operation', 'result');
         document.addEventListener("DOMContentLoaded", () => {
             //* Handle functionality that only requires frontend (no relation to backend).

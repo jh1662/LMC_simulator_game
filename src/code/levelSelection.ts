@@ -19,10 +19,12 @@ class LevelSelection{
             //* button to go back to the game menu
             (document.getElementById(menuId) as HTMLButtonElement).addEventListener("click", () => this.menu());
         });
+        window.selectLevel = this.selectLevel.bind(this);
+        //^ link the method to the global window declaration
         this.HTMLTable = document.getElementById(tableId) as HTMLTableSectionElement;
         /// this.levelIdPrefix = levelIdPrefix;
         this.levelCount = levelCount;
-        this.generateLevelButtons()
+        this.generateLevelButtons();
     }
 
     private generateLevelButtons(){
@@ -45,7 +47,7 @@ class LevelSelection{
     }
     private menu(){ window.location.href = "menu.html"+window.location.search; }
     public selectLevel(level:number){
-        console.log(level);
+        window.location.href = "simulator.html"+window.location.search+"#"+level
     }
 };
 
@@ -53,4 +55,4 @@ class LevelSelection{
 const levelSelection:LevelSelection = new LevelSelection("menu","mainContents",30);
 
 //@ts-ignore (TS-6133)
-const uRlQuery:URLQuery = new URLQuery(false);
+const uRlQuery:URLQuery = new URLQuery();
