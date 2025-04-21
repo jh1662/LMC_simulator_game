@@ -1,5 +1,7 @@
-V0.1.5 - Fixed Toggle Display problem ('splice' command 2ng arg was 1 higher than it should be.). Made memory cells read only.
+        console.log(script);
+        //! used in development for quicker development of 3rd sprint
 
+V0.1.5 - Fixed Toggle Display problem ('splice' command 2ng arg was 1 higher than it should be.). Made memory cells read only.
 
     public getInput = async(): Promise<number> => {
         this.input.readOnly = false;

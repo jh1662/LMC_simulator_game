@@ -5,44 +5,6 @@ import path from 'path';
 //: linking HTML file only once because nothing will change it from original DOM and saves computational time
 const html = fs.readFileSync(path.resolve('src/frames/', 'simulator.html'), 'utf8');
 document.body.innerHTML = html;
-/* All ids in simulator.HTML
-editorTable
-line-0
-0-0
-input-0-0
-0-1
-input-0-1
-0-2
-input-0-2
-line-1
-1-0
-input-1-0
-1-1
-input-1-1
-1-2
-input-1-2
-menu
-reset
-compile
-run
-manual
-submitInput
-toggleMode
-toggleDisplay
-registerProgramCounter
-registerInstruction
-registerAddress
-registerAccumulator
-flow
-operation
-result
-input
-output
-predefinedInputs
-displayBox
-status
-memoryTable
-*/
 //* Saperated by wells
 describe("Testing invalid elements to make sure tests are actually working", () => {
     test("Fetching element by non-existant id", () => {
@@ -147,24 +109,13 @@ describe("Testing input/output (IO) elements (all textboxes)", () => {
 describe("Control panel (group of buttons in bottom left)", () => {
     //* All buttons' HTML code do not declare a JS function "onclick"
     //* because that is handeled by the methods instead for modularity and organisation.
-    /* Button ids here due to more vague nameing conventions.
-    - menu
-    - timeOrStep
-    - reset
-    - compile
-    - run
-    - manual
-    - submitInput
-    - toggleMode
-    - toggleDisplay
-    */
     test("To menu", () => {
         const htmlElement = document.getElementById('menu');
         expect(htmlElement).not.toEqual(null);
         expect(htmlElement instanceof HTMLButtonElement).toEqual(true);
     });
-    test("execution method ('timeOrStep')", () => {
-        const htmlElement = document.getElementById('timeOrStep');
+    test("execution method ('executionMode')", () => {
+        const htmlElement = document.getElementById('executionMode');
         expect(htmlElement).not.toEqual(null);
         expect(htmlElement instanceof HTMLButtonElement).toEqual(true);
     });

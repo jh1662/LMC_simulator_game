@@ -256,20 +256,21 @@ export class Compiler {
                                 break;
                             }
                             //^ If there is no operand, the stored is '0' be default - empty variables like in other LMCs and progromming languages.
-                            if (!(/^-?(?:[1-9]?\d{0,2}|0)$/).test(token)) {
+                            if (!(/^-?\d{1,3}$/).test(token)) {
                                 this.errorMessage(lineId, column, ErrorType.addressOutOfBoundsDAT, token);
                                 return [-1];
                             }
-                            //^ Invalid if not made out of numerical digit ('[0-9]') that is in range -999 to -1
-                            //^ ('-?' and '\d{1,2}'), 1 to 999 ('\d{1,2}'), or is 0 (|0) in any way in whole string
-                            //^ ('^' and '$' respectively), as swell as having the DAT opcode.
+                            //^ Changed to allow multi-digit numbers to have zero as the first digits like 000, 001, 011, -001, etc.
+                            /// Invalid if not made out of numerical digit ('[0-9]') that is in range -999 to -1
+                            /// ('-?' and '\d{1,2}'), 1 to 999 ('\d{1,2}'), or is 0 (|0) in any way in whole string
+                            /// ('^' and '$' respectively), as swell as having the DAT opcode.
                             compiledInstruction = token.padStart(2, '0');
                             //^ Assaign, potentially padded integer (as string) to the compiled line.
                             //^ If single digit, then add 0 to its right, otherwise leave it.
                             //^ https://www.w3schools.com/jsref/jsref_string_padstart.asp .
                             break;
                         }
-                        if (!(/^(?:[1-9]?\d|0)$/).test(token)) {
+                        if (!(/^\d{1,2}$/).test(token)) {
                             this.errorMessage(lineId, column, ErrorType.addressOutOfBounds, token);
                             return [-1];
                         }

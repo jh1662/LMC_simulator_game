@@ -11,7 +11,7 @@
     "heurWarning": "node --trace-warnings --loader ts-node/esm src/tests/heuristicTesting.ts",
     "debug": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/tests/heuristicTesting.ts",
     "debugm": "node --inspect-brk --no-warnings=ExperimentalWarning --loader ts-node/esm src/code/middleware.ts",
-    "heurjs": "tsc && node --inspect-brk src/compiled/heuristicTesting.js",
+    "heurjs": "tsc && node --inspect-brk src/compiled/tests/heuristicTesting.js",
     "expe": "ts-node src/tests/experiment.ts"
   },
   "keywords": [],

@@ -1,11 +1,11 @@
-var themes;
-(function (themes) {
-    themes[themes["default"] = 0] = "default";
-    themes[themes["lowContrast"] = 1] = "lowContrast";
-    themes[themes["greyscale"] = 2] = "greyscale";
-})(themes || (themes = {}));
+var Themes;
+(function (Themes) {
+    Themes[Themes["default"] = 0] = "default";
+    Themes[Themes["lowContrast"] = 1] = "lowContrast";
+    Themes[Themes["greyscale"] = 2] = "greyscale";
+})(Themes || (Themes = {}));
 export class URLQuery {
-    constructor(isCampain) {
+    constructor() {
         const query = window.location.search.slice(1);
         //^ string slicing because the query includes the question mark ('?') query notation.
         const data = query.split("/");
@@ -14,15 +14,15 @@ export class URLQuery {
         this.parsedData = [];
         console.log("Raw:");
         console.log(data);
-        this.main(data, isCampain);
+        this.main(data);
         console.log("Parsed:");
         console.log(this.parsedData);
     }
-    getLevel() { return this.parsedData[4]; }
-    //^ first 3 peices of data will not be needed as thoese are not page-specific (sound effect toggle, dark mode toggle, and theme)
-    main(data, isCampain) {
+    getConfig(configIndex) { return this.parsedData[configIndex]; } //< getter
+    //^ 0-3 corrosponding to sound effect toggle, dark mode toggle, theme, and current level respectively.
+    main(data) {
         //* is called by constructor but appropiate for code block to be part of the constructor (usually constructors don't handle much logic - mostly assaignments)
-        const feedback = this.parseAndValidate(data, isCampain);
+        const feedback = this.parseAndValidate(data);
         if (feedback != "") {
             document.documentElement.innerHTML = "<p>" + feedback + "</p>";
         }
@@ -45,7 +45,7 @@ export class URLQuery {
         else {
             theme = "-light";
         }
-        theme = themes[this.parsedData[2]] + theme;
+        theme = Themes[this.parsedData[2]] + theme;
         //^ Enum key names are same as wanted in string.
         //^ For example theme will be "default-dark".
         //^ Far more simpler and compact than a switch statement.
@@ -53,26 +53,21 @@ export class URLQuery {
         //^ Changes [x] in '<html lang="en" data-theme="[x]">'.
         //^ Requires access to the HTML document.
     }
-    parseAndValidate(data, isCampain) {
+    parseAndValidate(data) {
         //* Very important because user may choose to edit the URL manually.
         //* Parsing and validate in same code for computing effeciency ( O(n) instead of O(2n) ).
         //: length checking
         if (data.length == 1 && data[0] == "") {
             //^ Specific contidtions used due to how 'window.location.search.slice(1)' work.
             //* If no query arguments are provided then use default values.
-            this.parsedData = [0, 0, 0];
+            this.parsedData = [0, 0, 0, 1];
             this.resetQuery();
             return "";
         }
-        if (isCampain) {
-            if (data.length != 4) {
-                return `URL query needs 4 arguments, ${data.length} was given`;
-            }
+        if (data.length != 4) {
+            return `URL query needs 4 arguments, ${data.length} was given`;
         }
-        //^ for doing a campain level only
-        if (data.length != 3) {
-            return `URL query needs 3 arguments, ${data.length} was given`;
-        }
+        //^ prevent a different number of config from being supplied
         //: general config checking
         for (let config of data) {
             this.parsedData.push(Number(config));
@@ -100,6 +95,9 @@ export class URLQuery {
         if (this.parsedData[2] > 2) {
             return 'invalid argument option - dark mode config can only be 0, 1, or 2';
         }
+        if (this.parsedData[3] > 30 || this.parsedData[3] == 0) {
+            return 'invalid argument option - current campain level can only be from 1 to 30';
+        }
         return "";
         //^ sucessful parsed and is thus valid
     }
@@ -108,7 +106,7 @@ export class URLQuery {
         //* Selects default query arguments of user haven't specify any in th URL and updates the URL without refresh.
         const url = new URL(window.location.href);
         //^ Get current URL
-        url.search = "?" + "0/0/0";
+        url.search = "?" + "0/0/0/1";
         //^ Add query (including '?' notation) to URL
         window.history.pushState({ custom: 'state' }, "", url.toString());
         //^ Updates URL to include the query in the browser URL but without any refresh to make it seamless.

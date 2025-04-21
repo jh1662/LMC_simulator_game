@@ -1,7 +1,7 @@
-enum themes{ default, lowContrast, greyscale }
+enum Themes{ default, lowContrast, greyscale }
 export class URLQuery{
     private parsedData:number[];
-    constructor(isCampain:boolean){
+    constructor(){
         const query = window.location.search.slice(1);
         //^ string slicing because the query includes the question mark ('?') query notation.
         const data:string[] = query.split("/");
@@ -10,15 +10,15 @@ export class URLQuery{
         this.parsedData = [];
         console.log("Raw:");
         console.log(data);
-        this.main(data, isCampain);
+        this.main(data);
         console.log("Parsed:");
         console.log(this.parsedData);
     }
-    public getLevel():number{ return this.parsedData[4] as number; }
-    //^ first 3 peices of data will not be needed as thoese are not page-specific (sound effect toggle, dark mode toggle, and theme)
-    private main(data:string[], isCampain:boolean):void{
+    public getConfig(configIndex:number):number{ return this.parsedData[configIndex] as number; } //< getter
+    //^ 0-3 corrosponding to sound effect toggle, dark mode toggle, theme, and current level respectively.
+    private main(data:string[]):void{
         //* is called by constructor but appropiate for code block to be part of the constructor (usually constructors don't handle much logic - mostly assaignments)
-        const feedback:string = this.parseAndValidate(data, isCampain);
+        const feedback:string = this.parseAndValidate(data);
         if (feedback != ""){ document.documentElement.innerHTML = "<p>"+feedback+"</p>"; }
         //^ requires access to the HTML document
         this.applySettings();
@@ -33,7 +33,7 @@ export class URLQuery{
         if (this.parsedData[1]){ theme="-dark"; }
         else{ theme="-light"; }
 
-        theme=themes[this.parsedData[2] as number]+theme;
+        theme=Themes[this.parsedData[2] as number]+theme;
         //^ Enum key names are same as wanted in string.
         //^ For example theme will be "default-dark".
         //^ Far more simpler and compact than a switch statement.
@@ -41,20 +41,19 @@ export class URLQuery{
         //^ Changes [x] in '<html lang="en" data-theme="[x]">'.
         //^ Requires access to the HTML document.
     }
-    private parseAndValidate(data:string[], isCampain:boolean):string{
+    private parseAndValidate(data:string[]):string{
         //* Very important because user may choose to edit the URL manually.
         //* Parsing and validate in same code for computing effeciency ( O(n) instead of O(2n) ).
         //: length checking
         if (data.length == 1 && data[0] == ""){
             //^ Specific contidtions used due to how 'window.location.search.slice(1)' work.
             //* If no query arguments are provided then use default values.
-            this.parsedData=[0,0,0];
+            this.parsedData=[0,0,0,1];
             this.resetQuery();
             return "";
         }
-        if (isCampain){ if (data.length != 4){ return `URL query needs 4 arguments, ${data.length} was given`; } }
-        //^ for doing a campain level only
-        if (data.length != 3){ return `URL query needs 3 arguments, ${data.length} was given`; }
+        if (data.length != 4){ return `URL query needs 4 arguments, ${data.length} was given`; }
+        //^ prevent a different number of config from being supplied
 
         //: general config checking
         for (let config of data){
@@ -74,6 +73,7 @@ export class URLQuery{
         //^ As in 'true' and 'false' respectively.
         if (this.parsedData[1] as number > 1){ return 'invalid argument option - dark mode config can only be 1 or 0'}
         if (this.parsedData[2] as number > 2){ return 'invalid argument option - dark mode config can only be 0, 1, or 2'}
+        if (this.parsedData[3] as number > 30 || this.parsedData[3] as number == 0){ return 'invalid argument option - current campain level can only be from 1 to 30'}
         return "";
         //^ sucessful parsed and is thus valid
     }
@@ -82,7 +82,7 @@ export class URLQuery{
         //* Selects default query arguments of user haven't specify any in th URL and updates the URL without refresh.
         const url = new URL(window.location.href);
         //^ Get current URL
-        url.search="?"+"0/0/0"
+        url.search="?"+"0/0/0/1"
         //^ Add query (including '?' notation) to URL
         window.history.pushState({ custom: 'state' }, "", url.toString());
         //^ Updates URL to include the query in the browser URL but without any refresh to make it seamless.

@@ -6,7 +6,7 @@ import { UICatagory } from "./simulatorUI.js";
 import { URLQuery } from "./URLQuery.js";
 export class Middleware {
     constructor() {
-        this.simulatorUI = new SimulatorUI("This is sandbox mode.");
+        this.simulatorUI = new SimulatorUI();
         //^ Single parameter is the text for the current objective.
         document.addEventListener("DOMContentLoaded", () => {
             //* Requires both frontend and backend functionality
@@ -27,7 +27,42 @@ export class Middleware {
         this.cycleModeAutomatic = true;
         this.simulator = new ControlUnit([], []);
         //^ Better to assaign redundant instance than using "?" sysntax (bad practice) also know as the Optional Chaining Operator.
+        const levelNum = this.campainLevel();
+        if (levelNum == 0) {
+            return;
+        }
+        //^ stop everything as URL is an invalid one
+        /*
+        if (levelNum != -1){ this.levelChecker = new LevelChecker(levelNum); return; }
+        //: reached if in campain mode
+        this.updateUI(UICatagory.status, [this.levelChecker?.getObjective() as string]);
+        */
     }
+    //#region campain
+    campainLevel() {
+        //* Mere method is not worth being its own class.
+        //* -1 for sandbox, 0 for invalid, 1-30 for level number.
+        let fragmentId = window.location.hash;
+        console.log(fragmentId);
+        fragmentId = fragmentId.slice(1);
+        if (fragmentId == "") {
+            return -1;
+        }
+        //^ Means sandbox mode as no level is specified
+        //: copied stragety from uRLQuery.ts
+        const level = Number(fragmentId);
+        if (Number.isNaN(level) || !Number.isInteger(level)) {
+            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer only)</p>`;
+            return 0;
+        }
+        if (!(0 < level && level < 31)) {
+            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer 1-30 only)</p>`;
+            return 0;
+        }
+        return level;
+    }
+    //#endregion
+    //#region Links with simulator (ControlUnit)
     compile() {
         this.currentSpeed = 4001;
         const compiler = new Compiler;
@@ -123,4 +158,4 @@ export class Middleware {
 const middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
 //@ts-ignore (TS-6133)
-const uRlQuery = new URLQuery(false);
+const uRlQuery = new URLQuery();

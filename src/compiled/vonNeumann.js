@@ -439,7 +439,8 @@ export class ControlUnit {
             if (!this.cycleModeAutomatic && !this.cycleReady) {
                 //* cannot perfrom cycle in manual until user deems it so (pressing the next-cycle button)
                 await sleep(this.cycleInterval);
-                //^ prevent busy-waiting that would otherwise freeze the browser tab (which actually happens without the wait).
+                //^ Prevent busy-waiting that would otherwise freeze the browser tab (which actually happens without the wait).
+                //^ If code is reached, 'this.cycleInterval' is always '1'.
                 continue;
             }
             if (!this.cycleModeAutomatic) {
@@ -448,10 +449,12 @@ export class ControlUnit {
             //: degugging purposes
             console.log("PC - " + this.registers.read(Register.programCounter));
             console.log("Instruction - " + String(this.registers.read(Register.instruction)));
+            console.log("Accumulator - " + this.registers.read(Register.accumulator));
             console.log("Cycle count - " + cycleCount);
             cycleCount++;
             if (cycleCount >= this.cycleCountLimit) {
                 this.displayStatus(UICatagory.status, ["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
+                console.log("CYCLE TIMEOUT!");
                 break;
             }
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.

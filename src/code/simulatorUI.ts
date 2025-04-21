@@ -21,7 +21,7 @@ declare global {
     //* Used because TS/JS files are called as modular files.
     interface Window {
         //* Required to listen to HTML elements that are generated after DOM load (e.g.: generating new texboxes for the script editor).
-        addRowIfNeeded: (textbox: HTMLInputElement) => void;
+        addRowIfNeeded: (textbox:HTMLInputElement) => void;
         navigateEditor: (event:KeyboardEvent) => void;
     }
 }
@@ -181,6 +181,7 @@ class EditorUI{
         console.log(this.parseScript(script));
         */
         console.log(script);
+        //! To help develop to help develop the level data in sprint 3^^^
         return this.parseScript(script);
         //^ Script is either a 2D array of tokens or an empty array.
         //^ If caller detects emty array, it will exit/stop.
@@ -435,26 +436,29 @@ class MiscellaneousUI{
     private HTMLEle:HTMLElement;
     //^ the HTML tag itself - "<html lang="en" data-theme="light">"
     private status:HTMLSpanElement;
+    private objectiveBox:HTMLSpanElement
     private displayBox:HTMLElement;
     private runButton:HTMLButtonElement;
     private stopButton:HTMLButtonElement;
 
     private displayImage:string;
-    private displayObjective:string;
+    private displayExample:string;
 
-    constructor(status:string, displayBox:string, objective:string, runButton:string, stopButton:string){
+    constructor(status:string, displayBox:string, example:string, runButton:string, stopButton:string, objective:string, objectiveBox:string){
         this.status = document.getElementById(status) as HTMLSpanElement;
+        this.objectiveBox = document.getElementById(objectiveBox) as HTMLSpanElement;
         this.HTMLEle = document.documentElement;
         this.displayBox = document.getElementById(displayBox) as HTMLElement;
         this.displayImage = "hlt.png";
         //^ Name for default image and image for program stopping or not currently running.
         //^ File path is handled by 'changeDisplayImage' method.
-        this.displayObjective = objective;
+        this.displayExample = example;
 
         this.stopButton = document.getElementById(stopButton) as HTMLButtonElement;
         this.runButton =  document.getElementById(runButton) as HTMLButtonElement;
 
-        this.displayBox.innerHTML = this.displayObjective;
+        this.displayBox.innerHTML = this.displayExample;
+        this.objectiveBox.textContent = objective;
     }
     public displayManual():void{ window.open('manual.html', '_blank', 'width=800,height=600'); }
     public changeStatus(status:string):void{ this.status.textContent = status; }
@@ -474,7 +478,7 @@ class MiscellaneousUI{
         //* Unless is start of execution then make it Little Man action.
         if (this.displayBox.innerHTML.slice(0,9) == "<img src=" && !start) {
             //^ simplistic way to tell if display
-            this.displayBox.innerHTML = this.displayObjective;
+            this.displayBox.innerHTML = this.displayExample;
             //^ switch to displaying objective in box
             return;
         }
@@ -522,13 +526,14 @@ export class SimulatorUI{
     private miscellaneousUI:MiscellaneousUI;
     private aLUUI:ALUUI;
 
-    constructor(objective:string){
+    constructor(example:string="This is sandbox mode.", objective:string=""){
+        //^ Default arguments from source - https://www.w3schools.com/typescript/typescript_functions.php .
         //: ids as arguments for simplicity and ease when maintaining/updating/developing
         this.memoryUI = new MemoryUI('memoryTable');
         this.editorUI = new EditorUI('editorTable');
         this.registerUI = new RegistersUI('registerProgramCounter','registerInstruction', 'registerAddress', 'registerAccumulator');
         this.iOUI = new IOUI('input','predefinedInputs','output','submitInput');
-        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',objective,'run','stop');
+        this.miscellaneousUI = new MiscellaneousUI('status','displayBox',example,'run','stop',objective,'objectiveBox');
         this.aLUUI = new ALUUI('flow','operation','result');
 
         document.addEventListener("DOMContentLoaded", () => {

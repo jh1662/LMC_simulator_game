@@ -9,7 +9,7 @@ class Menu {
             document.getElementById(settingsId).addEventListener("click", () => this.settings());
         });
     }
-    campain() { window.location.href = 'simulator.html' + window.location.search; }
+    campain() { window.location.href = 'levelSelection.html' + window.location.search; }
     sandbox() { window.location.href = 'simulator.html' + window.location.search; }
     manual() { window.open('manual.html' + window.location.search, '_blank'); }
     settings() { window.location.href = 'settings.html' + window.location.search; }
@@ -18,4 +18,4 @@ class Menu {
 //@ts-ignore (TS-6133) - Is used HTML but TS compiler does not know that.
 const menu = new Menu("campain", "sandbox", "manual", "settings");
 //@ts-ignore (TS-6133) - Only needs its constructor's full execution, nothing else hence not being used after VVV
-const uRlQuery = new URLQuery(false);
+const uRlQuery = new URLQuery();
