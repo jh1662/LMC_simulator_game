@@ -4,7 +4,7 @@ import { ControlUnit } from './vonNeumann.js';
 import { UICatagory } from "./simulatorUI.js";
 //^ better practice and far more easier to identify by enumeration that string or integer.
 import { URLQuery } from "./URLQuery.js";
-///import { LevelChecker } from './levelChecker.js';
+import { LevelChecker, levelType } from './levelChecker.js';
 
 declare global {
     //* For the togglable execution control
@@ -18,10 +18,12 @@ declare global {
 export class Middleware{
     //^ is export so ControlUnit has access to its parent class instance referance
     private simulatorUI:SimulatorUI;
+    //^ Frontend
+    //: backend
+    private simulator:ControlUnit;
     //: 'undefined' satisfies TS-2564
     private compiledScript:number[]|undefined;
-    ///private levelChecker:LevelChecker|undefined;
-    private simulator:ControlUnit;
+    private levelChecker:LevelChecker|undefined;
 
     //: to control simulator execution
     private slowestSpeed:number;
@@ -31,16 +33,18 @@ export class Middleware{
     private cycleModeAutomatic:boolean;
 
     constructor(){
-        this.simulatorUI = new SimulatorUI();
-        //^ Single parameter is the text for the current objective.
 
         document.addEventListener("DOMContentLoaded", () => {
-            //* Requires both frontend and backend functionality
-            //: HTML button elements
+            //* Requires both frontend and backend functionality.
+            //: HTML button elements.
             (document.getElementById('compile') as HTMLButtonElement).addEventListener("click", () => this.compile());
             (document.getElementById('run') as HTMLButtonElement).addEventListener("click", () => this.run());
             (document.getElementById('executionMode') as HTMLButtonElement).addEventListener("click", () => this.switchCycleModes());
             (document.getElementById('stop') as HTMLButtonElement).addEventListener("click", () => this.stop());
+            //: set up buttons that will only be used if in campain mode
+            //@ts-ignore
+            ///(document.getElementById('submitLevel') as HTMLButtonElement)
+            (document.getElementById('loadExample') as HTMLButtonElement).addEventListener("click", () => this.loadLevelSolution());
         });
         //: togglable execution control elements (because they dynamicly generate/unload when toggling modes)
         window.newCycle = this.newCycle.bind(this);
@@ -57,13 +61,19 @@ export class Middleware{
         //^ Better to assaign redundant instance than using "?" sysntax (bad practice) also know as the Optional Chaining Operator.
 
         const levelNum:number = this.campainLevel();
+
+        if (levelNum >= 0){
+            //* set up frontend for campain level if in campain mode
+            this.levelChecker = new LevelChecker(levelNum);
+            this.simulatorUI = new SimulatorUI(this.levelChecker.getExampleCase(), this.levelChecker.getObjective());
+            //: enable buttons exclusively used by campain mode
+            ///(document.getElementById('submitLevel') as HTMLButtonElement).disabled = false;
+            (document.getElementById('loadExample') as HTMLButtonElement).disabled = false;
+        }
+        else{ this.simulatorUI = new SimulatorUI(); }
+        //^ spefically located here to prevent TS-2564 without assaigning twice
         if (levelNum == 0){ return; }
         //^ stop everything as URL is an invalid one
-        /*
-        if (levelNum != -1){ this.levelChecker = new LevelChecker(levelNum); return; }
-        //: reached if in campain mode
-        this.updateUI(UICatagory.status, [this.levelChecker?.getObjective() as string]);
-        */
     }
     //#region campain
     private campainLevel():number{
@@ -80,11 +90,48 @@ export class Middleware{
             document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer only)</p>`;
             return 0;
         }
-        if (!(0<level && level<31)){
-            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer 1-30 only)</p>`;
+        if (!(0<level && level<21)){
+            document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer 1-20 only)</p>`;
             return 0;
         }
         return level;
+    }
+    //@ts-ignore
+    private levelCompleted(){
+        const campainProgress:number = Number(window.location.search.search(/\d{1,2}(?=#)/));
+        //^ Should always give valid number parsable string because if URL was invalid then page would not be loaded successfully in the first place.
+        //^ First "search" is the query part of the URL (attribute of object) while second "search" is method call.
+        if (campainProgress == 20) {  window.location.href = 'levelSelection.html'+window.location.search; }
+        //^ cannot go past last level
+        window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
+        //^ updates next level config
+        /// window.location.href = 'levelSelection.html'+window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
+        /// //^ Regex supports the '.replace' call - https://www.w3schools.com/js/js_regexp.asp
+    }
+    //@ts-ignore
+    private async levelCheck(){
+        //: similar validation to as running the script by user.
+        if (this.compiledScript == undefined){ this.simulatorUI.update(UICatagory.status,["Cannot submit empty compiled script."]); return; }
+        if (this.compiledScript[0] == -1){ this.simulatorUI.update(UICatagory.status,["Cannot submit incorrectly compiled script."]); return; }
+
+        this.levelChecker?.setUserCompiled(this.compiledScript);
+        const starCount:number|undefined = await this.levelChecker?.assessScript();
+        //^ requires multiple calls to assess script to isolate the required "await" for better practice
+        if(!starCount){ return; }
+        //^ solves TS-2322 but should not ever get satisfied because method only gets called when in campain mode
+        const message:string|undefined = this.levelChecker?.getMessage();
+        if(!message){ return; }
+        //^ solves TS-2322 but should not ever get satisfied
+
+    }
+    private loadLevelSolution(){
+        let script:string[][]|undefined;
+        if (this.levelChecker?.levelType() == levelType.tutorial) {script = this.levelChecker?.givePartial(); }
+        //^ tutorial level's partial script is its solution where user can use instead of reloading the simulator page.
+        else { script = this.levelChecker?.getExample(); }
+        if (!script){ return; }
+        //^ solves TS-2345 by checking for undefined - should not be satisfied unless unexpected error how simulator thinking its in campain mode when it is not
+        this.simulatorUI.loadSript(script);
     }
     //#endregion
     //#region Links with simulator (ControlUnit)

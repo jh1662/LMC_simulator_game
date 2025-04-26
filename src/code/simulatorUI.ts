@@ -14,7 +14,7 @@ export enum UICatagory {
     //^ outputted numbers from LMC simulator
     end,
     //^ resets for next script
-    switchCycleModes
+    switchCycleModes,
     //^ changes button layout in accordance to toggled cycle execution mode.
 }
 declare global {
@@ -89,20 +89,24 @@ class EditorUI{
         //^ "as HTMLTableElement" assures code that argument isn't null
         //^ hence satisfying TS-2322
     }
-    public generateLine(textbox:HTMLInputElement):void{
+    public generateLine(textbox:HTMLInputElement, loadExampleCall:boolean = false):void{
         //* adds a new line to the editor table only if the current/selected textbox is on the last line
-        const currentRow:HTMLTableRowElement = textbox.parentElement!.parentElement as HTMLTableRowElement;
-        //^ First 'parentElement' is the cell and second 'parentElement' is the row.
-        //^ exclamation mark assures the code that the cell is not null/undifined - satisfying TS-18047
-        //^ "as HTMLTableRowElement" satisfies TS-2322
-
         const lastRowID:number = this.HTMLTable.rows.length - 1;
         //^ this id included the top row (label opcode operand).
         const lastRow:HTMLTableRowElement = this.HTMLTable.rows[lastRowID] as HTMLTableRowElement;
         //^ to see compare with current row
 
-        if (currentRow != lastRow){ return; }
-        //^ not currently on the bottom row?
+        if(!loadExampleCall){
+            //* Verification is only bypassed/overiden if called by 'this.loadScript' method call.
+            const currentRow:HTMLTableRowElement = textbox.parentElement!.parentElement as HTMLTableRowElement;
+            //^ First 'parentElement' is the cell and second 'parentElement' is the row.
+            //^ exclamation mark assures the code that the cell is not null/undifined - satisfying TS-18047
+            //^ "as HTMLTableRowElement" satisfies TS-2322
+
+            if (currentRow != lastRow){ return; }
+            //^ Not currently on the bottom row?
+            //^ Only generate new line without being in last row if called by 'this.loadSolutionExample'.
+        }
 
         //: adding a new row/line
         const newRow:HTMLTableRowElement = this.HTMLTable.insertRow();
@@ -268,6 +272,31 @@ class EditorUI{
         }
         const textbox:HTMLInputElement = document.getElementById(`input-${rowId}-${columnId}`) as HTMLInputElement;
         textbox.focus();
+    }
+
+    public loadScript(script:string[][]){
+        //* Used only in campain mode.
+        //* Can be used to either load partial script or example solution script.
+        let rows:number = this.HTMLTable.rows.length - 1;
+        //^ minus 1 to account for token headers
+        for (rows; rows<script.length; rows++){
+            //* makes space to load the example solution script
+            /// this.generateLine(new HTMLInputElement(), true);
+            //^ uncaught error - HTMLInputElement cannot be instantiated directly
+            this.generateLine(document.createElement("input"), true);
+            //^ First argument is required but is not important.
+            //^ True argument allows new line to be generate without forcing client to focus of the last line/row.
+        }
+        for (let line=0; line<this.HTMLTable.rows.length+1; line++){
+            //^ length in incremented, by 1, to purposely have empty line underneath - to not confuse user if want to add to loaded script.
+            for (let token=0; token<3; token++){
+                //* Repeat via label, opcode and operand.
+                //* Row headers will need to be taken into account.
+                const tokenSlotId:string = `input-${line}-${token}`;
+                (document.getElementById(tokenSlotId) as HTMLInputElement).value = (script[line] as string[])[token] as string;
+                //^ TS-2532 solved with type assertions as 'script[line]' and 'script[line][token]' has string values.
+            }
+        }
     }
 }
 class IOUI{
@@ -573,7 +602,7 @@ export class SimulatorUI{
     public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); } //< call by middleware
     public resetRegesters():void{ this.registerUI.resetRegisters; } //< call by middleware
 
-    public update(catagory:UICatagory, value:string[]){
+    public update(catagory:UICatagory, value:string[]){ //< multi conditional caller
         //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
         switch(catagory){
             case UICatagory.registerAccumulator: this.registerUI.updateRegister(Register.accumulator,value[0] as string); break;
@@ -598,15 +627,18 @@ export class SimulatorUI{
             //^ Did not make default case for anything else because it is certain that it will not an unexpected value.
         }
     }
-    public end(){
+    public end(){ //< caller method
         this.miscellaneousUI.afterRun();
     }
-    public start(){
+    public start(){ //< method invocation (multi-caller)
         this.aLUUI.reset();
         this.iOUI.reset();
         this.registerUI.resetRegisters();
         this.miscellaneousUI.DuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);
     }
+    //: exclusive to campain mode
+    public loadSript(script:string[][]){ this.editorUI.loadScript(script); } //< caller method
+    //x Submitting script for campain mode can be done by the 'this.getScript()' method call.
 }
 //#endregion

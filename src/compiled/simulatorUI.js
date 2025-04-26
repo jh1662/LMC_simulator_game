@@ -91,20 +91,24 @@ class EditorUI {
         //^ "as HTMLTableElement" assures code that argument isn't null
         //^ hence satisfying TS-2322
     }
-    generateLine(textbox) {
+    generateLine(textbox, loadExampleCall = false) {
         //* adds a new line to the editor table only if the current/selected textbox is on the last line
-        const currentRow = textbox.parentElement.parentElement;
-        //^ First 'parentElement' is the cell and second 'parentElement' is the row.
-        //^ exclamation mark assures the code that the cell is not null/undifined - satisfying TS-18047
-        //^ "as HTMLTableRowElement" satisfies TS-2322
         const lastRowID = this.HTMLTable.rows.length - 1;
         //^ this id included the top row (label opcode operand).
         const lastRow = this.HTMLTable.rows[lastRowID];
         //^ to see compare with current row
-        if (currentRow != lastRow) {
-            return;
+        if (!loadExampleCall) {
+            //* Verification is only bypassed/overiden if called by 'this.loadScript' method call.
+            const currentRow = textbox.parentElement.parentElement;
+            //^ First 'parentElement' is the cell and second 'parentElement' is the row.
+            //^ exclamation mark assures the code that the cell is not null/undifined - satisfying TS-18047
+            //^ "as HTMLTableRowElement" satisfies TS-2322
+            if (currentRow != lastRow) {
+                return;
+            }
+            //^ Not currently on the bottom row?
+            //^ Only generate new line without being in last row if called by 'this.loadSolutionExample'.
         }
-        //^ not currently on the bottom row?
         //: adding a new row/line
         const newRow = this.HTMLTable.insertRow();
         //^ adds new row at the end
@@ -282,6 +286,30 @@ class EditorUI {
         }
         const textbox = document.getElementById(`input-${rowId}-${columnId}`);
         textbox.focus();
+    }
+    loadScript(script) {
+        //* Used only in campain mode.
+        //* Can be used to either load partial script or example solution script.
+        let rows = this.HTMLTable.rows.length - 1;
+        //^ minus 1 to account for token headers
+        for (rows; rows < script.length; rows++) {
+            //* makes space to load the example solution script
+            /// this.generateLine(new HTMLInputElement(), true);
+            //^ uncaught error - HTMLInputElement cannot be instantiated directly
+            this.generateLine(document.createElement("input"), true);
+            //^ First argument is required but is not important.
+            //^ True argument allows new line to be generate without forcing client to focus of the last line/row.
+        }
+        for (let line = 0; line < this.HTMLTable.rows.length + 1; line++) {
+            //^ length in incremented, by 1, to purposely have empty line underneath - to not confuse user if want to add to loaded script.
+            for (let token = 0; token < 3; token++) {
+                //* Repeat via label, opcode and operand.
+                //* Row headers will need to be taken into account.
+                const tokenSlotId = `input-${line}-${token}`;
+                document.getElementById(tokenSlotId).value = script[line][token];
+                //^ TS-2532 solved with type assertions as 'script[line]' and 'script[line][token]' has string values.
+            }
+        }
     }
 }
 class IOUI {
@@ -601,5 +629,7 @@ export class SimulatorUI {
         this.miscellaneousUI.DuringRun();
         this.miscellaneousUI.toggleDisplayMode(true);
     }
+    //: exclusive to campain mode
+    loadSript(script) { this.editorUI.loadScript(script); } //< caller method
 }
 //#endregion

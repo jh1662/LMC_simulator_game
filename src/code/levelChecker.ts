@@ -1,6 +1,12 @@
 import { ControlUnit } from "./vonNeumann.js"
 import { levelData, Level } from "./levelData.js";
 //^ to read current level data as a custom 'Level' type.
+export enum levelType {tutorial, partial, contexual}
+//^ Program only sees 3 types of levels.
+//^ Partial type - partial and correcting levels becuase they have the same configurations of what attributes are used and which ones are not.
+//^ Contexual type - contextual and big formula levels becuase they have the same configurations of what attributes are used and which ones are not.
+//^ Tutorial type - just tuotial/introduction levels.
+//^ See code report/dissertation regarding the 5 types of levels.
 export class LevelChecker{
     private currentLevel:Level;
     private userCompiled:number[];
@@ -18,6 +24,7 @@ export class LevelChecker{
 
     //: Getters
     public getObjective():string{ return this.currentLevel.objective; }
+    public getExampleCase():string{ return this.currentLevel.exampleCase; }
     public getMessage(){ return this.message; }
     public getExample():string[][]{
         if(this.currentLevel.exampleSolution) return this.currentLevel.exampleSolution;
@@ -92,11 +99,23 @@ export class LevelChecker{
         return true;
     }
     public async assessScript():Promise<number>{
+        //* called to check if level object is satisfied by user, and if so then how many stars
         const casesResult:number = await this.testCases();
         this.constructResultMessage(casesResult);
         if (casesResult != -1) { return 0; }
         //^ User's compiled script does not satisfies level objective
         return this.starCount(this.userCompiled.length);
         //^ User's compiled script does satisfies level objective so star count is retruned.
+    }
+    public levelType():levelType{
+        //* Do not need to check every optional attribute to determin level type (only the exclusives)!
+        if (this.currentLevel.exampleSolution == undefined) { return levelType.tutorial; }
+        //^ Tutorial level type does not have an solution example because its job is taken by the partial script attribute.
+        //^ Reason for not using example solution is because it needs to be loaded manually be user unlike partial script which is loaded automatically on page load.
+        if (this.currentLevel.patrialScript == undefined) { return levelType.contexual; }
+        //^ Partial level type does not have partial script because user is expected to make assembly script from scratch.
+        return levelType.partial;
+        //^ Only other level type.
+        //^ No if-statement to take unexpected errors in effect.
     }
 }

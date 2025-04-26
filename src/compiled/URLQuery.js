@@ -95,8 +95,8 @@ export class URLQuery {
         if (this.parsedData[2] > 2) {
             return 'invalid argument option - dark mode config can only be 0, 1, or 2';
         }
-        if (this.parsedData[3] > 30 || this.parsedData[3] == 0) {
-            return 'invalid argument option - current campain level can only be from 1 to 30';
+        if (this.parsedData[3] > 20 || this.parsedData[3] == 0) {
+            return 'invalid argument option - current campain level can only be from 1 to 20';
         }
         return "";
         //^ sucessful parsed and is thus valid
