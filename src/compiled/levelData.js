@@ -1,6 +1,6 @@
 export const levelData = [
     //^ Simpler and quicker compute time to referance an object by index then a sub-object by key.
-    //* If level does not have 'exampleSolution', 'cases' nor 'stars', it is a tutorial/introduction level type.
+    //* If level does not have 'exampleSolution', 'cases' and 'stars', it is a tutorial/introduction level type.
     //* If level does not have 'patrialScript', it is either a contexual or a big formula level type.
     //* If level does has everything, it is either a correcting or a partial level type.
     /* Template:
@@ -22,15 +22,8 @@ export const levelData = [
         //^ kept, despite redundancy, for standardisation
         patrialScript: [
             //^ Kept in 'patrialScript' instead of 'exampleSolution' because the editor always gets filled with 'patrialScript' automatically, unlike 'exampleSolution'.
-            ["", "INP", ""],
-            ["", "BRP", "positive"],
-            ["", "BRZ", "zero"],
-            ["", "HLT", ""],
-            ["zero", "OUT", ""],
-            ["", "OUT", ""],
-            ["", "HLT", ""],
-            ["positive", "OUT", ""],
-            ["", "HLT", ""]
+            ["input", "INP", ""],
+            ["output", "OUT", ""]
         ]
         /// exampleSolution:
         /// cases:

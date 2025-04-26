@@ -50,15 +50,8 @@ export const levelData:Level[] = [
         //^ kept, despite redundancy, for standardisation
         patrialScript:[
             //^ Kept in 'patrialScript' instead of 'exampleSolution' because the editor always gets filled with 'patrialScript' automatically, unlike 'exampleSolution'.
-            ["", "INP", ""],
-            ["", "BRP", "positive"],
-            ["", "BRZ", "zero"],
-            ["", "HLT", ""],
-            ["zero", "OUT", ""],
-            ["", "OUT", ""],
-            ["", "HLT", ""],
-            ["positive", "OUT", ""],
-            ["", "HLT", ""]
+            ["input", "INP", ""],
+            ["output", "OUT", ""]
         ]
         /// exampleSolution:
         /// cases:

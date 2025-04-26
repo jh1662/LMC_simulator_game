@@ -129,9 +129,7 @@ describe('Testing level data integrety', () => {
         describe('Tutorial/introduction levels (level #1-8)', () => {
             test('level #1', () => {
                 const result = integretyHelper(1, LevelType.tutorial);
-                //^ calls the 'integretyHelper' helper function
                 console.log(result);
-                //^ prints whatever string was caught from the call
                 expect(result).toBe("");
                 //^ if string is empty (""), then helper result experienced no jest-thrown errors
             });
