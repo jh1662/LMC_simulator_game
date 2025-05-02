@@ -23,7 +23,8 @@ export const levelData = [
         patrialScript: [
             //^ Kept in 'patrialScript' instead of 'exampleSolution' because the editor always gets filled with 'patrialScript' automatically, unlike 'exampleSolution'.
             ["input", "INP", ""],
-            ["output", "OUT", ""]
+            ["output", "OUT", ""],
+            ["halt", "HLT", ""]
         ]
         /// exampleSolution:
         /// cases:

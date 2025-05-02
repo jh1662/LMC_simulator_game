@@ -43,7 +43,7 @@ export class Middleware{
             (document.getElementById('stop') as HTMLButtonElement).addEventListener("click", () => this.stop());
             //: set up buttons that will only be used if in campain mode
             //@ts-ignore
-            ///(document.getElementById('submitLevel') as HTMLButtonElement)
+            (document.getElementById('submitLevel') as HTMLButtonElement).addEventListener("click", () => this.levelCheck());
             (document.getElementById('loadExample') as HTMLButtonElement).addEventListener("click", () => this.loadLevelSolution());
         });
         //: togglable execution control elements (because they dynamicly generate/unload when toggling modes)
@@ -64,24 +64,31 @@ export class Middleware{
 
         if (levelNum >= 0){
             //* set up frontend for campain level if in campain mode
-            this.levelChecker = new LevelChecker(levelNum);
+            this.levelChecker = new LevelChecker(levelNum, this);
             this.simulatorUI = new SimulatorUI(this.levelChecker.getExampleCase(), this.levelChecker.getObjective());
             //: enable buttons exclusively used by campain mode
             ///(document.getElementById('submitLevel') as HTMLButtonElement).disabled = false;
+            (document.getElementById('submitLevel') as HTMLButtonElement).disabled = false;
             (document.getElementById('loadExample') as HTMLButtonElement).disabled = false;
+            if (this.levelChecker.levelType() == levelType.tutorial) {
+                (document.getElementById('submitLevel') as HTMLButtonElement).innerText = "Finish tutorial";
+            }
         }
         else{ this.simulatorUI = new SimulatorUI(); }
         //^ spefically located here to prevent TS-2564 without assaigning twice
-        if (levelNum == 0){ return; }
-        //^ stop everything as URL is an invalid one
+        ///if (levelNum == 0){ return; }
+        /// ^ stop everything as URL is an invalid one
+        if (levelNum != 0) {this.prepareLevel();}
+        //^ render partial script if level type is appropiate
     }
     //#region campain
     private campainLevel():number{
         //* Mere method is not worth being its own class.
         //* -1 for sandbox, 0 for invalid, 1-30 for level number.
-        let fragmentId:string = window.location.hash;
+        let fragmentId:string = window.location.hash.slice(1);
         console.log(fragmentId);
-        fragmentId = fragmentId.slice(1);
+        /// fragmentId = fragmentId.slice(1);
+        //^ redundant since making code more compact
         if (fragmentId == ""){ return -1; }
         //^ Means sandbox mode as no level is specified
         //: copied stragety from uRLQuery.ts
@@ -94,35 +101,16 @@ export class Middleware{
             document.documentElement.innerHTML = `<p>Selected level ${fragmentId} is not a valid level (integer 1-20 only)</p>`;
             return 0;
         }
+
         return level;
     }
-    //@ts-ignore
-    private levelCompleted(){
-        const campainProgress:number = Number(window.location.search.search(/\d{1,2}(?=#)/));
-        //^ Should always give valid number parsable string because if URL was invalid then page would not be loaded successfully in the first place.
-        //^ First "search" is the query part of the URL (attribute of object) while second "search" is method call.
-        if (campainProgress == 20) {  window.location.href = 'levelSelection.html'+window.location.search; }
-        //^ cannot go past last level
-        window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
-        //^ updates next level config
-        /// window.location.href = 'levelSelection.html'+window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
-        /// //^ Regex supports the '.replace' call - https://www.w3schools.com/js/js_regexp.asp
-    }
-    //@ts-ignore
-    private async levelCheck(){
-        //: similar validation to as running the script by user.
-        if (this.compiledScript == undefined){ this.simulatorUI.update(UICatagory.status,["Cannot submit empty compiled script."]); return; }
-        if (this.compiledScript[0] == -1){ this.simulatorUI.update(UICatagory.status,["Cannot submit incorrectly compiled script."]); return; }
-
-        this.levelChecker?.setUserCompiled(this.compiledScript);
-        const starCount:number|undefined = await this.levelChecker?.assessScript();
-        //^ requires multiple calls to assess script to isolate the required "await" for better practice
-        if(!starCount){ return; }
-        //^ solves TS-2322 but should not ever get satisfied because method only gets called when in campain mode
-        const message:string|undefined = this.levelChecker?.getMessage();
-        if(!message){ return; }
-        //^ solves TS-2322 but should not ever get satisfied
-
+    private prepareLevel(){
+        //* Called for every level but only makes a differance for partial and tutorial type levels.
+        const partialScript:string[][] = this.levelChecker?.givePartial() as string[][];
+        //^ type assertion for TS-2322 because levelChecker should never be undefined if caller method is called.
+        if (partialScript.length == 0 ){ return; }
+        //^ can also be done using 'this.levelChecker?.levelType()'
+        this.simulatorUI.loadSript(partialScript);
     }
     private loadLevelSolution(){
         let script:string[][]|undefined;
@@ -132,6 +120,60 @@ export class Middleware{
         if (!script){ return; }
         //^ solves TS-2345 by checking for undefined - should not be satisfied unless unexpected error how simulator thinking its in campain mode when it is not
         this.simulatorUI.loadSript(script);
+    }
+    private levelCompleted(){
+        //* Update URL query to increment total completed levels - allowing user to do the next level (limited to total number of levels).
+        /// const campainProgress:number = Number(window.location.search.match(/\d{1,2}(?=#)/));
+        //^ hastag/fragment is not part for 'window.location.search' and to search without is to make the regex too complex
+        /// ^ First "search" is the query part of the URL (attribute of object) while second "search" is method call.
+        const configParts:string[] = window.location.search.split('/')
+        let campainProgress:number = Number((configParts[3] as string));
+        //^ should always give valid number parsable string because if URL was invalid then page would not be loaded successfully in the first place
+        if (campainProgress == 20) { return; }
+        //^ cannot go past last level
+        if (configParts[3] == window.location.hash.slice(1)) { campainProgress++; }
+        //^ Prevent user from skipping levels.
+        //^ Comparing campain progress to current displayed level (in order).
+        ///window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
+        //: updates next level config
+        const newConfigParts:string[] = [configParts[0] as string,configParts[1] as string,configParts[2] as string,String(campainProgress)];
+        //^ Type assertion for TS-2322 because of same reason as previous type assertion.
+        ///window.location.search = newConfigParts.join('/');
+        window.history.pushState(null, '', newConfigParts.join('/') + window.location.hash );
+        //^ Allows to change URL without refreshing.
+        //^ In second parameter, 'window.location.herf' is not needed because method automatically use it if not stated in argument.
+        //^ Source - https://www.geeksforgeeks.org/how-to-modify-url-without-reloading-the-page-using-javascript/
+        console.log(window.location.search);
+        /// window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
+        /// //^ Regex supports the '.replace' call - https://www.w3schools.com/js/js_regexp.asp
+    }
+    private async levelCheck(){
+        //* Check user-provided compiled script and check it to see if satisfies current level's objective.
+        /// * Returns star count where '0' is fail and rages 0-3.
+        /// * Calls frontend many times to update status multiple times to satisfy HCI priciples by makeing page reponsive - not thinking it is frozen/stuck.
+        //: Take different approach if level is a tutorial type
+        if ((this.levelChecker as LevelChecker).levelType() == levelType.tutorial) {
+            //^ type assertion for TS-2532 because 'this.levelChecker' should never be undefined when called here.
+            this.levelCompleted();
+            this.simulatorUI.update(UICatagory.status,["Please go to the level selector to do the next level (from menu)"])
+            return;
+        }
+
+        //: similar validation to as running the script by user.
+        if (this.compiledScript == undefined){ this.simulatorUI.update(UICatagory.status,["Cannot submit empty compiled script."]); return; }
+        if (this.compiledScript[0] == -1){ this.simulatorUI.update(UICatagory.status,["Cannot submit incorrectly compiled script."]); return; }
+
+        this.levelChecker?.setUserCompiled(this.compiledScript);
+        let starCount:number|undefined = await this.levelChecker?.assessScript();
+        //^ requires multiple calls to assess script to isolate the required "await" call for better practice
+        if(!starCount){ starCount = 0; }
+        //^ solves TS-2322 but should not ever get satisfied because method only gets called when in campain mode
+        let message:string|undefined = this.levelChecker?.getMessage();
+        if(!message){ message = "No fetched message means something is wrong with the JS code. Try refreshing page."; }
+        //^ solves TS-2322 but should not ever get satisfied
+
+        this.simulatorUI.update(UICatagory.status,[message]);
+        if (starCount>0){ this.levelCompleted(); };
     }
     //#endregion
     //#region Links with simulator (ControlUnit)
