@@ -1,6 +1,6 @@
 import { ControlUnit } from "./vonNeumann.js";
 import { levelData } from "./levelData.js";
-//^ to read current level data as a custom 'Level' type.
+import { UICatagory } from "./simulatorUI.js";
 export var levelType;
 (function (levelType) {
     levelType[levelType["tutorial"] = 0] = "tutorial";
@@ -13,19 +13,22 @@ export var levelType;
 //^ Tutorial type - just tuotial/introduction levels.
 //^ See code report/dissertation regarding the 5 types of levels.
 export class LevelChecker {
-    ///private middleware:Middleware?
-    constructor(levelId) {
+    //^ Sole purpose of parent class referance is to update simimulator UI's status element for responsiveness - Human Computer Interaction (HCI) theory.
+    //^ Field is optional type to esure moduality and ability to test backend by itself (without frontend).
+    constructor(levelId, middleware) {
         this.currentLevel = levelData[levelId - 1];
         //^ argument should always be in valid integer range
         this.userCompiled = [];
         //^ just to instanciate the list
         this.message = "";
         //^ just to initialise the list
+        this.middleware = middleware || undefined;
     }
     //: Getters
     getObjective() { return this.currentLevel.objective; }
     getExampleCase() { return this.currentLevel.exampleCase; }
     getMessage() { return this.message; }
+    //^ is used dispite having 'updateStatus' because 'getMessage' is not dependent on frontend (unlike 'updateStatus') - being more stable and usable in unit tests.
     getExample() {
         if (this.currentLevel.exampleSolution)
             return this.currentLevel.exampleSolution;
@@ -62,10 +65,10 @@ export class LevelChecker {
     }
     //: Setters
     setUserCompiled(compiledScript) { this.userCompiled = compiledScript; }
-    constructResultMessage(caseIndex) {
+    constructResultMessage(caseIndex, starCount) {
         //^ Convert index to human-friendly labelling
         if (caseIndex == -1) {
-            this.message = "Level achieved, redirecting to level selector";
+            this.message = "Level achieved, " + starCount + " stars achieved! Go to level selector (from menu) to do next level";
             return;
         }
         //: Done in multiple lines to keep code simple and easy to read/update by developers.
@@ -98,6 +101,8 @@ export class LevelChecker {
                 return caseIndex;
             }
             //^ give index of case that causes the user script to not satisfy level's objective
+            this.updateStatus();
+            //^ inform user on current progress on assessing script
         }
         return -1;
         //^ user script satisfies level's objective
@@ -115,16 +120,22 @@ export class LevelChecker {
         }
         return true;
     }
+    updateStatus() { if (this.middleware) {
+        this.middleware.updateUI(UICatagory.status, [this.message]);
+    } }
     async assessScript() {
         //* called to check if level object is satisfied by user, and if so then how many stars
         const casesResult = await this.testCases();
-        this.constructResultMessage(casesResult);
         if (casesResult != -1) {
+            this.constructResultMessage(casesResult);
             return 0;
         }
         //^ User's compiled script does not satisfies level objective
-        return this.starCount(this.userCompiled.length);
-        //^ User's compiled script does satisfies level objective so star count is retruned.
+        /// return this.starCount(this.userCompiled.length);
+        //: User's compiled script does satisfies level objective so star count is returned.
+        const starCount = this.starCount(this.userCompiled.length);
+        this.constructResultMessage(casesResult, starCount);
+        return starCount;
     }
     levelType() {
         //* Do not need to check every optional attribute to determin level type (only the exclusives)!

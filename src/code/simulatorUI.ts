@@ -287,7 +287,7 @@ class EditorUI{
             //^ First argument is required but is not important.
             //^ True argument allows new line to be generate without forcing client to focus of the last line/row.
         }
-        for (let line=0; line<this.HTMLTable.rows.length+1; line++){
+        for (let line=0; line<this.HTMLTable.rows.length-1; line++){
             //^ length in incremented, by 1, to purposely have empty line underneath - to not confuse user if want to add to loaded script.
             for (let token=0; token<3; token++){
                 //* Repeat via label, opcode and operand.

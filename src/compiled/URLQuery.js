@@ -4,6 +4,14 @@ var Themes;
     Themes[Themes["lowContrast"] = 1] = "lowContrast";
     Themes[Themes["greyscale"] = 2] = "greyscale";
 })(Themes || (Themes = {}));
+export var Configs;
+(function (Configs) {
+    Configs[Configs["soundEffectToggle"] = 0] = "soundEffectToggle";
+    Configs[Configs["darkModeToggle"] = 1] = "darkModeToggle";
+    Configs[Configs["theme"] = 2] = "theme";
+    Configs[Configs["currentLevel"] = 3] = "currentLevel";
+})(Configs || (Configs = {}));
+//^ exported to be used by TS files that calls "URLQuery.getConfig"
 export class URLQuery {
     constructor() {
         const query = window.location.search.slice(1);

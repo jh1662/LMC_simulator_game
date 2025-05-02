@@ -1,6 +1,4 @@
-import { URLQuery } from "./URLQuery.js";
-
-enum Configs { soundEffectToggle, darkModeToggle, theme, currentLevel }
+import { URLQuery, Configs } from "./URLQuery.js";
 
 class Settings{
     private uRlQuery:URLQuery;

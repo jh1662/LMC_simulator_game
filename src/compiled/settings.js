@@ -1,11 +1,4 @@
-import { URLQuery } from "./URLQuery.js";
-var Configs;
-(function (Configs) {
-    Configs[Configs["soundEffectToggle"] = 0] = "soundEffectToggle";
-    Configs[Configs["darkModeToggle"] = 1] = "darkModeToggle";
-    Configs[Configs["theme"] = 2] = "theme";
-    Configs[Configs["currentLevel"] = 3] = "currentLevel";
-})(Configs || (Configs = {}));
+import { URLQuery, Configs } from "./URLQuery.js";
 class Settings {
     constructor(soundEffectToggleId, darkModeToggleId, themeSelectionId, menuId) {
         this.uRlQuery = new URLQuery();

@@ -1,6 +1,8 @@
 import { ControlUnit } from "./vonNeumann.js"
 import { levelData, Level } from "./levelData.js";
 //^ to read current level data as a custom 'Level' type.
+import { Middleware } from "./middleware.js";
+import { UICatagory } from "./simulatorUI.js";
 export enum levelType {tutorial, partial, contexual}
 //^ Program only sees 3 types of levels.
 //^ Partial type - partial and correcting levels becuase they have the same configurations of what attributes are used and which ones are not.
@@ -11,21 +13,25 @@ export class LevelChecker{
     private currentLevel:Level;
     private userCompiled:number[];
     private message:string;
-    ///private middleware:Middleware?
+    private middleware:Middleware|undefined
+    //^ Sole purpose of parent class referance is to update simimulator UI's status element for responsiveness - Human Computer Interaction (HCI) theory.
+    //^ Field is optional type to esure moduality and ability to test backend by itself (without frontend).
 
-    constructor(levelId: number){
+    constructor(levelId:number, middleware?:Middleware){
         this.currentLevel = levelData[levelId-1] as Level;
         //^ argument should always be in valid integer range
         this.userCompiled = [];
         //^ just to instanciate the list
         this.message = "";
         //^ just to initialise the list
+        this.middleware = middleware || undefined;
     }
 
     //: Getters
     public getObjective():string{ return this.currentLevel.objective; }
     public getExampleCase():string{ return this.currentLevel.exampleCase; }
     public getMessage(){ return this.message; }
+    //^ is used dispite having 'updateStatus' because 'getMessage' is not dependent on frontend (unlike 'updateStatus') - being more stable and usable in unit tests.
     public getExample():string[][]{
         if(this.currentLevel.exampleSolution) return this.currentLevel.exampleSolution;
         //^ not-undifined checking if-statement solves TS-2322
@@ -55,9 +61,9 @@ export class LevelChecker{
 
     //: Setters
     public setUserCompiled(compiledScript:number[]){ this.userCompiled = compiledScript; }
-    private constructResultMessage(caseIndex:number){ //< transformative setter
+    private constructResultMessage(caseIndex:number, starCount?:number){ //< transformative setter
         //^ Convert index to human-friendly labelling
-        if (caseIndex == -1){ this.message = "Level achieved, redirecting to level selector"; return; }
+        if (caseIndex == -1){ this.message = "Level achieved, "+starCount+" stars achieved! Go to level selector (from menu) to do next level"; return; }
         //: Done in multiple lines to keep code simple and easy to read/update by developers.
         this.message = "Script does not satisfies objective in case #"+(caseIndex+1);
         if (this.currentLevel.cases && this.currentLevel.cases[caseIndex] && this.currentLevel.cases[caseIndex][1]){
@@ -85,6 +91,8 @@ export class LevelChecker{
             console.log(output);
             if (!this.isSame(output,currentCase[1])){ return caseIndex; }
             //^ give index of case that causes the user script to not satisfy level's objective
+            this.updateStatus();
+            //^ inform user on current progress on assessing script
         }
         return -1;
         //^ user script satisfies level's objective
@@ -98,14 +106,17 @@ export class LevelChecker{
         }
         return true;
     }
+    private updateStatus(){ if (this.middleware){ this.middleware.updateUI(UICatagory.status,[this.message])} }
     public async assessScript():Promise<number>{
         //* called to check if level object is satisfied by user, and if so then how many stars
         const casesResult:number = await this.testCases();
-        this.constructResultMessage(casesResult);
-        if (casesResult != -1) { return 0; }
+        if (casesResult != -1) { this.constructResultMessage(casesResult); return 0; }
         //^ User's compiled script does not satisfies level objective
-        return this.starCount(this.userCompiled.length);
-        //^ User's compiled script does satisfies level objective so star count is retruned.
+        /// return this.starCount(this.userCompiled.length);
+        //: User's compiled script does satisfies level objective so star count is returned.
+        const starCount:number = this.starCount(this.userCompiled.length);
+        this.constructResultMessage(casesResult, starCount);
+        return starCount;
     }
     public levelType():levelType{
         //* Do not need to check every optional attribute to determin level type (only the exclusives)!

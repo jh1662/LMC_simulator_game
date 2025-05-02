@@ -1,4 +1,8 @@
 enum Themes{ default, lowContrast, greyscale }
+
+export enum Configs { soundEffectToggle, darkModeToggle, theme, currentLevel }
+//^ exported to be used by TS files that calls "URLQuery.getConfig"
+
 export class URLQuery{
     private parsedData:number[];
     constructor(){
