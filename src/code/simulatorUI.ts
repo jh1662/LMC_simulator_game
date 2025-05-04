@@ -524,7 +524,7 @@ class MiscellaneousUI{
         this.displayBox.innerHTML = this.displayExample;
         this.objectiveBox.textContent = objective;
     }
-    public displayManual():void{ window.open('manual.html', '_blank', 'width=800,height=600'); }
+    public displayManual():void{ window.open('manual.html'+window.location.search, '_blank', 'width=800,height=600'); }
     public changeStatus(status:string):void{ this.status.textContent = status; }
     public toggleDarkMode():void{
         //* note: dark/light mode is different to style themes

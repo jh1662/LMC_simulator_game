@@ -513,7 +513,7 @@ class MiscellaneousUI {
         this.displayBox.innerHTML = this.displayExample;
         this.objectiveBox.textContent = objective;
     }
-    displayManual() { window.open('manual.html', '_blank', 'width=800,height=600'); }
+    displayManual() { window.open('manual.html' + window.location.search, '_blank', 'width=800,height=600'); }
     changeStatus(status) { this.status.textContent = status; }
     toggleDarkMode() {
         //* note: dark/light mode is different to style themes

@@ -30,10 +30,38 @@ export class URLQuery{
     private applySettings():void{
         //* gets applied to every page so is in this file instead of a copy per page
         let theme:string;
-        if (this.parsedData[0]) { console.log("Sound effects on"); }
-        //^ TS treats '1' as true and '0' as false.
+        if (this.parsedData[0]) {
+            //^ TS treats '1' as true and '0' as false.
+            /* Only works for static/origninal buttons
+            document.querySelectorAll("button").forEach((button) => {
+                //x audio file source - https://pixabay.com/sound-effects/ui-button-heavy-button-press-metallic-333826/
+                //* inspired by https://www.w3schools.com/jsref/met_audio_play.asp
+                //^ does for all buttons instead of specifying one
+                button.addEventListener("click", () => {
+                    const audio:HTMLAudioElement = document.getElementById("soundEffect") as HTMLAudioElement;
+                    //^ fetches audio file
+                    audio.play();
+                    //^ plays audio file
+                });
+            });
+            */
+            //: Solution found to add listener to all future dynamicly loaded buttons.
+            //: Source - https://stackoverflow.com/questions/34896106/attach-event-to-dynamic-elements-in-javascript .
+            document.body.addEventListener("click", (event) => {
+                const target:HTMLElement = event.target as HTMLElement;
+                if (target.tagName == "BUTTON") {
+                    //x audio file source - https://pixabay.com/sound-effects/ui-button-heavy-button-press-metallic-333826/
+                    //* inspired by https://www.w3schools.com/jsref/met_audio_play.asp
+                    const audio:HTMLAudioElement = document.getElementById("soundEffect") as HTMLAudioElement;
+                    //^ fetches audio file
+                    audio.play();
+                    //^ plays audio file
+                }
+            });
+            console.log("Sound effects on"); }
         else{ console.log("Sound effects off"); }
 
+        //: determines if should be dark or light mode based on URL configuration/query
         if (this.parsedData[1]){ theme="-dark"; }
         else{ theme="-light"; }
 
