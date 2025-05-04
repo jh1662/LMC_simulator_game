@@ -47,7 +47,7 @@ class MemoryUI{
             for (let cell = 0; cell < 10; cell++) {
                 //* X-axis - appending cells/fields.
                 //* Writing to the cells as feilds but the cell count can also be concidered as column number.
-                rowEven.insertCell().innerHTML = `<b>${(row*10)+cell}</b>`;
+                rowEven.insertCell().innerHTML = `<b>${String((row*10)+cell).padStart(2, "0")}</b>`;
                 //^ Not the usual coding style, but it is very clear to the author.
                 //^ Cell's referance is not needed afterwards, hence not stored.
                 //^ "innerHTML" property is applied directly to the result of "rowEven.insertCell()" (the cell).
@@ -68,7 +68,8 @@ class MemoryUI{
         //* Table is 2-dimentional, but LMC simulator engine ('vonNeumann.ts') views memory as 1-dimentional.
         const cell:HTMLElement|null = document.getElementById(`memoryCell${index}`);
         //^ Satisfies TS-2531 - takes possibliity of null into account
-        if (cell instanceof HTMLInputElement) { cell.value = value.toString(); }
+
+        if (cell instanceof HTMLInputElement) { cell.value = value.toString().padStart(3, "0"); }
         //^ Satisfies TS-2339 - assures cell have the '.value' property
     }
     public compileToMemory(memory:number[]):void{
