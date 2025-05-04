@@ -451,12 +451,6 @@ export class ControlUnit {
             console.log("Instruction - " + String(this.registers.read(Register.instruction)));
             console.log("Accumulator - " + this.registers.read(Register.accumulator));
             console.log("Cycle count - " + cycleCount);
-            cycleCount++;
-            if (cycleCount >= this.cycleCountLimit) {
-                this.displayStatus(UICatagory.status, ["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
-                console.log("CYCLE TIMEOUT!");
-                break;
-            }
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
             await sleep(this.cycleInterval);
             this.fetch();
@@ -468,6 +462,13 @@ export class ControlUnit {
                 break;
             }
             await sleep(this.cycleInterval);
+            cycleCount++;
+            if (cycleCount >= this.cycleCountLimit) {
+                //^ satisfied when cycle count exceeds limit of 300 or user purposely stopped script execution (by pressing 'stop' button)
+                this.displayStatus(UICatagory.status, ["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
+                console.log("CYCLE TIMEOUT!");
+                break;
+            }
             await this.decode();
             //^ decode part of the cycle but also calls the specified instruction method for the execution part of the cycle
             await sleep(this.cycleInterval);

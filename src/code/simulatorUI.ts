@@ -609,7 +609,13 @@ export class SimulatorUI{
             (document.getElementById('toggleDisplay') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
             (document.getElementById('reset') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.reload());
             (document.getElementById('submitInput') as HTMLButtonElement).addEventListener("click", async () => await this.iOUI.cacheInput());
-
+            (document.getElementById('input') as HTMLInputElement).addEventListener("focus", async () => {
+                //* Alternative to clicking on 'submitInput' HTML button element.
+                //* Only works if user focuse (is currently typing/using textbox and press enter at the same time).
+                (document.getElementById('input') as HTMLInputElement).addEventListener("keydown", async (event) => {
+                    if (event.key == "Enter"){ await this.iOUI.cacheInput(); }
+                });
+            });
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
         window.addRowIfNeeded = this.addRowIfNeeded.bind(this);

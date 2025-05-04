@@ -72,7 +72,7 @@ export class LevelChecker{
             this.message += ` - from inputs ${this.currentLevel.cases[caseIndex][0].join(", ")}`;
         }
     }
-    private constructProcessingMessage(caseIndex:number){ this.message = "Checking user's compiled script with case #"+caseIndex+1 } //< transformative setter
+    private constructProcessingMessage(caseIndex:number){ this.message = "Checking user's compiled script with case #"+(caseIndex+1) } //< transformative setter
 
     private async testCases():Promise<number>{
         //* Returns Promise because of the ControlUnit.cycle's sleep statements.
