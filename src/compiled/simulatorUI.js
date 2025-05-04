@@ -331,7 +331,7 @@ class IOUI {
         //^ 1000 means empty as its outside valid range from LMC input number (-999 to 999)
     }
     ///public getInput = async (): Promise<number> => {
-    /*
+    /* Failed code (attempt for user's real-time input) from sprint 2
     public getInput = async (): Promise<number> => {
         this.input.readOnly = false;
         return new Promise<number>((resolve, reject) => {
@@ -593,6 +593,15 @@ export class SimulatorUI {
             document.getElementById('toggleDisplay').addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
             document.getElementById('reset').addEventListener("click", () => this.miscellaneousUI.reload());
             document.getElementById('submitInput').addEventListener("click", async () => await this.iOUI.cacheInput());
+            document.getElementById('input').addEventListener("focus", async () => {
+                //* Alternative to clicking on 'submitInput' HTML button element.
+                //* Only works if user focuse (is currently typing/using textbox and press enter at the same time).
+                document.getElementById('input').addEventListener("keydown", async (event) => {
+                    if (event.key == "Enter") {
+                        await this.iOUI.cacheInput();
+                    }
+                });
+            });
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
         window.addRowIfNeeded = this.addRowIfNeeded.bind(this);
