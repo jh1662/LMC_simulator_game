@@ -38,7 +38,7 @@ class MemoryUI{
         this.generateTable();
     }
     private generateTable():void {
-        for (let row = 0; row < 9; row++) {
+        for (let row = 0; row < 10; row++) {
             //* Y-axis - appending rows
             const rowEven = this.HTMLTable.insertRow();
             //^ Row 0,2,4,6, and 8
@@ -47,7 +47,7 @@ class MemoryUI{
             for (let cell = 0; cell < 10; cell++) {
                 //* X-axis - appending cells/fields.
                 //* Writing to the cells as feilds but the cell count can also be concidered as column number.
-                rowEven.insertCell().innerHTML = `<b>${cell}</b>`;
+                rowEven.insertCell().innerHTML = `<b>${(row*10)+cell}</b>`;
                 //^ Not the usual coding style, but it is very clear to the author.
                 //^ Cell's referance is not needed afterwards, hence not stored.
                 //^ "innerHTML" property is applied directly to the result of "rowEven.insertCell()" (the cell).
@@ -278,8 +278,9 @@ class EditorUI{
         //* Used only in campain mode.
         //* Can be used to either load partial script or example solution script.
         let rows:number = this.HTMLTable.rows.length - 1;
-        //^ minus 1 to account for token headers
-        for (rows; rows<script.length; rows++){
+        //^ Minus 1 to account for token headers.
+        //: Creates rows.
+        for (rows; rows<script.length+1; rows++){
             //* makes space to load the example solution script
             /// this.generateLine(new HTMLInputElement(), true);
             //^ uncaught error - HTMLInputElement cannot be instantiated directly
@@ -287,12 +288,15 @@ class EditorUI{
             //^ First argument is required but is not important.
             //^ True argument allows new line to be generate without forcing client to focus of the last line/row.
         }
+        //: populate the rows
         for (let line=0; line<this.HTMLTable.rows.length-1; line++){
             //^ length in incremented, by 1, to purposely have empty line underneath - to not confuse user if want to add to loaded script.
             for (let token=0; token<3; token++){
                 //* Repeat via label, opcode and operand.
                 //* Row headers will need to be taken into account.
                 const tokenSlotId:string = `input-${line}-${token}`;
+                if (line > script.length-1){ (document.getElementById(tokenSlotId) as HTMLInputElement).value = ""; continue;}
+                //^ erase the text content in any lines undeneath the loaded script
                 (document.getElementById(tokenSlotId) as HTMLInputElement).value = (script[line] as string[])[token] as string;
                 //^ TS-2532 solved with type assertions as 'script[line]' and 'script[line][token]' has string values.
             }
@@ -310,6 +314,8 @@ class IOUI{
     //^ button for submitting non-predefined inputs
     private firstOutput:boolean;
     //^ to prevent a comma before the first output in the display
+    private cachedInput:number;
+    //^ when pre-defined inputs are exhausted, next input is taken from here and will reset value once taken.
 
     constructor(input:string, predefinedInput:string, outputHistory:string, submitInput:string){
         this.input = document.getElementById(input) as HTMLInputElement;
@@ -317,11 +323,12 @@ class IOUI{
         this.outputHistory = document.getElementById(outputHistory) as HTMLInputElement;
         this.submitInput = document.getElementById(submitInput) as HTMLButtonElement;
         this.firstOutput = true;
+        this.cachedInput = 1000;
+        //^ 1000 means empty as its outside valid range from LMC input number (-999 to 999)
     }
     ///public getInput = async (): Promise<number> => {
-    public getInput():number{
-        return 0;
-        /*
+    /* Failed code (attempt for user's real-time input) from sprint 2
+    public getInput = async (): Promise<number> => {
         this.input.readOnly = false;
         return new Promise<number>((resolve, reject) => {
             const attachEventListener = () => {
@@ -350,21 +357,52 @@ class IOUI{
                 }
             };
         });
-        */
-    };
+    }
+    */
 
-    public output(appendingValue:string){
+    public async cacheInput():Promise<void>{
+        //* parse, verify, then store input (if valid) to 'this.cachedInput' field.
+        let input:string = this.input.value;
+        //^ fetches what ever value is in the input textbox
+        input = input.trim();
+        //^ make it easier for users by ignoring (assumed-to-be accidental) side whitesapces
+        if (input.length == 0){ return; }
+        //^ no point assaigning nothing
+        if (!(/^-?\d{1,3}$/).test(input)) {
+            //^ Regex copied from compiler.ts - is it number between -999 and 999?
+            this.input.value  = "Invalid: -999 to 999 only";
+            //^ If input is invalid, then tell user.
+        }
+        else {
+            this.input.value  = "Input cached.";
+            this.cachedInput = Number(input);
+            //^ assaigns valid input to cache input field wating to be taken by the backend when needed
+        }
+        /// this.input.focus();
+        /// this.input.readOnly = true;
+        //: clear input box after a while to not inconvenience user.
+        await new Promise((r) => setTimeout(r, 2000));
+        //^ Copied (and partially manipulated) from vonNeumann.ts.
+        //^ Not a constant of method this time because it is only needed once here.
+        this.input.value = "";
+        //^ clears textbox's content.
+    }
+    public getInput():number{ //< getter and setter
+        const inputted:number = this.cachedInput;
+        this.cachedInput = 1000;
+        //^ reset value
+        return inputted;
+    }
+    public output(appendingValue:string):void{
         if (!this.firstOutput){ this.outputHistory.value += (", "+appendingValue); return; }
         this.outputHistory.value = (appendingValue);
         this.firstOutput = false;
     }
-
-    public reset():void{
+    public reset():void{ //< setter
         this.predefinedInput.value = "";
         this.predefinedInput.readOnly = false;
         ///this.input.readOnly = true;
     }
-
     public start():number[]{
         //* Fetching and validating pre-defined inputs, not complex enough to be in a different class/file (and resetting output).
         //: for resetting the output
@@ -391,7 +429,6 @@ class IOUI{
         //^ parsed pre-defined inputs as integer array.
     }
 }
-
 class ALUUI{
     //: all input textboxes are readonly - output instead
     private flow:HTMLInputElement;
@@ -419,7 +456,6 @@ class ALUUI{
     public reset(){ this.update(NumberStatus.normal, "", "") }
     //^ used before next script execution
 }
-
 class RegistersUI{
     //* simplitic - only display integers or resets to "0" as the procession happens in the backend.
     //* specifically named in plural form to emphasise the
@@ -459,7 +495,6 @@ class RegistersUI{
         this.accumulator.value = "0";
     }
 }
-
 class MiscellaneousUI{
     //* Collection of managing single UI attributes that are not belong to a group.
     private HTMLEle:HTMLElement;
@@ -573,6 +608,7 @@ export class SimulatorUI{
             (document.getElementById('menu') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toMenu());
             (document.getElementById('toggleDisplay') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
             (document.getElementById('reset') as HTMLButtonElement).addEventListener("click", () => this.miscellaneousUI.reload());
+            (document.getElementById('submitInput') as HTMLButtonElement).addEventListener("click", async () => await this.iOUI.cacheInput());
 
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
@@ -591,11 +627,18 @@ export class SimulatorUI{
         return this.iOUI.start();
         //^ get pre-defined inputs
     }
-    ///public async getInput():Promise<number>{
-    ///    return await this.iOUI.getInput();
-    ///}
-    public getInput():number{
-        return this.iOUI.getInput();
+    public async getInput():Promise<number>{
+        this.miscellaneousUI.changeStatus("Waiting for user to enter input.")
+        while (true){
+            await new Promise((r) => setTimeout(r, 10));
+            //^ iterative sleep to prevent busy-waiting (10ms because responce times is not too important here)
+            const input:number = this.iOUI.getInput();
+            if (input != 1000){
+                //* do not return input until user enters a valid one
+                this.miscellaneousUI.changeStatus("Valid input received")
+                return input;
+            }
+        }
     }
 
     //: For the frontend (not relating to backend)

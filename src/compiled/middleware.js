@@ -36,7 +36,6 @@ export class Middleware {
             this.levelChecker = new LevelChecker(levelNum, this);
             this.simulatorUI = new SimulatorUI(this.levelChecker.getExampleCase(), this.levelChecker.getObjective());
             //: enable buttons exclusively used by campain mode
-            ///(document.getElementById('submitLevel') as HTMLButtonElement).disabled = false;
             document.getElementById('submitLevel').disabled = false;
             document.getElementById('loadExample').disabled = false;
             if (this.levelChecker.levelType() == levelType.tutorial) {
@@ -49,7 +48,7 @@ export class Middleware {
         //^ spefically located here to prevent TS-2564 without assaigning twice
         ///if (levelNum == 0){ return; }
         /// ^ stop everything as URL is an invalid one
-        if (levelNum != 0) {
+        if (levelNum > 0) {
             this.prepareLevel();
         }
         //^ render partial script if level type is appropiate
@@ -223,7 +222,7 @@ export class Middleware {
         this.simulatorUI.update(uIcatagory, content);
     }
     ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
-    getInput() { return this.simulatorUI.getInput(); }
+    async getInput() { return await this.simulatorUI.getInput(); }
     //: Controlling simulator's execution.
     changeSpeed(toSlower) {
         //* Make code simpler to use one method for both speeding up and slowing down.

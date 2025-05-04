@@ -336,7 +336,7 @@ describe("Testing", () => {
                         expect(await simulator.cycle()).toStrictEqual(["A"]);
                     });
                     describe("extremities", () => {
-                        test("output spacebar whitespace - first visable (exception to the whitespace) extended ASCII char (without input)", async () => {
+                        test("output first visable (exception to the whitespace) ASCII character (without input)", async () => {
                             //* check if output integers and memory include negatives
                             let compiled = [503, 903, 0, 33];
                             //^ lda TEN, oct,
@@ -345,7 +345,7 @@ describe("Testing", () => {
                             simulator.changeSpeed(1);
                             expect(await simulator.cycle()).toStrictEqual(["!"]);
                         });
-                        test("output 'ÿ' - last visable extended ASCII char (without input)", async () => {
+                        test("output 'ÿ' - last visable ASCII char (without input)", async () => {
                             //* check if output integers and memory include negatives
                             let compiled = [503, 903, 0, 255];
                             //^ lda TEN, oct,

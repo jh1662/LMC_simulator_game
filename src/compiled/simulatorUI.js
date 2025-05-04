@@ -38,7 +38,7 @@ class MemoryUI {
         this.generateTable();
     }
     generateTable() {
-        for (let row = 0; row < 9; row++) {
+        for (let row = 0; row < 10; row++) {
             //* Y-axis - appending rows
             const rowEven = this.HTMLTable.insertRow();
             //^ Row 0,2,4,6, and 8
@@ -47,7 +47,7 @@ class MemoryUI {
             for (let cell = 0; cell < 10; cell++) {
                 //* X-axis - appending cells/fields.
                 //* Writing to the cells as feilds but the cell count can also be concidered as column number.
-                rowEven.insertCell().innerHTML = `<b>${cell}</b>`;
+                rowEven.insertCell().innerHTML = `<b>${(row * 10) + cell}</b>`;
                 //^ Not the usual coding style, but it is very clear to the author.
                 //^ Cell's referance is not needed afterwards, hence not stored.
                 //^ "innerHTML" property is applied directly to the result of "rowEven.insertCell()" (the cell).
@@ -291,8 +291,9 @@ class EditorUI {
         //* Used only in campain mode.
         //* Can be used to either load partial script or example solution script.
         let rows = this.HTMLTable.rows.length - 1;
-        //^ minus 1 to account for token headers
-        for (rows; rows < script.length; rows++) {
+        //^ Minus 1 to account for token headers.
+        //: Creates rows.
+        for (rows; rows < script.length + 1; rows++) {
             //* makes space to load the example solution script
             /// this.generateLine(new HTMLInputElement(), true);
             //^ uncaught error - HTMLInputElement cannot be instantiated directly
@@ -300,12 +301,18 @@ class EditorUI {
             //^ First argument is required but is not important.
             //^ True argument allows new line to be generate without forcing client to focus of the last line/row.
         }
+        //: populate the rows
         for (let line = 0; line < this.HTMLTable.rows.length - 1; line++) {
             //^ length in incremented, by 1, to purposely have empty line underneath - to not confuse user if want to add to loaded script.
             for (let token = 0; token < 3; token++) {
                 //* Repeat via label, opcode and operand.
                 //* Row headers will need to be taken into account.
                 const tokenSlotId = `input-${line}-${token}`;
+                if (line > script.length - 1) {
+                    document.getElementById(tokenSlotId).value = "";
+                    continue;
+                }
+                //^ erase the text content in any lines undeneath the loaded script
                 document.getElementById(tokenSlotId).value = script[line][token];
                 //^ TS-2532 solved with type assertions as 'script[line]' and 'script[line][token]' has string values.
             }
@@ -313,18 +320,19 @@ class EditorUI {
     }
 }
 class IOUI {
-    //^ to prevent a comma before the first output in the display
+    //^ when pre-defined inputs are exhausted, next input is taken from here and will reset value once taken.
     constructor(input, predefinedInput, outputHistory, submitInput) {
         this.input = document.getElementById(input);
         this.predefinedInput = document.getElementById(predefinedInput);
         this.outputHistory = document.getElementById(outputHistory);
         this.submitInput = document.getElementById(submitInput);
         this.firstOutput = true;
+        this.cachedInput = 1000;
+        //^ 1000 means empty as its outside valid range from LMC input number (-999 to 999)
     }
     ///public getInput = async (): Promise<number> => {
-    getInput() {
-        return 0;
-        /*
+    /*
+    public getInput = async (): Promise<number> => {
         this.input.readOnly = false;
         return new Promise<number>((resolve, reject) => {
             const attachEventListener = () => {
@@ -353,9 +361,43 @@ class IOUI {
                 }
             };
         });
-        */
     }
-    ;
+    */
+    async cacheInput() {
+        //* parse, verify, then store input (if valid) to 'this.cachedInput' field.
+        let input = this.input.value;
+        //^ fetches what ever value is in the input textbox
+        input = input.trim();
+        //^ make it easier for users by ignoring (assumed-to-be accidental) side whitesapces
+        if (input.length == 0) {
+            return;
+        }
+        //^ no point assaigning nothing
+        if (!(/^-?\d{1,3}$/).test(input)) {
+            //^ Regex copied from compiler.ts - is it number between -999 and 999?
+            this.input.value = "Invalid: -999 to 999 only";
+            //^ If input is invalid, then tell user.
+        }
+        else {
+            this.input.value = "Input cached.";
+            this.cachedInput = Number(input);
+            //^ assaigns valid input to cache input field wating to be taken by the backend when needed
+        }
+        /// this.input.focus();
+        /// this.input.readOnly = true;
+        //: clear input box after a while to not inconvenience user.
+        await new Promise((r) => setTimeout(r, 2000));
+        //^ Copied (and partially manipulated) from vonNeumann.ts.
+        //^ Not a constant of method this time because it is only needed once here.
+        this.input.value = "";
+        //^ clears textbox's content.
+    }
+    getInput() {
+        const inputted = this.cachedInput;
+        this.cachedInput = 1000;
+        //^ reset value
+        return inputted;
+    }
     output(appendingValue) {
         if (!this.firstOutput) {
             this.outputHistory.value += (", " + appendingValue);
@@ -550,6 +592,7 @@ export class SimulatorUI {
             document.getElementById('menu').addEventListener("click", () => this.miscellaneousUI.toMenu());
             document.getElementById('toggleDisplay').addEventListener("click", () => this.miscellaneousUI.toggleDisplayMode(false));
             document.getElementById('reset').addEventListener("click", () => this.miscellaneousUI.reload());
+            document.getElementById('submitInput').addEventListener("click", async () => await this.iOUI.cacheInput());
         });
         //: Handles frontend-only functionality but for HTML elements that are dynamicly generated after after DOM load
         window.addRowIfNeeded = this.addRowIfNeeded.bind(this);
@@ -565,11 +608,18 @@ export class SimulatorUI {
         return this.iOUI.start();
         //^ get pre-defined inputs
     }
-    ///public async getInput():Promise<number>{
-    ///    return await this.iOUI.getInput();
-    ///}
-    getInput() {
-        return this.iOUI.getInput();
+    async getInput() {
+        this.miscellaneousUI.changeStatus("Waiting for user to enter input.");
+        while (true) {
+            await new Promise((r) => setTimeout(r, 10));
+            //^ iterative sleep to prevent busy-waiting (10ms because responce times is not too important here)
+            const input = this.iOUI.getInput();
+            if (input != 1000) {
+                //* do not return input until user enters a valid one
+                this.miscellaneousUI.changeStatus("Valid input received");
+                return input;
+            }
+        }
     }
     //: For the frontend (not relating to backend)
     compile(memory) { this.memoryUI.compileToMemory(memory); } //< call by middleware
