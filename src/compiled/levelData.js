@@ -147,21 +147,16 @@ export const levelData = [
             ["", "STA", "num1"],
             ["", "INP", ""],
             ["", "STA", "num2"],
-            ["loop", "LDA", "TOTAL"],
-            ["", "ADD", "num1"],
-            ["", "STA", "total"],
+            ["", "SUB", "num1"],
+            ["", "BRP", "pos"],
             ["", "LDA", "num2"],
-            ["", "SUB", "one"],
-            ["", "STA", "num2"],
-            ["", "BRP", "loop"],
-            ["", "LDA", "total"],
-            ["", "STA", "total"],
             ["", "OUT", ""],
-            ["", "HLT", ""],
+            ["", "BRA", "exit"],
+            ["pos", "LDA", "num1"],
+            ["", "OUT", ""],
+            ["exit", "HLT", ""],
             ["num1", "DAT", ""],
-            ["num2", "DAT", ""],
-            ["one", "DAT", "1"],
-            ["total", "DAT", "0"]
+            ["num2", "DAT", ""]
         ],
         exampleSolution: [
             ["", "INP", ""],
@@ -654,7 +649,9 @@ export const levelData = [
         ],
         cases: [
             [[], ["0", "1", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144", "233", "377", "610", "987"]]
-            //^
+            //^ The only level where solution script does not take inputs (only generates).
+            //^ This means user can cheat but will not get 3 stars.
+            //^ But does not fully matter as student will have done the other levels first.
         ]
     },
     //#endregion
