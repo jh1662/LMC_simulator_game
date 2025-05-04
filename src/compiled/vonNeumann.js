@@ -227,7 +227,7 @@ export class ControlUnit {
         this.displayStatus(UICatagory.status, ["Little man fetches next instruction at mail locker #" + this.registers.read(Register.programCounter)]);
         this.displayStatus(UICatagory.displayImage, ["fetching.png"]);
     }
-    decode() {
+    async decode() {
         this.displayStatus(UICatagory.status, ["Little man open the mail and reads: " + this.ram.read(Register.programCounter)]);
         //^ Simpler thad getting from memory address and memory instruction registers because those would require formatting such as conditional padding.
         this.displayStatus(UICatagory.displayImage, ["decoding.png"]);
@@ -266,7 +266,7 @@ export class ControlUnit {
             case 8:
                 this.BRP();
                 break;
-            default: this.IO(); //< case 9
+            default: await this.IO(); //< case 9
             //^ Used "default" for code integrety.
             //^ Either input (901), output integer (902), or output extended ASCII character (only if in specified range) (903).
         }
@@ -371,7 +371,7 @@ export class ControlUnit {
     }
     ///private async IO(){
     ///* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
-    IO() {
+    async IO() {
         //* Takes user input for accumulator value or output from accumulator value.
         const address = this.registers.read(Register.address);
         switch (address) {
@@ -382,7 +382,7 @@ export class ControlUnit {
                 if (input == -1000) {
                     ///if (this.middleware != undefined) { input = await this.middleware.getInput(); }
                     if (this.middleware != undefined) {
-                        input = this.middleware.getInput();
+                        input = await this.middleware.getInput();
                     }
                     //^ middleware will be undifined when testing only the backend simulator
                     else {
@@ -468,7 +468,7 @@ export class ControlUnit {
                 break;
             }
             await sleep(this.cycleInterval);
-            this.decode();
+            await this.decode();
             //^ decode part of the cycle but also calls the specified instruction method for the execution part of the cycle
             await sleep(this.cycleInterval);
             //: increment and check in PC's value went over limit (99)

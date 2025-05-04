@@ -63,7 +63,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             // output the basic ASCII characters
             */
             let compiled:number[] = [510, 313, 513, 903, 111, 313, 212, 709, 602, 0, 32, 1, 127, 0];
-            let predefinedInputs:number[] = [20,300,41];
+            let predefinedInputs:number[] = [];
             let simulator:ControlUnit = new ControlUnit(compiled,predefinedInputs);
             simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(
@@ -272,7 +272,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
         //* missing Indirect Addressing and Immediate Addressing because they contradict the LMC standard
     });
     describe("pbrinkmeier's LMC assembly program example",() => {
-        test('"takes two inputs and puts their difference in the outbox" program (basically subtracting the 1st number from the 2nd number)', async () => {
+        test('"takes two inputs and puts their difference in the outbox" program', async () => {
             /*
             INP
             STA first
@@ -333,7 +333,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["1","0","1","0","1","0","1","0"]);
         });
-        test('"Example 3 - Calculate the square of a number', async () => {
+        test('"Example 3 - Calculate the square of a number program', async () => {
             /*
             start	INP
             STA	number
@@ -364,7 +364,7 @@ describe("Testing based on other LMC program's examples to test if this is up to
             simulator.changeSpeed(1);
             expect(await simulator.cycle()).toStrictEqual(["81"]);
         });
-        test('"Example 4 - Integer division', async () => {
+        test('"Example 4 - Integer division" program', async () => {
             /*
             start	INP
             STA	dividend
@@ -460,6 +460,8 @@ describe("Testing based on other LMC program's examples to test if this is up to
         });
         //* As of this moment, the "Shift left" program is inaccessable (404 error)
         test('"Copy N inputs to an array" (self-modifying) program', async () => {
+            //* Does not output as it just changes values inside memory.
+            //* Still included to see if scrip runs as intended.
             /*
             INP
             STA C
