@@ -53,11 +53,12 @@ export class Middleware {
         }
         //^ render partial script if level type is appropiate
     }
-    //#region campain
+    //#region campaign
     campainLevel() {
         //* Mere method is not worth being its own class.
         //* -1 for sandbox, 0 for invalid, 1-30 for level number.
         let fragmentId = window.location.hash.slice(1);
+        //^ the '.slice(1)' removes the hastag denoter from the string
         console.log(fragmentId);
         /// fragmentId = fragmentId.slice(1);
         //^ redundant since making code more compact
@@ -264,7 +265,7 @@ export class Middleware {
     }
 }
 //@ts-ignore (TS-6133)
+const uRlQuery = new URLQuery();
+//@ts-ignore (TS-6133)
 const middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
-//@ts-ignore (TS-6133)
-const uRlQuery = new URLQuery();

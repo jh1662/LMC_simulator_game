@@ -26,7 +26,8 @@ async function checkerHelper3Star(level) {
         //^ Assume that user submits the same as the example solution allowing testing of both submittng scripts and the example solution's validity.
         const uppercaseScriptSolution = scriptSolution.map((line) => line.map((token) => token.toUpperCase()));
         //^ To simulate SimulatorUI's capitalisation feature.
-        //^ Sources - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map and https://stackoverflow.com/questions/29719329/convert-array-into-upper-case .
+        //^ Sources - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+        //^ and https://stackoverflow.com/questions/29719329/convert-array-into-upper-case .
         const compiledSolution = compiler.validateAndCompile(uppercaseScriptSolution);
         //^ Attempt to compile script.
         console.log(compiledSolution);
@@ -350,10 +351,10 @@ describe('Testing level checking', () => {
     });
     describe('More detailed check testing', () => {
         describe('Unsuccessful check testing', () => {
-            test('Different program', async () => { await checkerHelperCustom(9, [901, 901, 902]); });
+            test('Different program', async () => { expect(await checkerHelperCustom(9, [901, 901, 902])).toBe(0); });
             //^ Instead of comparing inputs, the user's compiled program simply takes in two inputs and outputs the 2nd input.
             //^ This program is completely different so it gets 0 stars indicating that level objective failed to be satisfied.
-            test('Infinite loop program', async () => { await checkerHelperCustom(9, [901, 316, 901, 602]); });
+            test('Infinite loop program', async () => { expect(await checkerHelperCustom(9, [901, 316, 901, 602])).toBe(0); });
             //^ Instead of comparing inputs, the user's compiled program simply takes in two inputs and outputs the 2nd input but
             //^ then always loop/branch back to the outputting in an infinite loop until timeout.
             //! Due to script relying on the ControlUnit's timeout feature to end, execution will take long time.

@@ -11,7 +11,7 @@
 <body>
     <h1>Instruction Manual</h1>
     <p class="border rounded p-3">Little Man Computer (LMC) is a visual simulator of a simplied version of the Von Neumann architecture CPU (computer processing).
-        Below is a quick guide that will assist helping inexperienced users whether they are stuck on a campain level or just want to play around in the sandbox mode.
+        Below is a quick guide that will assist helping inexperienced users whether they are stuck on a campaign level or just want to play around in the sandbox mode.
     </p>
     <!--#region Instruction Set-->
     <h2>Instruction Set</h2>
@@ -174,11 +174,12 @@
         <li>Compile - Attempts to compile script and store in memory.</li>
         <li>Stop - Stops currently executing assembly program.</li>
         <li>Reset - Reloads page to rid off unexpected errors (and current script, so think twice before reloading).</li>
-        <li>Toggle Display - Switches between Little Man action display and the current campain level objective (does not really matter if in sandbox mode).</li>
+        <li>Toggle Display - Switches between Little Man action display and the current campaign level objective (does not really matter if in sandbox mode).</li>
         <li>Toggle Execution Mode - Switches between continuously running each cycle, but with configurable speeds, or only execute next cycle when "New Cycle" button is pressed.</li>
     </ul>
     <!--#endregion-->
     <!--#region ALU labelling-->
+    <h2>Arithmetic Logical Unit</h2>
     <div class="well border rounded col-md-4 p-3">
         <span>Arithmetic Logical Unit status</span>
         <div class="d-flex">
@@ -213,6 +214,130 @@
             <li>Result - Result of the last operation performed in the Arithmetic Logical Unit.</li>
         </ol>
     </div>
+    <!--#endregion-->
+    <!--#region URL saving-->
+    <h2>Loading game save using URL</h2>
+    <p>Instead of cookies, this web application stores both the campaign progress and styling setting configurations are stored in the URL.</p>
+    <p>It is recommended for user to keep/save the URL and use it next time to load the users data to not start from scratch.</p>
+    <p>URL layout: https://jh1662.github.io/LMC_simulator_game/<b>[Page Navigation]</b>/?<b>[Sound Effect Toggle]</b>/<b>[Dark/Light Mode Toggle]</b>/<b>[Current Theme]</b>/<b>[Campaign Levels Completed]</b></p>
+    <!--#endregion-->
+    <!--#region Campaign level type-->
+    <h2>Different types of campaign levels</h2>
+    <table class="table">
+        <header><tr><td>Level type</td><td>Nature</td><td>Affected Levels</td></tr></header>
+        <tr>
+            <td>Tutorial</td>
+            <td>Simple teaches how to code in the LMC - only objective is to learn. Just click "Finish tutorial" to proceed to the next level.</td>
+            <td>1, 2, 3, 4, 5, 6, 7, 8</td>
+        </tr>
+        <tr>
+            <td>Contexual</td>
+            <td>Level objective is contexualised, no other traits.</td>
+            <td>13, 14, 16, 17</td>
+        </tr>
+        <tr>
+            <td>Big formula</td>
+            <td>Level objective is based making a program for a mathematical equation.</td>
+            <td>10, 20</td>
+        </tr>
+        <tr>
+            <td>Correcting</td>
+            <td>An assembly script is already loaded but is inncorrect, user must find mistakes and correct them.</td>
+            <td>9, 12, 19</td>
+        </tr>
+        <tr>
+            <td>Partial</td>
+            <td>Part of an assembly script is already loaded, user must complete the script to satisfy the level's objective.</td>
+            <td>11, 15, 18</td>
+        </tr>
+    </table>
+    <!--#endregion-->
+    <!--#region Campaign level nature-->
+    <h2>Each campaign level's nature</h2>
+    <table class="table">
+        <header><tr><td>Level #</td><td>Type</td><td>3-star line count limit</td><td>2-star line count limit</td><td>Program</td></tr></header>
+        <tr>
+            <td>1</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <!--^ all in one line to save space as innerHTMLs are short and concistent -->
+            <td>relay - input then output</td>
+        </tr>
+        <tr>
+            <td>2</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>adder calculator - store input then add</td>
+        </tr>
+        <tr>
+            <td>3</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>withdrawal - load then subtract</td>
+        </tr>
+        <tr>
+            <td>4</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>hundred rounding - Shift right twice then left twice</td>
+        </tr>
+        <tr>
+            <td>5</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>character set - number to ASCII converter</td>
+        </tr>
+        <tr>
+            <td>6</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>varaibles - add 10 to input</td>
+        </tr>
+        <tr>
+            <td>7</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>selection (if-statements) - branching if zero then if zero/positive</td>
+        </tr>
+        <tr>
+            <td>8</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>iteration - using counter to exit infinite loop</td>
+        </tr>
+        <tr>
+            <td>9</td><td>Correcting</td><td>14</td><td>19</td>
+            <td>comparison - which input is higher</td>
+        </tr>
+        <tr>
+            <td>10</td><td>Big formula</td><td>8</td><td>13</td>
+            <td>linear graph equation - y=2x+3</td>
+        </tr>
+        <tr>
+            <td>11</td><td>Partial</td><td>13</td><td>18</td>
+            <td>even - is positive number even?</td>
+        </tr>
+        <tr>
+            <td>12</td><td>Correcting</td><td>20</td><td>25</td>
+            <td>positive multiplication - calculator</td>
+        </tr>
+        <tr>
+            <td>13</td><td>Contexual</td><td>5</td><td>10</td>
+            <td>unit converter - add 273 for C to K</td>
+        </tr>
+        <tr>
+            <td>14</td><td>Contexual</td><td>22</td><td>27</td>
+            <td>squaring - input ^ 2</td>
+        </tr>
+        <tr>
+            <td>15</td><td>Partial</td><td>12</td><td>17</td>
+            <td>overflow - addition over the limit?</td>
+        </tr>
+        <tr>
+            <td>16</td><td>Contexual</td><td>7</td><td>12</td>
+            <td>digit significance - least significant digit</td>
+        </tr>
+        <tr>
+            <td>17</td><td>Contexual</td><td>23</td><td>18</td>
+            <td>floor division - calculator</td>
+        </tr>
+        <tr>
+            <td>18</td><td>Partial</td><td>65</td><td>70</td>
+            <td>FizzBuzz - classic programming</td>
+        </tr>
+        <tr>
+            <td>19</td><td>Correcting</td><td>24</td><td>29</td>
+            <td>bank balance - adding/subtracting until negative</td>
+        </tr>
+        <tr>
+            <td>20</td><td>Big formula</td><td>18</td><td>23</td>
+            <td>fibonacci sequence - 1st to 17th term (0-987)</td>
+        </tr>
+    </table>
     <!--#endregion-->
     <!--#region legalities-->
     <h2>Legal claimers</h2>

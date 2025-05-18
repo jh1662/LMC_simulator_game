@@ -35,7 +35,8 @@ img {
     /** using viewport fix instead of flexbox because "flex-end" does not appear to work*/
     position: fixed;
     bottom: -50px;
-    /*^ Is in negative because the SVG itself has empty space arounf the actual mascot*/
+    /*^ Is in negative because the SVG itself has empty space arounf the actual mascot.*/
+    /*^ Pixel unit is used because only an absolute (not relative) unit can make it work in this specfic scenario.*/
     right: 0;
     height: auto;
     width: 10rem;
@@ -54,3 +55,15 @@ img {
 .manualBottom{ padding-bottom: 8rem; }
 /*^ lets the user see the legal claimers without the mascot being in the way*/
 /*#endregion*/
+/*: From feedback implementation*/
+.pixelArt{
+    /** inherits from 'img' class*/
+    width: 512px;
+    /*^ Enlarged size also serves to not mess up the layout of the menu buttons. */
+    /*^ Overwrites property of 'img'.*/
+    /*^ Pixel unit is used to share the same non-scalable characteristic with other menu page elements, such as paragraphs and buttons.*/
+    image-rendering: pixelated;
+    /*^ supported in the Chromium-based browsers, such as: Chrome, Edge, Opera, et cetera */
+    image-rendering: crisp-edges;
+    /*^ supported in the other browsers, such as Firefox and Safari */
+}

@@ -51,7 +51,7 @@ export class LevelChecker{
         //^ not-undefined checking if-statement solves TS-2322
         return [];
     }
-    public starCount(lineCount:number):number{ //< conditional getter
+    private starCount(lineCount:number):number{ //< conditional getter
         if (this.currentLevel.stars && lineCount > this.currentLevel.stars[2]) { return 1; }
         if (this.currentLevel.stars && lineCount > this.currentLevel.stars[3]) { return 2; }
         //^ Another way to deal with potential undefined! (TS-2532).
@@ -88,7 +88,7 @@ export class LevelChecker{
             simulator.changeSpeed(1);
             //^ ensure fastest speed to reduce redundant waiting but does not cause busy-waiting
             const output:string[] = await simulator.cycle();
-            console.log(output);
+            ///console.log(output);
             if (!this.isSame(output,currentCase[1])){ return caseIndex; }
             //^ give index of case that causes the user script to not satisfy level's objective
             this.updateStatus();

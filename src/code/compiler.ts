@@ -13,7 +13,7 @@ export class Compiler{
         //* invalidToken may or may not be used depending on type of error ('errorType' argument).
         //* Code structure with or without 'invalidToken' is so similar that method overloading (
         //* methods with same name but different parameter set) is not worth it.
-        let message:string = ` error at the ${TokenType[tokenType]} of line ${lineId} - `
+        const message:string = ` error at the ${TokenType[tokenType]} of line ${lineId} - `
         //^ base the middle of the error message on where it happend (code line and token type)
         switch(errorType){
             //^ base left and right ends of error message on the error type and sometimes the content of the corrosponding invalid token ('invalidToken').
@@ -53,14 +53,13 @@ export class Compiler{
                 //^ using default case satisfy TS-2366 for method's return data-type
                 return "non-alphanumeric" + message + `token "${invalidToken}" is not alphanumeric. Alphanumeric must only comprise of numbers digits (0-9) and letters (A-Z)`;
 
-
         }
     }
     private errorMessage(lineId:number, tokenType:TokenType, errorType:ErrorType, invalidToken:string):void{
         //* 'errorMessage' and 'generateErrorMessage' became thier own methods because one has a lot code to accommodate all of the differnt kind of errors
         //* and the other calls a method from another class.
         const message:string = this.generateErrorMessage(lineId, tokenType, errorType, invalidToken);
-        console.log(message);
+        ///console.log(message);
         this.message = message;
     }
     private labelMapping(script:string[][]):Map<string, number>{

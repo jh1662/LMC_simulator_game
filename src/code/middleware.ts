@@ -80,12 +80,13 @@ export class Middleware{
         if (levelNum > 0) { this.prepareLevel(); }
         //^ render partial script if level type is appropiate
     }
-    //#region campain
+    //#region campaign
     private campainLevel():number{
         //* Mere method is not worth being its own class.
         //* -1 for sandbox, 0 for invalid, 1-30 for level number.
         let fragmentId:string = window.location.hash.slice(1);
-        console.log(fragmentId);
+        //^ the '.slice(1)' removes the hastag denoter from the string
+        ///console.log(fragmentId);
         /// fragmentId = fragmentId.slice(1);
         //^ redundant since making code more compact
         if (fragmentId == ""){ return -1; }
@@ -103,7 +104,7 @@ export class Middleware{
 
         return level;
     }
-    private prepareLevel(){
+    private prepareLevel():void{
         //* Called for every level but only makes a differance for partial and tutorial type levels.
         const partialScript:string[][] = this.levelChecker?.givePartial() as string[][];
         //^ type assertion for TS-2322 because levelChecker should never be undefined if caller method is called.
@@ -111,7 +112,7 @@ export class Middleware{
         //^ can also be done using 'this.levelChecker?.levelType()'
         this.simulatorUI.loadSript(partialScript);
     }
-    private loadLevelSolution(){
+    private loadLevelSolution():void{
         let script:string[][]|undefined;
         if (this.levelChecker?.levelType() == levelType.tutorial) {script = this.levelChecker?.givePartial(); }
         //^ tutorial level's partial script is its solution where user can use instead of reloading the simulator page.
@@ -120,7 +121,7 @@ export class Middleware{
         //^ solves TS-2345 by checking for undefined - should not be satisfied unless unexpected error how simulator thinking its in campain mode when it is not
         this.simulatorUI.loadSript(script);
     }
-    private levelCompleted(){
+    private levelCompleted():void{
         //* Update URL query to increment total completed levels - allowing user to do the next level (limited to total number of levels).
         /// const campainProgress:number = Number(window.location.search.match(/\d{1,2}(?=#)/));
         //^ hastag/fragment is not part for 'window.location.search' and to search without is to make the regex too complex
@@ -142,11 +143,11 @@ export class Middleware{
         //^ Allows to change URL without refreshing.
         //^ In second parameter, 'window.location.herf' is not needed because method automatically use it if not stated in argument.
         //^ Source - https://www.geeksforgeeks.org/how-to-modify-url-without-reloading-the-page-using-javascript/
-        console.log(window.location.search);
+        ///console.log(window.location.search);
         /// window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
         /// //^ Regex supports the '.replace' call - https://www.w3schools.com/js/js_regexp.asp
     }
-    private async levelCheck(){
+    private async levelCheck():Promise<void>{
         //* Check user-provided compiled script and check it to see if satisfies current level's objective.
         /// * Returns star count where '0' is fail and rages 0-3.
         /// * Calls frontend many times to update status multiple times to satisfy HCI priciples by makeing page reponsive - not thinking it is frozen/stuck.
@@ -214,7 +215,7 @@ export class Middleware{
 
     //: called by VonNeuman.ts
     public updateUI(uIcatagory:UICatagory, content:string[]):void{
-        console.log("update: "+uIcatagory+"-"+content);
+        ///console.log("update: "+uIcatagory+"-"+content);
         this.simulatorUI.update(uIcatagory,content);
     }
     ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }
@@ -257,7 +258,7 @@ export class Middleware{
 }
 
 //@ts-ignore (TS-6133)
+const uRlQuery:URLQuery = new URLQuery();
+//@ts-ignore (TS-6133)
 const middleware:Middleware = new Middleware();
 //^ ts-ignore because compiler thinks class instance doesn't get used when infact it does (by HTML calls)
-//@ts-ignore (TS-6133)
-const uRlQuery:URLQuery = new URLQuery();

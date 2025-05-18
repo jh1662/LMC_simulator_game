@@ -16,6 +16,8 @@
         <!--^ necessary to keep each section in thier own column, otherwise they all load in the first column-->
             <!--#region left section-->
             <div class="col-sm-4">
+                <span>Script editor</span>
+                <!--^ heading of the "well" div-->
                 <div class="well mb-3">
                     <!--^ mb,mt,mr,ml all used as paddings -->
                     <table class="table" id="editorTable">
@@ -41,6 +43,8 @@
                         </tr>
                     </table>
                 </div>
+
+                <span>Controls</span>
                 <div class="well">
                     <button class="btn mb-3" id="menu">Back to menu</button>
                     <button class="btn mb-3" id="reset">Reset</button>
@@ -65,6 +69,7 @@
             <!--#endregion-->
             <!--#region middle section-->
             <div class="col-sm-4">
+                <span>Registers</span>
                 <div class="well">
                     <div class="list-item">
                         <div class="input-group mb-3">
@@ -93,9 +98,10 @@
                         </div>
                     </div>
                 </div>
+
+                <span>Arithmetic Logical Unit status</span>
                 <div class="well">
-                    <span>Arithmetic Logical Unit status</span>
-                    <div class="d-flex">
+                    <div class="d-flex mb-3">
                         <input type="text" class="form-control" id="flow" style="flex: 0.5;" readonly>
                         <!--^ the style part is a shorthand for 'flex-shrink' or 'flex-grow' but can specify the scale of the effect -->
                         <!--^ and it is neccessary to tweak that way because the sub-section/'well' is too small that 'flex-shrink' does not -->
@@ -106,9 +112,11 @@
                         <input type="text" class="form-control" id="result" style="flex: 0.5;" readonly>
                     </div>
                 </div>
+
+                <span>Input/Output (IO)</span>
                 <div class="well">
                     <div class="group">
-                        <div class="input-group mb-3 mr-3 mt-3">
+                        <div class="input-group mb-3 mr-3">
                             <span class="input-group-text">Input</span>
                             <input type="text" class="form-control" id="input">
                         </div>
@@ -122,7 +130,9 @@
                         <input type="text" class="form-control" id="predefinedInputs">
                     </div>
                 </div>
-                <div class="container">
+
+                <span>Infomation</span>
+                <div class="well">
                     <div class="row">
                         <div class="col-md-6 well">
                             <div id="displayBox">If you are seing this message then that means that the JavaScript UI application loading isn't complete or failed.</div>
@@ -139,6 +149,7 @@
             <!--#endregion-->
             <!--#region right section-->
             <div class="col-sm-4">
+                <span>Memory (RAM)</span>
                 <div class="well">
                     <table class="table" id="memoryTable"></table>
                     <!--^ better for compiled TS to expand and fill the table for good coding practice -->
