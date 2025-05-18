@@ -11,10 +11,10 @@ class Menu{
         });
 
     }
-    private campain(){ window.location.href = 'levelSelection.html'+window.location.search; }
-    private sandbox(){ window.location.href = 'simulator.html'+window.location.search; }
-    private manual(){ window.open('manual.html'+window.location.search, '_blank'); }
-    private settings(){  window.location.href = 'settings.html'+window.location.search; }
+    private campain():void{ window.location.href = 'levelSelection.html'+window.location.search; }
+    private sandbox():void{ window.location.href = 'simulator.html'+window.location.search; }
+    private manual():void{ window.open('manual.html'+window.location.search, '_blank'); }
+    private settings():void{  window.location.href = 'settings.html'+window.location.search; }
 };
 //@ts-ignore (TS-6133) - Is used HTML but TS compiler does not know that.
 const menu:Menu = new Menu("campain","sandbox","manual","settings");

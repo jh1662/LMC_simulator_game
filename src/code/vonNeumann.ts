@@ -117,7 +117,7 @@ class Registers{
         this.accumulator = 0;
     }
     //: conditional accessor methods
-    public read(register:Register){ //< conditional exclusive getter
+    public read(register:Register):number{ //< conditional exclusive getter
         switch(register){
             case Register.programCounter: return this.programCounter;
             case Register.address: return this.address;
@@ -125,7 +125,7 @@ class Registers{
             default: return this.accumulator; //< case Register.accumulator
         }
     }
-    public write(register:Register, value:number){ //< conditional exclusive setter
+    public write(register:Register, value:number):void{ //< conditional exclusive setter
         switch(register){
             case Register.programCounter: this.programCounter = value; break;
             case Register.address: this.address = value; break;
@@ -147,11 +147,11 @@ class IO{
     }
 
     //: property methods
-    public output(operand:number|string){ //< mutator and display
+    public output(operand:number|string):void{ //< mutator and display
         this.outputHistory.push(String(operand));
-        console.log(operand);
+        ///console.log(operand);
     }
-    private stackShift(){ //< pop
+    private stackShift():number{ //< pop
         //* satisfies TS-2322 (return type could be either 'number' or 'undefined')
         const element = this.predefinedInputs.shift();
         //^ pops the list
@@ -221,7 +221,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["Program starting"]);
     }
     //: private methods
-    private fetch(){
+    private fetch():void{
         //* inter-class getter and inter-class mutator method
         const buffer:number = this.ram.read(this.registers.read(Register.programCounter));
         //^ call getter method
@@ -233,7 +233,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["Little man fetches next instruction at mail locker #"+this.registers.read(Register.programCounter)]);
         this.displayStatus(UICatagory.displayImage,["fetching.png"])
     }
-    private async decode(){ //< contitional caller method
+    private async decode():Promise<void>{ //< contitional caller method
         this.displayStatus(UICatagory.status,["Little man open the mail and reads: " + this.ram.read(Register.programCounter)]);
         //^ Simpler thad getting from memory address and memory instruction registers because those would require formatting such as conditional padding.
         this.displayStatus(UICatagory.displayImage,["decoding.png"]);
@@ -262,7 +262,7 @@ export class ControlUnit{
         }
     }
     //: methods for each instuction - the methods for instriction's execution
-    private ADD(){
+    private ADD():void{
         //* Add memory cell address’ value to accumulator’s value
         //: locate and get pointed value
         const address:number = this.registers.read(Register.address);
@@ -278,7 +278,7 @@ export class ControlUnit{
 
         this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
-    private SUB(){
+    private SUB():void{
         //* Subtract memory cell address’ value from accumulator’s value
         //: locate and get pointed value
         const address:number = this.registers.read(Register.address);
@@ -294,7 +294,7 @@ export class ControlUnit{
 
         this.displayStatus(UICatagory.aLU, [flow.toString(), operation, result]);
     }
-    private STA(){
+    private STA():void{
         //* Store accumulator’s value in memory cell address
         const address:number = this.registers.read(Register.address);
         const accumulator:number = this.registers.read(Register.accumulator);
@@ -305,7 +305,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.displayImage, ["sta.png"]);
         this.displayStatus(UICatagory.cell,[address.toString(), accumulator.toString()]);
     }
-    private SH(){
+    private SH():void{
         //* Shift the accumulator value’s base-10 digits of significance, by one digit, to the left or right
         let operation:string = "Shift " +this.registers.read(Register.accumulator);
         if(this.registers.read(Register.address) == 1){ //< left
@@ -325,7 +325,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.registerAccumulator, [this.registers.read(Register.accumulator).toString()]);
         this.displayStatus(UICatagory.aLU, ["SHIFT",operation,result]);
     }
-    private LDA(){
+    private LDA():void{
         //* Load memory address’s value to the accumulator (becomes the new accumulator’s value)
         const address:number = this.registers.read(Register.address);
         const value:number = this.ram.read(address);
@@ -337,7 +337,7 @@ export class ControlUnit{
 
         this.registers.write(Register.accumulator, value); //< loading operation
     }
-    private BRA(){
+    private BRA():void{
         //* Branch – change PC’s value to – the address value (regardless of accumulator’s value)
         const address:number = this.registers.read(Register.address);
 
@@ -347,7 +347,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["Little man branches to mail address by changing program counter to "+(address-1)]);
         this.displayStatus(UICatagory.displayImage,["branchSuccess.png"]);
     }
-    private BRZ(){
+    private BRZ():void{
         //* Branch – change PC’s value to – the address value if accumulator’s value is zero
         const address:number = this.registers.read(Register.address);
 
@@ -362,7 +362,7 @@ export class ControlUnit{
         this.displayStatus(UICatagory.status,["If calculator value is not 0, little man continues"+(address-1)]);
         this.displayStatus(UICatagory.displayImage,["branchFail.png"]);
     }
-    private BRP(){
+    private BRP():void{
         //* Branch – change PC’s value to – the address value if accumulator’s value is positive or zero (not negative)
         const address:number = this.registers.read(Register.address);
 
@@ -379,7 +379,7 @@ export class ControlUnit{
     }
     ///private async IO(){
         ///* Is async because it waits for user inputs when INP is executed ('901') and there is no pre-defined inputs left.
-    private async IO(){
+    private async IO():Promise<void>{
         //* Takes user input for accumulator value or output from accumulator value.
         const address:number = this.registers.read(Register.address);
         switch(address){
@@ -424,7 +424,7 @@ export class ControlUnit{
                 this.displayStatus(UICatagory.displayImage,["output.png"]);
         }
     }
-    public displayStatus(uIcatagory:UICatagory, content:string[]){ //< display method
+    public displayStatus(uIcatagory:UICatagory, content:string[]):void{ //< display method
         if (this.middleware == undefined) { return; }
         //^ no point updating UI when there is no UI, used in test files
         this.middleware.updateUI(uIcatagory,content);
@@ -450,10 +450,10 @@ export class ControlUnit{
             if (!this.cycleModeAutomatic){ this.cycleReady = false; }
 
             //: degugging purposes
-            console.log("PC - "+this.registers.read(Register.programCounter));
-            console.log("Instruction - "+String(this.registers.read(Register.instruction)));
-            console.log("Accumulator - "+this.registers.read(Register.accumulator));
-            console.log("Cycle count - "+cycleCount);
+            ///console.log("PC - "+this.registers.read(Register.programCounter));
+            ///console.log("Instruction - "+String(this.registers.read(Register.instruction)));
+            ///console.log("Accumulator - "+this.registers.read(Register.accumulator));
+            ///console.log("Cycle count - "+cycleCount);
 
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
             await sleep(this.cycleInterval);
@@ -471,7 +471,7 @@ export class ControlUnit{
             if (cycleCount >= this.cycleCountLimit){
                 //^ satisfied when cycle count exceeds limit of 300 or user purposely stopped script execution (by pressing 'stop' button)
                 this.displayStatus(UICatagory.status,["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
-                console.log("CYCLE TIMEOUT!");
+                ///console.log("CYCLE TIMEOUT!");
                 break;
             }
 
@@ -531,7 +531,7 @@ export class ControlUnit{
         return cycleModeAutomatic;
     }
 
-    public timeout(){ this.cycleCountLimit = 0; }
+    public timeout():void{ this.cycleCountLimit = 0; }
     //^ Infinite loop counter.
     //^ Makes cycle count limit lower (or same) as the current cycle count which causes the execution to stop.
 }

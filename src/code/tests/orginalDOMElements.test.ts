@@ -67,7 +67,7 @@ describe("Testing register textbox elements", () => {
     });
 
 });
-describe("Testing ALU elements (all textboxs)", () => {
+describe("Testing ALU elements (all textboxes)", () => {
     test("Flow", () => {
         const htmlElement:any = document.getElementById('flow');
         expect(htmlElement).not.toEqual(null);
@@ -160,7 +160,7 @@ describe("Control panel (group of buttons in bottom left)", () => {
         expect(htmlElement instanceof HTMLButtonElement).toEqual(true);
     });
 });
-describe("The first two lines of texboxes in the script editor", () => {
+describe("The first two lines of textboxes in the script editor", () => {
     //* Only tested the ids of the textbox and table because cell and rows ids are not called.
     //* Row and cells have ids for sake of integrity and good coding practive.
     test("testing the table containing the token textboxes (label, opcode, and operand)", () => {

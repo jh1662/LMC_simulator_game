@@ -26,7 +26,7 @@ class LevelSelection{
         //^ levelCountProgress - value depends on how many campain levels are completed by user.
     }
 
-    private generateLevelButtons(levelCount:number, levelCountProgress:number){
+    private generateLevelButtons(levelCount:number, levelCountProgress:number):void{
         let rowHTML:string = "";
         for (let levelNum = 1; levelNum < levelCount+1; levelNum++){
             //: No need for ids for buttons at they are not called at all.
@@ -48,8 +48,8 @@ class LevelSelection{
             }
         }
     }
-    private menu(){ window.location.href = "menu.html"+window.location.search; }
-    public selectLevel(level:number){
+    private menu():void{ window.location.href = "menu.html"+window.location.search; }
+    public selectLevel(level:number):void{
         window.location.href = "simulator.html"+window.location.search+"#"+level
     }
 };

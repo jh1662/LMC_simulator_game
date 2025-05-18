@@ -178,14 +178,7 @@ class EditorUI{
             script.push(line);
             //^ each sub-array is a line, of tokens, in the script.
         }
-        /*
-        //? If only top line runs the output is no parsed
-        //? but if both top and bottom lines run both outputs are parsed.
-        //? Most likely the cause is that the script somehow gets parsed (by object referance) before first output.
-        console.log(script);
-        console.log(this.parseScript(script));
-        */
-        console.log(script);
+        ///console.log(script);
         //! To help develop to help develop the level data in sprint 3^^^
         return this.parseScript(script);
         //^ Script is either a 2D array of tokens or an empty array.
@@ -275,7 +268,7 @@ class EditorUI{
         textbox.focus();
     }
 
-    public loadScript(script:string[][]){
+    public loadScript(script:string[][]):void{
         //* Used only in campain mode.
         //* Can be used to either load partial script or example solution script.
         let rows:number = this.HTMLTable.rows.length - 1;
@@ -441,7 +434,7 @@ class ALUUI{
         this.operation = document.getElementById(operation) as HTMLInputElement;
         this.result = document.getElementById(result) as HTMLInputElement;
     }
-    public update(flow:NumberStatus, operation:string, result:string){
+    public update(flow:NumberStatus, operation:string, result:string):void{
         switch(flow){
             case NumberStatus.normal: this.flow.value = "_"; break;
             //: better to use plus and minus signs instead of greater/less signs ('>' and '<') to not confuse the HTML.
@@ -454,7 +447,7 @@ class ALUUI{
         //^ formatting the string requires processing outside class
         this.result.value = result;
     }
-    public reset(){ this.update(NumberStatus.normal, "", "") }
+    public reset():void{ this.update(NumberStatus.normal, "", "") }
     //^ used before next script execution
 }
 class RegistersUI{
@@ -576,7 +569,7 @@ class MiscellaneousUI{
         (document.getElementById('executionControl') as HTMLOptGroupElement).innerHTML = '<button type="button" class="btn mb-3" id="faster" onclick="changeSpeed(false)">&lt;&lt;</button>\n<button type="button" class="btn mb-3" id="slower" onclick="changeSpeed(true)">&gt;&gt;</button>'
         //^ not necessary to use '\n' but makes the HTML code neater
     }
-    public reload(){ window.location.reload(); }
+    public reload():void{ window.location.reload(); }
     //^ Reload the entire page instead of just the class instance.
     //^ Important as it allows user to deal with unexpected errors.
 }
@@ -652,7 +645,7 @@ export class SimulatorUI{
     public compile(memory:number[]):void{ this.memoryUI.compileToMemory(memory); } //< call by middleware
     public resetRegesters():void{ this.registerUI.resetRegisters; } //< call by middleware
 
-    public update(catagory:UICatagory, value:string[]){ //< multi conditional caller
+    public update(catagory:UICatagory, value:string[]):void{ //< multi conditional caller
         //* 'value' - taking advantage of the list's dynamic size to allow one or multiple values - much less complicated than optional parameters
         switch(catagory){
             case UICatagory.registerAccumulator: this.registerUI.updateRegister(Register.accumulator,value[0] as string); break;

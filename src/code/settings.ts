@@ -25,24 +25,24 @@ class Settings{
         });
     }
     //: each corrosponds to a HTML imput element
-    private menu(){  window.location.href = 'menu.html'+window.location.search; }
-    private darkModeToggle(){
+    private menu():void{  window.location.href = 'menu.html'+window.location.search; }
+    private darkModeToggle():void{
         let currentToggleValue:number = this.uRlQuery.getConfig(Configs.darkModeToggle);
         if (currentToggleValue){ currentToggleValue--; } else { currentToggleValue++; }
         this.changeQuery([-1,currentToggleValue,-1,-1])
     }
-    private soundEffectToggle(){
+    private soundEffectToggle():void{
         //* extra logic and handling of a parameter is not worth making a common method for toggling
         let currentToggleValue:number = this.uRlQuery.getConfig(Configs.soundEffectToggle);
         if (currentToggleValue){ currentToggleValue--; } else { currentToggleValue++; }
         this.changeQuery([currentToggleValue,-1,-1,-1])
     }
-    private themeSelection(){
+    private themeSelection():void{
         const selectedIndex:number = this.themeSelector.selectedIndex;
         this.changeQuery([-1,-1,selectedIndex,-1])
     }
 
-    private changeQuery(configs:number[]){
+    private changeQuery(configs:number[]):void{
         //* Called when a config is changed
         //* Much easier to use a list parameter then two number arguments as the list way involves less logic.
         let query:string = "?"
