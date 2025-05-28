@@ -1,0 +1,70 @@
+/*#region Theme Configuration*/
+[data-theme="default-light"] {
+    /** originally the light mode in sprint 2*/
+    --background-color: #FFB;
+    --text-color: #000;
+    --primary-color: #0F0;
+    --secondary-color: #0AF;
+}
+[data-theme="default-dark"] {
+    /** originally the dark mode in sprint 2*/
+    --background-color: #886;
+    --text-color: #FFF;
+    --primary-color: #080;
+    --secondary-color: #058;
+}
+[data-theme="lowContrast-light"] {
+    --background-color: #0F0;
+    --text-color: #030;
+    --primary-color: #0FB;
+    --secondary-color: #BF0;
+}
+[data-theme="lowContrast-dark"] {
+    --background-color: #886;
+    --text-color: #FFF;
+    --primary-color: #058;
+    --secondary-color: #080;
+}
+[data-theme="greyscale-light"] {
+    --background-color: #FFF;
+    --text-color: #000;
+    --primary-color: #CCC;
+    --secondary-color: #333;
+}
+[data-theme="greyscale-dark"] {
+    --background-color: #000;
+    --text-color: #FFF;
+    --primary-color: #666;
+    --secondary-color: #555;
+}
+/*#endregion*/
+/*#region Component Styling*/
+* { color: var(--text-color) !important; }
+body { background-color: var(--background-color); }
+span {
+    background-color: var(--background-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+.btn {
+    background-color: var(--secondary-color);
+    border-color: var(--primary-color);
+}
+.btn:hover {
+    background-color: var(--primary-color);
+    border-color: var(--secondary-color);
+}
+input {
+    background-color: var(--primary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+.table td, .table th {
+    padding: 0;
+    border-color: var(--primary-color);
+}
+/*: for sprint 3*/
+.border { border-color: var(--primary-color) !important;}
+.form-select {
+    border-color: var(--primary-color);
+    background-color: var(--secondary-color);
+}
+/*#endregion*/

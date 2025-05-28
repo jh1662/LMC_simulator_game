@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default-light">
+<head>
+    <title>Manual</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="../styles/commons.css">
+    <link rel="stylesheet" href="../styles/default.css">
+    <audio id="soundEffect"><source src="../assets/soundEffect.mp3" type="audio/mpeg"></audio>
+    <!--^ Not used in this page but is there for standardisation - make 'URLQuery' code far simpler-->
+</head>
+<body class="p-4">
+    <h1>Instruction Manual</h1>
+    <p class="border rounded p-3">Little Man Computer (LMC) is a visual simulator of a simplied version of the Von Neumann architecture CPU (computer processing).
+        Below is a quick guide that will assist helping inexperienced users whether they are stuck on a campaign level or just want to play around in the sandbox mode.
+    </p>
+    <!--#region Instruction Set-->
+    <h2>Instruction Set</h2>
+    <table class="table">
+        <head>
+            <tr>
+                <!--^ 'tr' tags are still needed in header section for of semantic clarity and structural consistency-->
+                <th>Name</th>
+                <th>Mnemonic</th>
+                <th>Code</th>
+                <th>Description</th>
+            </tr>
+        </head>
+        <tbody>
+            <tr>
+                <td>Addition</td>
+                <td>ADD</td>
+                <td>1XX</td>
+                <td>Add memory cell address’ value to accumulator’s value</td>
+            </tr>
+            <tr>
+                <td>Subtraction</td>
+                <td>SUB</td>
+                <td>2XX</td>
+                <td>Subtract memory cell address’ value from accumulator’s value</td>
+            </tr>
+            <tr>
+                <td>Store from Accumulator</td>
+                <td>STA</td>
+                <td>3XX</td>
+                <td>Store accumulator’s value in memory cell address</td>
+            </tr>
+            <tr>
+                <td>Left Shift</td>
+                <td>LSH</td>
+                <td>401</td>
+                <td>Shift the accumulator value’s base-10 digits of significance to the left by one digit.</td>
+            </tr>
+            <tr>
+                <td>Right Shift</td>
+                <td>RSH</td>
+                <td>402</td>
+                <td>Shift the accumulator value’s base-10 digits of significance to the right by one digit.</td>
+            </tr>
+            <tr>
+                <td>Load to Accumulator</td>
+                <td>LDA</td>
+                <td>5XX</td>
+                <td>Load memory address’s value to the accumulator (becomes the new accumulator’s value).</td>
+            </tr>
+            <tr>
+                <td>Branch Always</td>
+                <td>BRA</td>
+                <td>6XX</td>
+                <td>Branch – change PC’s value to – the address value (regardless of accumulator’s value).</td>
+            </tr>
+            <tr>
+                <td>Branch if Zero</td>
+                <td>BRZ</td>
+                <td>7XX</td>
+                <td>Branch – change PC’s value to – the address value if accumulator’s value is zero.</td>
+            </tr>
+            <tr>
+                <td>Branch if Positive</td>
+                <td>BRP</td>
+                <td>8XX</td>
+                <td>Branch – change PC’s value to – the address value if accumulator’s value is positive or zero (not negative).</td>
+            </tr>
+            <tr>
+                <td>Input</td>
+                <td>INP</td>
+                <td>901</td>
+                <td>Takes user’s or predefined input and store it as accumulator’s value.</td>
+            </tr>
+            <tr>
+                <td>Output</td>
+                <td>OUT</td>
+                <td>902</td>
+                <td>Outputs from accumulator’s value (as integer).</td>
+            </tr>
+            <tr>
+                <td>Output as Character</td>
+                <td>OTC</td>
+                <td>903</td>
+                <td>Outputs from accumulator’s value as an ASCII character</td>
+            </tr>
+            <tr>
+                <td>Halt</td>
+                <td>HLT</td>
+                <td>0</td>
+                <td>Stops program</td>
+            </tr>
+            <tr>
+                <td>Data location</td>
+                <td>DAT</td>
+                <td>N/A</td>
+                <td>Compile data into memory before program starts (can be used as variables)</td>
+            </tr>
+        </tbody>
+    </table>
+    <!--#endregion-->
+    <!--#region Editor Navigation-->
+    <h2>Script Editor</h2>
+    <p>Use the following keys to navigate:</p>
+    <ul>
+        <li>Tab key - Go down a line if in an operand box.</li>
+        <li>Space key - Go down a line if in an operand box.</li>
+
+        <li>Enter key - Go back to the top line if on the bottom line.</li>
+        <li>Downwards key - Go back to the top line if on the bottom line.</li>
+        <li>Upwards key - Go to the bottom line if on the top line.</li>
+        <!-- Lower priority
+        <li>Shift key + right arrow key - Go down a line if in an operand box.</li>
+        <li>Shift key + enter key - Go to the bottom line if on the top line.</li>
+        <li>Shift key + left key - Go to the line like above if in a label box.</li>
+        <li>Shift key + space key - Go to the line like above if in a label box.</li>
+        -->
+    </ul>
+    <p> Typing on the bottom code line/row will generate a new empty one underneath.</p>
+    <!--#endregion-->
+    <!--#region Registers-->
+    <h2>Registers</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Valid range</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Program Counter (PC)</td>
+                <td>Dictates where the simulator fetches its next instruction (which RAM cell).</td>
+                <td>0 to 99</td>
+            </tr>
+            <tr>
+                <td>Memory Instruction Register (MIR)</td>
+                <td>Gathered from the first digit of the fetched instruction from memory.</td>
+                <td>0 to 9</td>
+            </tr>
+            <tr>
+                <td>Memory Address Register (MAR)</td>
+                <td>Gathered from the last two digits of the fetched instruction from memory.</td>
+                <td>0 to 99</td>
+            </tr>
+            <tr>
+                <td>Accumulator</td>
+                <td>A form of immediate storage for processor operations such as adding, outputing, inputing, etc.</td>
+                <td>-999 to 999</td>
+            </tr>
+        </tbody>
+    </table>
+    <!--#endregion-->
+    <!--#region Simulator Controls-->
+    <h2>Simulator Controls</h2>
+    <p>Controls relavent to simulator</p>
+    <ul>
+        <li>Run - Runs the compiled program as seen in the RAM table (requires valid compilation first)</li>
+        <li>Compile - Attempts to compile script and store in memory.</li>
+        <li>Stop - Stops currently executing assembly program.</li>
+        <li>Reset - Reloads page to rid off unexpected errors (and current script, so think twice before reloading).</li>
+        <li>Toggle Display - Switches between Little Man action display and the current campaign level objective (does not really matter if in sandbox mode).</li>
+        <li>Toggle Execution Mode - Switches between continuously running each cycle, but with configurable speeds, or only execute next cycle when "New Cycle" button is pressed.</li>
+    </ul>
+    <!--#endregion-->
+    <!--#region ALU labelling-->
+    <h2>Arithmetic Logical Unit</h2>
+    <div class="well border rounded col-md-4 p-3">
+        <span>Arithmetic Logical Unit status</span>
+        <div class="d-flex">
+            <input type="text" class="form-control" style="flex: 0.5;" value="[1]" readonly>
+            <input type="text" class="form-control" style="flex: 2;" value="[2]" readonly>
+            <input type="text" class="form-control" style="flex: 0.5;" value="[3]" readonly>
+        </div>
+        <ol>
+            <li>
+                Flow:
+                <table class="table">
+                    <header><tr><td>Symbol</td><td>Meaning</td><td>Explaination</td></tr></header>
+                    <tr>
+                        <td>_</td>
+                        <td>Normal</td>
+                        <td>Initial result in range (-999 to 999).</td>
+                    </tr>
+                    <tr>
+                        <td>^</td>
+                        <td>Overflow</td>
+                        <td>Result of operation exceeded 999 and thus resets back from -999.</td>
+                    </tr>
+                    <tr>
+                        <td>V</td>
+                        <td>Underflow</td>
+                        <td>Result of operation exceeded -999 and thus resets back from 999.</td>
+                    </tr>
+                </table>
+                <p>None of these indicate error with the simulator - fully informative.</p>
+            </li>
+            <li>Operation - Last operation performed in the Arithmetic Logical Unit.</li>
+            <li>Result - Result of the last operation performed in the Arithmetic Logical Unit.</li>
+        </ol>
+    </div>
+    <!--#endregion-->
+    <!--#region URL saving-->
+    <h2>Loading game save using URL</h2>
+    <p>Instead of cookies, this web application stores both the campaign progress and styling setting configurations are stored in the URL.</p>
+    <p>It is recommended for user to keep/save the URL and use it next time to load the users data to not start from scratch.</p>
+    <p>URL layout: https://jh1662.github.io/LMC_simulator_game/<b>[Page Navigation]</b>/?<b>[Sound Effect Toggle]</b>/<b>[Dark/Light Mode Toggle]</b>/<b>[Current Theme]</b>/<b>[Campaign Levels Completed]</b></p>
+    <!--#endregion-->
+    <!--#region Campaign level type-->
+    <h2>Different types of campaign levels</h2>
+    <table class="table">
+        <header><tr><td>Level type</td><td>Nature</td><td>Affected Levels</td></tr></header>
+        <tr>
+            <td>Tutorial</td>
+            <td>Simple teaches how to code in the LMC - only objective is to learn. Just click "Finish tutorial" to proceed to the next level.</td>
+            <td>1, 2, 3, 4, 5, 6, 7, 8</td>
+        </tr>
+        <tr>
+            <td>Contexual</td>
+            <td>Level objective is contexualised, no other traits.</td>
+            <td>13, 14, 16, 17</td>
+        </tr>
+        <tr>
+            <td>Big formula</td>
+            <td>Level objective is based making a program for a mathematical equation.</td>
+            <td>10, 20</td>
+        </tr>
+        <tr>
+            <td>Correcting</td>
+            <td>An assembly script is already loaded but is inncorrect, user must find mistakes and correct them.</td>
+            <td>9, 12, 19</td>
+        </tr>
+        <tr>
+            <td>Partial</td>
+            <td>Part of an assembly script is already loaded, user must complete the script to satisfy the level's objective.</td>
+            <td>11, 15, 18</td>
+        </tr>
+    </table>
+    <!--#endregion-->
+    <!--#region Campaign level nature-->
+    <h2>Each campaign level's nature</h2>
+    <table class="table">
+        <header><tr><td>Level #</td><td>Type</td><td>3-star line count limit</td><td>2-star line count limit</td><td>Program</td></tr></header>
+        <tr>
+            <td>1</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <!--^ all in one line to save space as innerHTMLs are short and concistent -->
+            <td>relay - input then output</td>
+        </tr>
+        <tr>
+            <td>2</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>adder calculator - store input then add</td>
+        </tr>
+        <tr>
+            <td>3</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>withdrawal - load then subtract</td>
+        </tr>
+        <tr>
+            <td>4</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>hundred rounding - Shift right twice then left twice</td>
+        </tr>
+        <tr>
+            <td>5</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>character set - number to ASCII converter</td>
+        </tr>
+        <tr>
+            <td>6</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>varaibles - add 10 to input</td>
+        </tr>
+        <tr>
+            <td>7</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>selection (if-statements) - branching if zero then if zero/positive</td>
+        </tr>
+        <tr>
+            <td>8</td><td>Tutorial</td><td>N/A</td><td>N/A</td>
+            <td>iteration - using counter to exit infinite loop</td>
+        </tr>
+        <tr>
+            <td>9</td><td>Correcting</td><td>14</td><td>19</td>
+            <td>comparison - which input is higher</td>
+        </tr>
+        <tr>
+            <td>10</td><td>Big formula</td><td>8</td><td>13</td>
+            <td>linear graph equation - y=2x+3</td>
+        </tr>
+        <tr>
+            <td>11</td><td>Partial</td><td>13</td><td>18</td>
+            <td>even - is positive number even?</td>
+        </tr>
+        <tr>
+            <td>12</td><td>Correcting</td><td>20</td><td>25</td>
+            <td>positive multiplication - calculator</td>
+        </tr>
+        <tr>
+            <td>13</td><td>Contexual</td><td>5</td><td>10</td>
+            <td>unit converter - add 273 for C to K</td>
+        </tr>
+        <tr>
+            <td>14</td><td>Contexual</td><td>22</td><td>27</td>
+            <td>squaring - input ^ 2</td>
+        </tr>
+        <tr>
+            <td>15</td><td>Partial</td><td>12</td><td>17</td>
+            <td>overflow - addition over the limit?</td>
+        </tr>
+        <tr>
+            <td>16</td><td>Contexual</td><td>7</td><td>12</td>
+            <td>digit significance - least significant digit</td>
+        </tr>
+        <tr>
+            <td>17</td><td>Contexual</td><td>23</td><td>18</td>
+            <td>floor division - calculator</td>
+        </tr>
+        <tr>
+            <td>18</td><td>Partial</td><td>65</td><td>70</td>
+            <td>FizzBuzz - classic programming</td>
+        </tr>
+        <tr>
+            <td>19</td><td>Correcting</td><td>24</td><td>29</td>
+            <td>bank balance - adding/subtracting until negative</td>
+        </tr>
+        <tr>
+            <td>20</td><td>Big formula</td><td>18</td><td>23</td>
+            <td>fibonacci sequence - 1st to 17th term (0-987)</td>
+        </tr>
+    </table>
+    <!--#endregion-->
+    <!--#region legalities-->
+    <h2>Legal claimers</h2>
+    <p>Created by James Haddad 2025</p>
+    <p>The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.</p>
+    <p class="manualBottom">Vectors and icons by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a></p>
+    <!--#endregion-->
+    <embed class="bottomMiddle mascot" src="..\assets\mascot.svg" type="image/svg+xml">
+</body>
+<script type="module" src="../compiled/URLQuery.js"></script>
+<script type="module" src="../compiled/manual.js"></script>
+</html>
