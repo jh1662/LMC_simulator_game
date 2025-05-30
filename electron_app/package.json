@@ -26,8 +26,13 @@
       "packagerConfig": {},
       "makers": [
         {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "lmc_offline_edition",
+            "authors": "James R. Haddad",
+            "setupIcon": "./assets/favicon.png",
+            "setupExe": "LMC_Offline_Edition_Setup.exe"
+          }
         }
       ]
     }
