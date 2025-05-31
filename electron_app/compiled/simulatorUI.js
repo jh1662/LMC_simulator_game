@@ -181,14 +181,7 @@ class EditorUI {
             script.push(line);
             //^ each sub-array is a line, of tokens, in the script.
         }
-        /*
-        //? If only top line runs the output is no parsed
-        //? but if both top and bottom lines run both outputs are parsed.
-        //? Most likely the cause is that the script somehow gets parsed (by object referance) before first output.
-        console.log(script);
-        console.log(this.parseScript(script));
-        */
-        console.log(script);
+        ///console.log(script);
         //! To help develop to help develop the level data in sprint 3^^^
         return this.parseScript(script);
         //^ Script is either a 2D array of tokens or an empty array.

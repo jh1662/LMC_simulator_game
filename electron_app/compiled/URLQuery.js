@@ -20,11 +20,11 @@ export class URLQuery {
         //^ Any queries in the LMC application will always concist of atleast 3 pieces of data.
         //^ The potential 4th one is the campain level.
         this.parsedData = [];
-        console.log("Raw:");
-        console.log(data);
+        ///console.log("Raw:");
+        ///console.log(data);
         this.main(data);
-        console.log("Parsed:");
-        console.log(this.parsedData);
+        ///console.log("Parsed:");
+        ///console.log(this.parsedData);
     }
     getConfig(configIndex) { return this.parsedData[configIndex]; } //< getter
     //^ 0-3 corrosponding to sound effect toggle, dark mode toggle, theme, and current level respectively.
@@ -68,11 +68,9 @@ export class URLQuery {
                     //^ plays audio file
                 }
             });
-            console.log("Sound effects on");
         }
-        else {
-            console.log("Sound effects off");
-        }
+        ///console.log("Sound effects on");
+        ///else{ console.log("Sound effects off"); }
         //: determines if should be dark or light mode based on URL configuration/query
         if (this.parsedData[1]) {
             theme = "-dark";

@@ -1,3 +1,11 @@
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-dmg": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+
+V1.1.3 - Managed to be able to package into Electron application by running "npm run make" and other changes, such as PNG to icon file and configuration file.
+
+//: goes full window-screen anyways but dimensions are still here to not cause seizure to ppl with epilepsy.
+
 sudo apt update && sudo apt install dpkg fakeroot -y
 
 

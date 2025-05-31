@@ -158,7 +158,7 @@ class IO {
     //: property methods
     output(operand) {
         this.outputHistory.push(String(operand));
-        console.log(operand);
+        ///console.log(operand);
     }
     stackShift() {
         //* satisfies TS-2322 (return type could be either 'number' or 'undefined')
@@ -447,10 +447,10 @@ export class ControlUnit {
                 this.cycleReady = false;
             }
             //: degugging purposes
-            console.log("PC - " + this.registers.read(Register.programCounter));
-            console.log("Instruction - " + String(this.registers.read(Register.instruction)));
-            console.log("Accumulator - " + this.registers.read(Register.accumulator));
-            console.log("Cycle count - " + cycleCount);
+            ///console.log("PC - "+this.registers.read(Register.programCounter));
+            ///console.log("Instruction - "+String(this.registers.read(Register.instruction)));
+            ///console.log("Accumulator - "+this.registers.read(Register.accumulator));
+            ///console.log("Cycle count - "+cycleCount);
             //: mix of displaying status, sleeping, and doing the "fetch, decode, execute" cycle.
             await sleep(this.cycleInterval);
             this.fetch();
@@ -466,7 +466,7 @@ export class ControlUnit {
             if (cycleCount >= this.cycleCountLimit) {
                 //^ satisfied when cycle count exceeds limit of 300 or user purposely stopped script execution (by pressing 'stop' button)
                 this.displayStatus(UICatagory.status, ["User has manually stopped the LMC assembly program or it has reached the timeout limit (300 cycles)."]);
-                console.log("CYCLE TIMEOUT!");
+                ///console.log("CYCLE TIMEOUT!");
                 break;
             }
             await this.decode();

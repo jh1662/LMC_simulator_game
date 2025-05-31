@@ -59,7 +59,7 @@ export class Middleware {
         //* -1 for sandbox, 0 for invalid, 1-30 for level number.
         let fragmentId = window.location.hash.slice(1);
         //^ the '.slice(1)' removes the hastag denoter from the string
-        console.log(fragmentId);
+        ///console.log(fragmentId);
         /// fragmentId = fragmentId.slice(1);
         //^ redundant since making code more compact
         if (fragmentId == "") {
@@ -129,7 +129,7 @@ export class Middleware {
         //^ Allows to change URL without refreshing.
         //^ In second parameter, 'window.location.herf' is not needed because method automatically use it if not stated in argument.
         //^ Source - https://www.geeksforgeeks.org/how-to-modify-url-without-reloading-the-page-using-javascript/
-        console.log(window.location.search);
+        ///console.log(window.location.search);
         /// window.location.search = window.location.search.replace(/\d{1,2}(?=#)/,String(campainProgress+1));
         /// //^ Regex supports the '.replace' call - https://www.w3schools.com/js/js_regexp.asp
     }
@@ -219,7 +219,7 @@ export class Middleware {
     //^ Stops currently executing assembly program.
     //: called by VonNeuman.ts
     updateUI(uIcatagory, content) {
-        console.log("update: " + uIcatagory + "-" + content);
+        ///console.log("update: "+uIcatagory+"-"+content);
         this.simulatorUI.update(uIcatagory, content);
     }
     ///public async getInput():Promise<number>{ return await this.simulatorUI.getInput(); }

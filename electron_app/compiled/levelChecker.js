@@ -96,7 +96,7 @@ export class LevelChecker {
             simulator.changeSpeed(1);
             //^ ensure fastest speed to reduce redundant waiting but does not cause busy-waiting
             const output = await simulator.cycle();
-            console.log(output);
+            ///console.log(output);
             if (!this.isSame(output, currentCase[1])) {
                 return caseIndex;
             }

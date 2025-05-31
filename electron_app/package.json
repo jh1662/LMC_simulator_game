@@ -1,11 +1,11 @@
 {
   "name": "lmc_offline_edition",
-  "version": "1.1.1",
-  "description": "Porting LMC educational game to a offline desktop application using electron-forge",
+  "version": "1.1.2",
+  "description": "LMC educational simulator game ported to Windows executable",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron-forge start",
+    "start": "electron .",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
@@ -13,9 +13,6 @@
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
-    "@electron-forge/maker-deb": "^7.8.1",
-    "@electron-forge/maker-dmg": "^7.8.1",
-    "@electron-forge/maker-rpm": "^7.8.1",
     "@electron-forge/maker-squirrel": "^7.8.1",
     "electron": "^36.3.1",
     "electron-forge": "^5.2.4",
@@ -30,11 +27,14 @@
           "config": {
             "name": "lmc_offline_edition",
             "authors": "James R. Haddad",
-            "setupIcon": "./assets/favicon.png",
-            "setupExe": "LMC_Offline_Edition_Setup.exe"
+            "setupIcon": "./assets/favicon.ico",
+            "setupExe": "LMC Sim Game.exe"
           }
         }
       ]
     }
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
   }
 }
