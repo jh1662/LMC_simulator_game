@@ -16,7 +16,9 @@ Repository at: https://github.com/jh1662/LMC_simulator_game .
 Online at: https://jh1662.github.io/LMC_simulator_game/ .
 
 ## Download for Windows to play
-Just download the application file *LMC Sim Game.exe* from: https://www.dropbox.com/scl/fi/iu2z3n5sn6u9f3lz3qqvf/LMC-Sim-Game.exe?rlkey=pwy6vyi803mkaahwsrn76fjrk&st=2lqm81jp&dl=0 .
+*LMC Sim Game.exe* can be downloaded from the Realeases: https://github.com/jh1662/LMC_simulator_game/releases .
+
+If that is down, for whatever reason, or having other difficulties then you can get it from DropBox instead: https://www.dropbox.com/scl/fi/iu2z3n5sn6u9f3lz3qqvf/LMC-Sim-Game.exe?rlkey=pwy6vyi803mkaahwsrn76fjrk&st=2lqm81jp&dl=0 .
 
 ## Regarding cloned commits (for developers and assignment markers/examiners only)
 Due to the large number of commits, the author urges the markers/examiners to look at the versions in the submitted zip file instead of the repository.
