@@ -1,6 +1,6 @@
 {
   "name": "lmc_offline_edition",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "LMC educational simulator game ported to Windows executable",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,9 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./assets/favicon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
