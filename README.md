@@ -20,6 +20,9 @@ Online at: https://jh1662.github.io/LMC_simulator_game/ .
 
 If that is down, for whatever reason, or having other difficulties then you can get it from DropBox instead: https://www.dropbox.com/scl/fi/iu2z3n5sn6u9f3lz3qqvf/LMC-Sim-Game.exe?rlkey=pwy6vyi803mkaahwsrn76fjrk&st=2lqm81jp&dl=0 .
 
+## Corrosponding project poster and dissertation
+The graded corrosponding project poster and dissertation can be viewed in the root directory, as *[BSc Y3T1 Idv (final year poject) Poster.pdf](<BSc Y3T1 Idv (final year poject) Poster.pdf>)* and *[BSc Y3T2 Idv (final year poject) Dissertation.pdf](<BSc Y3T2 Idv (final year poject) Dissertation.pdf>)* respectfully.
+
 ## Regarding cloned commits (for developers and assignment markers/examiners only)
 Due to the large number of commits, the author urges the markers/examiners to look at the versions in the submitted zip file instead of the repository.
 
