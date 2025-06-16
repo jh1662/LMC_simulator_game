@@ -6,11 +6,13 @@ Repository at: https://github.com/jh1662/LMC_simulator_game .
 ## Table of Contents
 - [Play now](#play-now)
 - [Download for Windows to play](#download-for-windows-to-play)
+- [Corrosponding project poster and dissertation](#corrosponding-project-poster-and-dissertation)
 - [Regarding cloned commits (for developers and assaignment markers only)](#regarding-cloned-commits-for-developers-and-assaignment-markers-only)
   - [For all versions](#for-all-versions)
   - [Pre-sprint](#pre-sprint)
   - [For sprint-specific versions](#for-sprint-specific-versions)
   - [For the feedback implementation and offline porting (post-sprints) version](#for-the-feedback-implementation-and-offline-porting-post-sprints-version)
+
 
 ## Play Now
 Online at: https://jh1662.github.io/LMC_simulator_game/ .
